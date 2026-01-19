@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: go.sum
+      
+      - name: Verify Go version
+        run: |
+          go version
+          if ! go version | grep -q "go1.25"; then
+            echo "❌ Go version is not 1.25"
+            exit 1
+          fi
+          echo "✅ Go version is correct"
+      
+      - name: Install dependencies
+        run: go mod download
+      
+      - name: Build golangci-lint from source (Go 1.25)
+        # Workaround: Build golangci-lint from source with Go 1.25
+        # until official releases support Go 1.25
+        # This ensures the binary is built with the same Go version as the project
+        run: |
+          echo "Building golangci-lint from source with Go 1.25..."
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          GOBIN=$(go env GOPATH)/bin
+          echo "$GOBIN" >> $GITHUB_PATH
+          echo "Verifying golangci-lint installation..."
+          $GOBIN/golangci-lint version
+          echo "golangci-lint built successfully with Go 1.25"
+      
+      - name: Run golangci-lint
+        run: |
+          GOBIN=$(go env GOPATH)/bin
+          $GOBIN/golangci-lint run --timeout=5m
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: go.sum
+      
+      - name: Install dependencies
+        run: go mod download
+      
+      - name: Run tests
+        run: go test -v -race -timeout=15m ./...
+      
+      - name: Check coverage
+        run: go test -coverprofile=coverage.out ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: go.sum
+      
+      - name: Install dependencies
+        run: go mod download
+      
+      - name: Build
+        run: |
+          mkdir -p bin
+          go build -o bin/gc-controller ./cmd/gc-controller
+      
+      - name: Verify binary
+        run: |
+          if [ ! -f bin/gc-controller ]; then
+            echo "Binary not found"
+            exit 1
+          fi
+          file bin/gc-controller
