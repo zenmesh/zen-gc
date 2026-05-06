@@ -15,14 +15,14 @@ limitations under the License.
 */
 
 // Package errors provides structured error types for the GC controller with policy and resource context.
-// This package now uses zen-sdk/pkg/errors as the base implementation.
+// This package now uses zen-gc/internal/pkg/errors as the base implementation.
 package errors
 
 import (
 	sdkerrors "github.com/zenmesh/zen-gc/internal/errors"
 )
 
-// GCError is an alias for zen-sdk's ContextError.
+// GCError is an alias for zen-gc/internal's ContextError.
 // This maintains backward compatibility while using the shared implementation.
 type GCError = sdkerrors.ContextError
 

@@ -25,14 +25,9 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ## Tag → Artifact Mapping
 
-### Libraries (zen-sdk)
-- Tag: `v0.1.0-alpha`
-- Artifact: Go module version
-- Changelog: Required entry in CHANGELOG.md
-
-### Controllers (zen-flow, zen-gc, zen-watcher, zen-lock, zen-lead)
+### Controllers (zen-gc)
 - Tag: `v0.0.1-alpha`
-- Image: `kubezen/<project-name>:v0.0.1-alpha` (from project.yaml.imageName)
+- Image: `zenmesh/gc-controller:v0.0.1-alpha`
 - Changelog: Required entry in CHANGELOG.md
 
 ### Charts (helm-charts)

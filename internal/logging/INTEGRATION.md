@@ -1,6 +1,6 @@
 # Logging Integration Guide
 
-This document describes how to integrate `zen-sdk/pkg/logging` with monitoring systems, log aggregation tools, and other observability infrastructure.
+This document describes how to integrate `internal/logging` with monitoring systems, log aggregation tools, and other observability infrastructure.
 
 ## Log Aggregation
 
@@ -144,7 +144,7 @@ The logger automatically extracts trace and span IDs from OpenTelemetry context.
 
 1. Ensure OpenTelemetry is initialized:
    ```go
-   import "github.com/zenmesh/zen-sdk/pkg/observability"
+   import "github.com/zenmesh/zen-gc/internal/pkg/observability"
    observability.InitWithDefaults(ctx, "my-service")
    ```
 

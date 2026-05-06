@@ -1,6 +1,6 @@
 # Config Package
 
-**Package:** `github.com/zenmesh/zen-sdk/pkg/config`
+**Package:** `github.com/zenmesh/zen-gc/internal/config`
 
 **Purpose:** Environment variable validation and configuration helpers
 
@@ -18,7 +18,7 @@ The `config` package provides utilities for validating and parsing environment v
 ## Quick Start
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/config"
+import "github.com/zenmesh/zen-gc/internal/config"
 
 // Create validator
 v := config.NewValidator()
@@ -91,7 +91,7 @@ if v.HasErrors() {
 Use direct helpers when you want immediate error handling:
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/config"
+import "github.com/zenmesh/zen-gc/internal/config"
 
 // Returns error immediately if missing
 dbHost, err := config.RequireEnv("DB_HOST")
@@ -214,10 +214,10 @@ if val == "" {
 }
 ```
 
-### After (zen-sdk/pkg/config)
+### After (internal/config)
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/config"
+import "github.com/zenmesh/zen-gc/internal/config"
 
 v := config.NewValidator()
 dbHost := v.RequireString("DB_HOST")
@@ -248,7 +248,7 @@ Loads rate limit configuration with priority order:
 
 **Usage:**
 ```go
-import sdkconfig "github.com/zenmesh/zen-sdk/pkg/config"
+import sdkconfig "github.com/zenmesh/zen-gc/internal/config"
 
 // From CRD (zen-ingester)
 var crdConfig sdkconfig.CRDRateLimitConfig

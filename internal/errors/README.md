@@ -16,7 +16,7 @@ This package provides generic structured error types that can be used across zen
 ## Quick Start
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/errors"
+import "github.com/zenmesh/zen-gc/internal/pkg/errors"
 
 // Create a new error
 err := errors.New("informer_creation_failed", "failed to create informer")
@@ -144,6 +144,6 @@ func WithPolicy(err error, namespace, name string) *GCError {
 
 ## Related
 
-- [zen-sdk/pkg/logging](../logging/README.md) - Error logging utilities
-- [zen-sdk/pkg/retry](../retry/README.md) - Retry logic for errors
+- [internal/logging](../logging/README.md) - Error logging utilities
+- [internal/backoff](../backoff/README.md) - Backoff logic for retries
 

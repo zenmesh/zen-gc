@@ -17,7 +17,7 @@ This package provides a generic wrapper around Kubernetes event recording that c
 
 ```go
 import (
-    "github.com/zenmesh/zen-sdk/pkg/events"
+    "github.com/zenmesh/zen-gc/internal/pkg/events"
     "k8s.io/client-go/kubernetes"
 )
 
@@ -123,7 +123,7 @@ func NewEventRecorder(client kubernetes.Interface) *EventRecorder {
 
 **After:**
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/events"
+import "github.com/zenmesh/zen-gc/internal/pkg/events"
 
 type EventRecorder struct {
     *events.Recorder

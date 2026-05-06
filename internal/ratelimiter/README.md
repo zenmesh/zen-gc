@@ -5,7 +5,7 @@ Shared rate limiting primitives for GC operations, extracted from zen-gc and zen
 ## Usage
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
+import "github.com/zenmesh/zen-gc/internal/pkg/gc/ratelimiter"
 
 // Create rate limiter (10 operations per second)
 rl := ratelimiter.NewRateLimiter(10)
@@ -37,7 +37,7 @@ import "github.com/zenmesh/zen-gc/pkg/controller"
 rl := controller.NewRateLimiter(maxPerSecond)
 
 // After
-import "github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
+import "github.com/zenmesh/zen-gc/internal/pkg/gc/ratelimiter"
 rl := ratelimiter.NewRateLimiter(maxPerSecond)
 ```
 
@@ -48,7 +48,7 @@ import "github.com/zenmesh/zen-watcher/pkg/server"
 rl := server.NewRateLimiter(maxTokens, refillInterval)
 
 // After
-import "github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
+import "github.com/zenmesh/zen-gc/internal/pkg/gc/ratelimiter"
 rl := ratelimiter.NewRateLimiter(maxPerSecond)
 ```
 

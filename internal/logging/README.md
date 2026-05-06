@@ -1,4 +1,4 @@
-# zen-sdk/pkg/logging
+# Internal Logging Package
 
 Unified, professional logging package for all `zen` components with context-aware structured logging, OpenTelemetry integration, and production-ready features.
 
@@ -17,7 +17,7 @@ Unified, professional logging package for all `zen` components with context-awar
 ## Quick Start
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/logging"
+import "github.com/zenmesh/zen-gc/internal/pkg/logging"
 
 // Create a logger
 logger := logging.NewLogger("my-component")
@@ -421,7 +421,7 @@ The logger automatically extracts trace and span IDs from OpenTelemetry context:
 
 ```go
 // After initializing OpenTelemetry
-import "github.com/zenmesh/zen-sdk/pkg/observability"
+import "github.com/zenmesh/zen-gc/internal/pkg/observability"
 
 observability.InitWithDefaults(ctx, "my-service")
 

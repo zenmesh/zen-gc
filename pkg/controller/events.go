@@ -10,7 +10,7 @@ import (
 )
 
 // EventRecorder wraps Kubernetes event recorder for GC controller.
-// This now uses zen-sdk/pkg/events as the base implementation.
+// This now uses zen-gc/internal/pkg/events as the base implementation.
 type EventRecorder struct {
 	*sdkevents.Recorder
 }

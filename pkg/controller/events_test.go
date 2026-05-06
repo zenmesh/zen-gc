@@ -186,7 +186,7 @@ func TestGetResourceName_Unknown(t *testing.T) {
 }
 
 func TestEventSinkWrapper_Create(t *testing.T) {
-	// eventSinkWrapper is now internal to zen-sdk/pkg/events
+	// eventSinkWrapper is now internal to zen-gc/internal/pkg/events
 	// Test through the recorder instead
 	client := fake.NewSimpleClientset()
 	recorder := NewEventRecorder(client)
@@ -201,7 +201,7 @@ func TestEventSinkWrapper_Create(t *testing.T) {
 }
 
 func TestEventSinkWrapper_Update(t *testing.T) {
-	// eventSinkWrapper is now internal to zen-sdk/pkg/events
+	// eventSinkWrapper is now internal to zen-gc/internal/pkg/events
 	// Test through the recorder instead
 	client := fake.NewSimpleClientset()
 	recorder := NewEventRecorder(client)
@@ -216,7 +216,7 @@ func TestEventSinkWrapper_Update(t *testing.T) {
 }
 
 func TestEventSinkWrapper_Patch(t *testing.T) {
-	// eventSinkWrapper is now internal to zen-sdk/pkg/events
+	// eventSinkWrapper is now internal to zen-gc/internal/pkg/events
 	// Test through the recorder instead
 	client := fake.NewSimpleClientset()
 	recorder := NewEventRecorder(client)

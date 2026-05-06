@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # H120: Run tests with race detection for GC primitives
-# Ensures concurrency safety of zen-sdk/pkg/gc usage
+# Ensures concurrency safety of internal packages
 
 set -euo pipefail
 
@@ -28,7 +28,7 @@ echo ""
 
 cd "${REPO_ROOT}/zen-gc"
 
-# Test packages that use zen-sdk GC primitives
+# Test packages that use internal GC primitives
 PACKAGES=(
     "./pkg/controller/..."
 )

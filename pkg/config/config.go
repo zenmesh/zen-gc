@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 // Package config provides centralized configuration management for the GC controller.
-// This package now uses zen-sdk/pkg/config for validation.
+// This package now uses zen-gc/internal/pkg/config for validation.
 package config
 
 import (
@@ -69,7 +69,7 @@ func NewControllerConfig() *ControllerConfig {
 
 // LoadFromEnv loads configuration from environment variables.
 // Environment variables override defaults if set.
-// This implementation uses zen-sdk/pkg/config for validation.
+// This implementation uses zen-gc/internal/pkg/config for validation.
 func (c *ControllerConfig) LoadFromEnv() error {
 	validator := sdkconfig.NewValidator()
 

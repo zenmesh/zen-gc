@@ -1,31 +1,22 @@
 # Build Requirements
 
-## Tag Push Requirement
+## Dependencies
 
-The `zen-gc` module depends on `github.com/zen-mesh/zen-sdk v0.2.0-alpha`. For Docker builds to succeed, this tag **must be pushed to the remote repository**.
+zen-gc has no external private dependencies. All SDK code is inlined into `internal/` packages.
 
-### Current Status
+## Build
 
-- ✅ `go.mod` is configured with tagged version (`v0.2.0-alpha`)
-- ✅ No `replace` directive in `go.mod` (uses tagged version)
-- ⚠️ Tag `v0.2.0-alpha` exists locally but needs to be pushed remotely
-- ⚠️ Docker builds will fail until tag is pushed
+```bash
+# Build the controller
+go build -o bin/gc-controller ./cmd/gc-controller
 
-### To Enable Docker Builds
+# Run tests
+go test ./...
 
-1. Push the tag to remote:
-   ```bash
-   cd zen-sdk
-   git push origin v0.2.0-alpha
-   ```
+# Build Docker image
+docker build -t zenmesh/gc-controller:latest .
+```
 
-2. After pushing, Docker builds should work without modifications.
+## Local Development
 
-### Local Development
-
-For local development, use `go.work` (configured at repository root) which allows using local paths without `replace` directives in `go.mod`.
-
-### Dockerfile Strategy
-
-The Dockerfile uses a temporary `replace` directive during build to work around the missing remote tag. This is a build-time only change and does not affect the committed `go.mod` file.
-
+No special requirements - standard Go tooling works out of the box.

@@ -150,7 +150,7 @@ func getOrCreateRateLimiterShared(mgr RateLimiterManager, policy *v1alpha1.Garba
 		return limiter
 	}
 
-	// Create new rate limiter using zen-sdk
+	// Create new rate limiter using zen-gc/internal
 	limiter := ratelimiter.NewRateLimiter(maxDeletionsPerSecond)
 	rateLimiters[policy.UID] = limiter
 
@@ -235,14 +235,14 @@ func deleteBatchShared(
 type TTLCalculator interface{}
 
 // calculateExpirationTimeShared is a shared implementation for calculating expiration time.
-// This now delegates to zen-sdk/pkg/gc/ttl for the actual evaluation.
+// This now delegates to zen-gc/internal/pkg/gc/ttl for the actual evaluation.
 func calculateExpirationTimeShared(resource *unstructured.Unstructured, ttlSpec *v1alpha1.TTLSpec) (time.Time, error) {
-	// Convert v1alpha1.TTLSpec to zen-sdk ttl.Spec
+	// Convert v1alpha1.TTLSpec to zen-gc/internal ttl.Spec
 	sdkSpec := convertToSDKTTLSpec(ttlSpec)
 	return sdkttl.CalculateExpirationTime(resource, sdkSpec)
 }
 
-// convertToSDKTTLSpec converts zen-gc's TTLSpec to zen-sdk's ttl.Spec.
+// convertToSDKTTLSpec converts zen-gc's TTLSpec to zen-gc/internal's ttl.Spec.
 func convertToSDKTTLSpec(gcSpec *v1alpha1.TTLSpec) *sdkttl.Spec {
 	return &sdkttl.Spec{
 		SecondsAfterCreation: gcSpec.SecondsAfterCreation,
@@ -287,7 +287,7 @@ func deleteResourceWithBackoffShared(
 ) error {
 	var lastErr error
 
-	// Use zen-sdk backoff
+	// Use zen-gc/internal backoff
 	backoffConfig := backoff.DefaultConfig()
 	b := backoff.NewBackoff(backoffConfig)
 

@@ -184,7 +184,7 @@ issues:
         - all
     
     # Note: fmt.Print* should not be used in production code
-    # Use structured logging (zen-sdk/pkg/logging) instead
+    # Use structured logging (internal/logging) instead
     # This is enforced via CI checks, not linter rules
     
     # Exclude some staticcheck messages

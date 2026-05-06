@@ -19,7 +19,7 @@ This package provides a platform-neutral TTL evaluation API that can be used by 
 ### Fixed TTL (Simple)
 
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/gc/ttl"
+import "github.com/zenmesh/zen-gc/internal/pkg/gc/ttl"
 
 // Delete resources 1 hour after creation
 ttlSeconds := int64(3600)

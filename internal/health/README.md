@@ -18,7 +18,7 @@ This package provides generic health check interfaces and implementations that c
 
 ```go
 import (
-    "github.com/zenmesh/zen-sdk/pkg/health"
+    "github.com/zenmesh/zen-gc/internal/pkg/health"
     "sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -161,7 +161,7 @@ func (h *HealthChecker) ReadinessCheck(req *http.Request) error {
 
 **After:**
 ```go
-import "github.com/zenmesh/zen-sdk/pkg/health"
+import "github.com/zenmesh/zen-gc/internal/pkg/health"
 
 checker := health.NewInformerSyncChecker(func() map[string]func() bool {
     // Return informers from reconciler
@@ -170,6 +170,5 @@ checker := health.NewInformerSyncChecker(func() map[string]func() bool {
 
 ## Related
 
-- [zen-sdk/pkg/lifecycle](../lifecycle/README.md) - Lifecycle management
-- [zen-sdk/pkg/logging](../logging/README.md) - Logging utilities
+- [internal/logging](../logging/README.md) - Logging utilities
 

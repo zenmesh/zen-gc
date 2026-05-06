@@ -25,9 +25,9 @@ import (
 )
 
 // HealthChecker provides health check functionality for the GC controller.
-// This now uses zen-sdk/pkg/health as the base implementation.
+// This now uses zen-gc/internal/pkg/health as the base implementation.
 type HealthChecker struct {
-	// Informer sync checker from zen-sdk
+	// Informer sync checker from zen-gc/internal
 	informerChecker *health.InformerSyncChecker
 
 	// Track last evaluation time to verify active processing.
@@ -43,7 +43,7 @@ type HealthChecker struct {
 
 // NewHealthChecker creates a new health checker.
 func NewHealthChecker(reconciler *GCPolicyReconciler) *HealthChecker {
-	// Create informer sync checker using zen-sdk
+	// Create informer sync checker using zen-gc/internal
 	informerChecker := health.NewInformerSyncChecker(func() map[string]func() bool {
 		reconciler.resourceInformersMu.RLock()
 		defer reconciler.resourceInformersMu.RUnlock()
