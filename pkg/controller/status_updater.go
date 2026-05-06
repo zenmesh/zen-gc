@@ -17,7 +17,7 @@ import (
 
 // PolicyGVR is the GroupVersionResource for GarbageCollectionPolicy CRDs.
 var PolicyGVR = schema.GroupVersionResource{
-	Group:    "gc.zen-mesh.io",
+	Group:    "gc.ops.zen-mesh.io",
 	Version:  "v1alpha1",
 	Resource: "garbagecollectionpolicies",
 }

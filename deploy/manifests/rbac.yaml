@@ -25,7 +25,7 @@ metadata:
 rules:
   # Read and update GarbageCollectionPolicy CRDs (controller only needs to read policies and update status)
   - apiGroups:
-      - gc.zen-mesh.io
+      - gc.ops.zen-mesh.io
     resources:
       - garbagecollectionpolicies
     verbs:
@@ -34,7 +34,7 @@ rules:
       - watch
   # Update status subresource only (controller manages status, not spec)
   - apiGroups:
-      - gc.zen-mesh.io
+      - gc.ops.zen-mesh.io
     resources:
       - garbagecollectionpolicies/status
     verbs:

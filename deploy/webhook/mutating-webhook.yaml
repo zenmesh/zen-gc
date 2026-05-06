@@ -18,14 +18,14 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: gc-system/gc-controller-webhook-cert
 webhooks:
-  - name: mutate-gc-policy.gc.zen-mesh.io
+  - name: mutate-gc-policy.gc.ops.zen-mesh.io
     clientConfig:
       service:
         name: gc-controller-webhook
         namespace: gc-system
         path: "/mutate-gc-policy"
     rules:
-      - apiGroups: ["gc.zen-mesh.io"]
+      - apiGroups: ["gc.ops.zen-mesh.io"]
         apiVersions: ["v1alpha1"]
         operations: ["CREATE"]
         resources: ["garbagecollectionpolicies"]

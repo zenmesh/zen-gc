@@ -81,7 +81,7 @@ func TestStatusUpdater_UpdateStatus(t *testing.T) {
 
 	// Create the policy in the fake client
 	gvr := schema.GroupVersionResource{
-		Group:    "gc.zen-mesh.io",
+		Group:    "gc.ops.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -128,7 +128,7 @@ func TestStatusUpdater_UpdateStatus_WithExistingStatus(t *testing.T) {
 
 	// Create the policy in the fake client with existing status
 	gvr := schema.GroupVersionResource{
-		Group:    "gc.zen-mesh.io",
+		Group:    "gc.ops.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -177,7 +177,7 @@ func TestStatusUpdater_UpdateStatus_WithConfig(t *testing.T) {
 
 	// Create the policy in the fake client
 	gvr := schema.GroupVersionResource{
-		Group:    "gc.zen-mesh.io",
+		Group:    "gc.ops.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 // GroupName is the group name used in this package.
-const GroupName = "gc.zen-mesh.io"
+const GroupName = "gc.ops.zen-mesh.io"
 
 // SchemeGroupVersion is group version used to register these objects.
 var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}

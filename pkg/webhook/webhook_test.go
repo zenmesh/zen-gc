@@ -52,7 +52,7 @@ func TestWebhookServer_handleValidate(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "test-uid",
 					Kind: metav1.GroupVersionKind{
-						Group:   "gc.zen-mesh.io",
+						Group:   "gc.ops.zen-mesh.io",
 						Version: "v1alpha1",
 						Kind:    "GarbageCollectionPolicy",
 					},
@@ -81,7 +81,7 @@ func TestWebhookServer_handleValidate(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "test-uid-2",
 					Kind: metav1.GroupVersionKind{
-						Group:   "gc.zen-mesh.io",
+						Group:   "gc.ops.zen-mesh.io",
 						Version: "v1alpha1",
 						Kind:    "GarbageCollectionPolicy",
 					},
@@ -108,7 +108,7 @@ func TestWebhookServer_handleValidate(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "test-uid-3",
 					Kind: metav1.GroupVersionKind{
-						Group:   "gc.zen-mesh.io",
+						Group:   "gc.ops.zen-mesh.io",
 						Version: "v1alpha1",
 						Kind:    "GarbageCollectionPolicy",
 					},

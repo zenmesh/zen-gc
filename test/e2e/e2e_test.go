@@ -44,7 +44,7 @@ func TestE2E_GCController(t *testing.T) {
 
 	// Test policy creation
 	policyGVR := schema.GroupVersionResource{
-		Group:    "gc.zen-mesh.io",
+		Group:    "gc.ops.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -76,7 +76,7 @@ func TestE2E_GCController(t *testing.T) {
 
 	unstructuredPolicy := &unstructured.Unstructured{Object: policyObj}
 	unstructuredPolicy.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "gc.zen-mesh.io",
+		Group:   "gc.ops.zen-mesh.io",
 		Version: "v1alpha1",
 		Kind:    "GarbageCollectionPolicy",
 	})
@@ -123,7 +123,7 @@ func TestE2E_PolicyDeletion(t *testing.T) {
 	namespace := "default"
 
 	policyGVR := schema.GroupVersionResource{
-		Group:    "gc.zen-mesh.io",
+		Group:    "gc.ops.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -151,7 +151,7 @@ func TestE2E_PolicyDeletion(t *testing.T) {
 
 	unstructuredPolicy := &unstructured.Unstructured{Object: policyObj}
 	unstructuredPolicy.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "gc.zen-mesh.io",
+		Group:   "gc.ops.zen-mesh.io",
 		Version: "v1alpha1",
 		Kind:    "GarbageCollectionPolicy",
 	})
@@ -253,7 +253,7 @@ func TestE2E_ResourceDeletion(t *testing.T) {
 
 	// Create GC policy with short TTL and dry-run
 	policyGVR := schema.GroupVersionResource{
-		Group:    "gc.zen-mesh.io",
+		Group:    "gc.ops.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -290,7 +290,7 @@ func TestE2E_ResourceDeletion(t *testing.T) {
 
 	unstructuredPolicy := &unstructured.Unstructured{Object: policyObj}
 	unstructuredPolicy.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   "gc.zen-mesh.io",
+		Group:   "gc.ops.zen-mesh.io",
 		Version: "v1alpha1",
 		Kind:    "GarbageCollectionPolicy",
 	})
