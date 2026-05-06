@@ -27,7 +27,7 @@ import (
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	"github.com/kube-zen/zen-gc/pkg/controller"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 )
 
 // MockResourceInformer is a mock implementation of ResourceInformer for testing.

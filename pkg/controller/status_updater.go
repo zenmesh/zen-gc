@@ -12,7 +12,7 @@ import (
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	"github.com/kube-zen/zen-gc/pkg/config"
 	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // PolicyGVR is the GroupVersionResource for GarbageCollectionPolicy CRDs.

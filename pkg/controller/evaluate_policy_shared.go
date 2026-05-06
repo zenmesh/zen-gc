@@ -26,8 +26,8 @@ import (
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // PolicyEvaluator provides methods needed for policy evaluation.

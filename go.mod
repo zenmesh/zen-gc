@@ -1,9 +1,8 @@
-module github.com/kube-zen/zen-gc
+module github.com/zenmesh/zen-gc
 
 go 1.25.0
 
 require (
-	github.com/kube-zen/zen-sdk v0.2.10-alpha
 	github.com/prometheus/client_golang v1.23.2
 	golang.org/x/text v0.32.0
 	k8s.io/api v0.35.0

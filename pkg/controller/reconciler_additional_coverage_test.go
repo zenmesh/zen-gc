@@ -29,8 +29,8 @@ import (
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	"github.com/kube-zen/zen-gc/pkg/config"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // TestGCPolicyReconciler_matchesSelectors tests the matchesSelectors method.

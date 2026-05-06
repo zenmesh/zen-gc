@@ -26,7 +26,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 )
 
 // Static errors for adapters.

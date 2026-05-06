@@ -30,7 +30,7 @@ import (
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	"github.com/kube-zen/zen-gc/pkg/config"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 )
 
 // DefaultResourceInformer wraps a cache.SharedInformer to implement ResourceInformer interface.

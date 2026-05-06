@@ -32,7 +32,7 @@ import (
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	"github.com/kube-zen/zen-gc/pkg/validation"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 var (

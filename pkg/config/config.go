@@ -21,7 +21,7 @@ package config
 import (
 	"time"
 
-	sdkconfig "github.com/kube-zen/zen-sdk/pkg/config"
+	sdkconfig "github.com/zenmesh/zen-gc/internal/config"
 )
 
 // Default values for controller configuration.

@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kube-zen/zen-sdk/pkg/health"
+	"github.com/zenmesh/zen-gc/internal/health"
 )
 
 // HealthChecker provides health check functionality for the GC controller.

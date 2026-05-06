@@ -37,8 +37,8 @@ import (
 	"github.com/kube-zen/zen-gc/pkg/config"
 	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
 	"github.com/kube-zen/zen-gc/pkg/validation"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // GCPolicyReconciler reconciles GarbageCollectionPolicy resources.

@@ -39,7 +39,7 @@ import (
 	gcwebhook "github.com/kube-zen/zen-gc/pkg/webhook"
 	"github.com/kube-zen/zen-sdk/pkg/leader"
 	"github.com/kube-zen/zen-sdk/pkg/lifecycle"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/kube-zen/zen-sdk/pkg/zenlead"
 )
 

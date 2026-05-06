@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // BenchmarkLoggerReuse benchmarks logger reuse vs creating new loggers.

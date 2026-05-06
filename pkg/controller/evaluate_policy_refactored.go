@@ -27,7 +27,7 @@ import (
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
 	"github.com/kube-zen/zen-gc/pkg/validation"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // PolicyEvaluationService provides policy evaluation using injected dependencies.

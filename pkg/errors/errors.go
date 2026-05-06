@@ -19,7 +19,7 @@ limitations under the License.
 package errors
 
 import (
-	sdkerrors "github.com/kube-zen/zen-sdk/pkg/errors"
+	sdkerrors "github.com/zenmesh/zen-gc/internal/errors"
 )
 
 // GCError is an alias for zen-sdk's ContextError.

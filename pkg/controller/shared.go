@@ -32,10 +32,10 @@ import (
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
 	"github.com/kube-zen/zen-gc/pkg/config"
 	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
-	"github.com/kube-zen/zen-sdk/pkg/gc/backoff"
-	"github.com/kube-zen/zen-sdk/pkg/gc/ratelimiter"
-	sdkttl "github.com/kube-zen/zen-sdk/pkg/gc/ttl"
-	sdklog "github.com/kube-zen/zen-sdk/pkg/logging"
+	"github.com/zenmesh/zen-gc/internal/backoff"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 var (

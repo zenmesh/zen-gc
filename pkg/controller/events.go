@@ -6,7 +6,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	sdkevents "github.com/kube-zen/zen-sdk/pkg/events"
+	sdkevents "github.com/zenmesh/zen-gc/internal/events"
 )
 
 // EventRecorder wraps Kubernetes event recorder for GC controller.
