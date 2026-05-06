@@ -27,7 +27,7 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ### Controllers (zen-gc)
 - Tag: `v0.0.1-alpha`
-- Image: `zenmesh/gc-controller:v0.0.1-alpha`
+- Image: `zenmesh/zen-gc-controller:v0.0.1-alpha`
 - Changelog: Required entry in CHANGELOG.md
 
 ### Charts (helm-charts)

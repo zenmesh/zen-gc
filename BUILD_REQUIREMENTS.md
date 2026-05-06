@@ -14,7 +14,7 @@ go build -o bin/gc-controller ./cmd/gc-controller
 go test ./...
 
 # Build Docker image
-docker build -t zenmesh/gc-controller:latest .
+docker build -t zenmesh/zen-gc-controller:latest .
 ```
 
 ## Local Development
