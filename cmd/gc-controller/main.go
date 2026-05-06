@@ -37,10 +37,10 @@ import (
 	"github.com/zenmesh/zen-gc/pkg/config"
 	"github.com/zenmesh/zen-gc/pkg/controller"
 	gcwebhook "github.com/zenmesh/zen-gc/pkg/webhook"
-	"github.com/kube-zen/zen-sdk/pkg/leader"
-	"github.com/kube-zen/zen-sdk/pkg/lifecycle"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
-	"github.com/kube-zen/zen-sdk/pkg/zenlead"
+	"github.com/zenmesh/zen-gc/internal/leader"
+	"github.com/zenmesh/zen-gc/internal/lifecycle"
+	"github.com/zenmesh/zen-gc/internal/zenlead"
 )
 
 var (
