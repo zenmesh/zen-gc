@@ -23,12 +23,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -38,18 +38,10 @@ import (
 	"github.com/zenmesh/zen-gc/pkg/controller"
 	gcwebhook "github.com/zenmesh/zen-gc/pkg/webhook"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
-	"github.com/zenmesh/zen-gc/internal/leader"
-	"github.com/zenmesh/zen-gc/internal/lifecycle"
-	"github.com/zenmesh/zen-gc/internal/zenlead"
+	"github.com/zenmesh/zen-gc/internal/election"
 )
 
 var (
-	// ErrLeaderElectionLeaseNameRequired indicates that leader election lease name is required.
-	ErrLeaderElectionLeaseNameRequired = errors.New("--leader-election-lease-name is required when --leader-election-mode=zenlead")
-
-	// ErrInvalidLeaderElectionMode indicates an invalid leader election mode.
-	ErrInvalidLeaderElectionMode = errors.New("invalid --leader-election-mode")
-
 	// ErrWebhookTLSCertificatesMissing indicates that webhook TLS certificates are missing.
 	ErrWebhookTLSCertificatesMissing = errors.New("webhook TLS certificates not found")
 )
@@ -75,18 +67,18 @@ var (
 )
 
 var (
-	metricsAddr              = flag.String("metrics-addr", ":8080", "The address the metric endpoint binds to")
-	webhookAddr              = flag.String("webhook-addr", ":9443", "The address the webhook endpoint binds to")
-	webhookCertFile          = flag.String("webhook-cert-file", "/etc/webhook/certs/tls.crt", "Path to TLS certificate file")
-	webhookKeyFile           = flag.String("webhook-key-file", "/etc/webhook/certs/tls.key", "Path to TLS private key file")
-	leaderElectionMode       = flag.String("leader-election-mode", "builtin", "Leader election mode: builtin (default), zenlead, or disabled")
-	leaderElectionID         = flag.String("leader-election-id", "", "The ID for leader election (default: gc-controller-leader-election). Required for builtin mode.")
-	leaderElectionLeaseName  = flag.String("leader-election-lease-name", "", "The LeaderGroup CRD name (required for zenlead mode)")
-	enableWebhook            = flag.Bool("enable-webhook", true, "Enable validating webhook server")
-	insecureWebhook          = flag.Bool("insecure-webhook", false, "Allow webhook to start without TLS (testing only, not recommended for production)")
-	gcInterval               = flag.Duration("gc-interval", 1*time.Minute, "Interval between GC evaluation runs")
-	maxDeletionsPerSecond    = flag.Int("max-deletions-per-second", 10, "Default maximum deletions per second (can be overridden per policy)")
-	batchSize                = flag.Int("batch-size", DefaultBatchSize, "Default batch size for deletions (can be overridden per policy)")
+	metricsAddr             = flag.String("metrics-addr", ":8080", "The address the metric endpoint binds to")
+	webhookAddr             = flag.String("webhook-addr", ":9443", "The address the webhook endpoint binds to")
+	webhookCertFile         = flag.String("webhook-cert-file", "/etc/webhook/certs/tls.crt", "Path to TLS certificate file")
+	webhookKeyFile          = flag.String("webhook-key-file", "/etc/webhook/certs/tls.key", "Path to TLS private key file")
+	leaderElection          = flag.Bool("leader-election", true, "Enable leader election (recommended for multi-replica)")
+	leaderElectionID        = flag.String("leader-election-id", "gc-controller-leader-election", "The ID for leader election")
+	leaderElectionNamespace = flag.String("leader-election-namespace", "default", "The namespace for leader election lock")
+	enableWebhook           = flag.Bool("enable-webhook", true, "Enable validating webhook server")
+	insecureWebhook         = flag.Bool("insecure-webhook", false, "Allow webhook to start without TLS (testing only)")
+	gcInterval              = flag.Duration("gc-interval", 1*time.Minute, "Interval between GC evaluation runs")
+	maxDeletionsPerSecond   = flag.Int("max-deletions-per-second", 10, "Default maximum deletions per second")
+	batchSize               = flag.Int("batch-size", DefaultBatchSize, "Default batch size for deletions")
 	maxConcurrentEvaluations = flag.Int("max-concurrent-evaluations", DefaultMaxConcurrentEvaluations, "Maximum number of policies to evaluate concurrently")
 )
 
@@ -104,9 +96,6 @@ func main() {
 
 	// Get config using controller-runtime (handles kubeconfig flag automatically)
 	restCfg := ctrl.GetConfigOrDie()
-
-	// Apply REST config defaults (via zen-sdk helper)
-	zenlead.ControllerRuntimeDefaults(restCfg)
 
 	// Create dynamic client (still needed for resource informers)
 	dynamicClient, err := dynamic.NewForConfig(restCfg)
@@ -129,11 +118,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Get namespace (required for leader election)
-	namespace, err := leader.RequirePodNamespace()
-	if err != nil {
-		setupLog.Error(err, "Failed to determine pod namespace", sdklog.ErrorCode("NAMESPACE_ERROR"))
-		os.Exit(1)
+	// Get namespace from environment variable (required for leader election)
+	namespace := os.Getenv("POD_NAMESPACE")
+	if namespace == "" {
+		namespace = "default"
 	}
 
 	// Load controller configuration
@@ -172,65 +160,40 @@ func main() {
 		HealthProbeBindAddress: ":8081", // Health probes on separate port (controller-runtime requirement)
 	}
 
-	// Configure leader election using zenlead package (Profiles B/C)
-	var leConfig zenlead.LeaderElectionConfig
+	// Configure manager options (no leader election - we use client-go leader election)
+	mgrOpts := baseOpts
 
-	// Determine election ID (default if not provided)
-	electionID := *leaderElectionID
-	if electionID == "" {
-		electionID = "gc-controller-leader-election"
+	// Set up graceful shutdown context
+	ctx, cancel := election.ShutdownContext(context.Background(), "zen-gc")
+	defer cancel()
+
+	// Run with leader election using client-go
+	leConfig := &election.Config{
+		ElectionID:  *leaderElectionID,
+		Namespace:    *leaderElectionNamespace,
+		Enable:       *leaderElection,
 	}
 
-	// Configure based on mode
-	switch *leaderElectionMode {
-	case "builtin":
-		leConfig = zenlead.LeaderElectionConfig{
-			Mode:       zenlead.BuiltIn,
-			ElectionID: electionID,
-			Namespace:  namespace,
-		}
-		setupLog.Info("Leader election mode: builtin (Profile B)", sdklog.Operation("leader_election_config"))
-	case "zenlead":
-		if *leaderElectionLeaseName == "" {
-			setupLog.Error(fmt.Errorf("%w", ErrLeaderElectionLeaseNameRequired), "invalid configuration", sdklog.ErrorCode("INVALID_CONFIG"))
-			os.Exit(1)
-		}
-		leConfig = zenlead.LeaderElectionConfig{
-			Mode:      zenlead.ZenLeadManaged,
-			LeaseName: *leaderElectionLeaseName,
-			Namespace: namespace,
-		}
-		setupLog.Info("Leader election mode: zenlead managed (Profile C)", sdklog.Operation("leader_election_config"), sdklog.String("leaseName", *leaderElectionLeaseName))
-	case "disabled":
-		leConfig = zenlead.LeaderElectionConfig{
-			Mode: zenlead.Disabled,
-		}
-		setupLog.Warn("Leader election disabled - single replica only (unsafe if replicas > 1)", sdklog.Operation("leader_election_config"))
-	default:
-		setupLog.Error(fmt.Errorf("%w: %q (must be builtin, zenlead, or disabled)", ErrInvalidLeaderElectionMode, *leaderElectionMode), "invalid configuration", sdklog.ErrorCode("INVALID_CONFIG"))
-		os.Exit(1)
+	if *leaderElection {
+		setupLog.Info("Leader election enabled", 
+			sdklog.String("electionID", *leaderElectionID),
+			sdklog.String("namespace", *leaderElectionNamespace))
+	} else {
+		setupLog.Warn("Leader election disabled - only safe for single replica")
 	}
 
-	// Prepare manager options with leader election
-	mgrOpts, err := zenlead.PrepareManagerOptions(&baseOpts, &leConfig)
+	err = election.RunWithLeaderElection(ctx, leConfig, kubeClient, func(runCtx context.Context) {
+		runController(runCtx, restCfg, mgrOpts, scheme, dynamicClient, statusUpdater, eventRecorder, controllerConfig)
+	})
 	if err != nil {
-		setupLog.Error(err, "Failed to prepare manager options", sdklog.ErrorCode("MANAGER_OPTIONS_ERROR"))
+		setupLog.Error(err, "Leader election failed", sdklog.ErrorCode("LEADER_ELECTION_ERROR"))
 		os.Exit(1)
 	}
+}
 
-	// Get replica count from environment (set by Helm/Kubernetes)
-	replicaCount := 1
-	if rcStr := os.Getenv("REPLICA_COUNT"); rcStr != "" {
-		if rc, err := strconv.Atoi(rcStr); err == nil {
-			replicaCount = rc
-		}
-	}
-
-	// Enforce safe HA configuration
-	if err := zenlead.EnforceSafeHA(replicaCount, mgrOpts.LeaderElection); err != nil {
-		setupLog.Error(err, "Unsafe HA configuration", sdklog.ErrorCode("UNSAFE_HA_CONFIG"))
-		os.Exit(1)
-	}
+// runController runs the controller manager and all components
+func runController(ctx context.Context, restCfg *rest.Config, mgrOpts ctrl.Options, scheme *runtime.Scheme, dynamicClient dynamic.Interface, statusUpdater *controller.StatusUpdater, eventRecorder *controller.EventRecorder, controllerConfig *config.ControllerConfig) {
+	setupLog := logger.WithComponent("controller")
 
 	mgr, err := ctrl.NewManager(restCfg, mgrOpts)
 	if err != nil {
@@ -308,10 +271,8 @@ func main() {
 		}
 	}
 
-	// Set up graceful shutdown using zen-sdk lifecycle package
-	// Do this after all initialization that might call os.Exit to avoid linter warning
-	ctx, cancel := lifecycle.ShutdownContext(context.Background(), "zen-gc")
-	defer cancel()
+	// Graceful shutdown is handled by election context
+	// The election.RunWithLeaderElection provides the context that cancels on SIGINT/SIGTERM
 
 	// Start webhook server if enabled (now that context is created)
 	if *enableWebhook {
@@ -330,7 +291,6 @@ func main() {
 			go func() {
 				if err := webhookServer.StartTLS(ctx, *webhookCertFile, *webhookKeyFile); err != nil {
 					setupLog.Error(err, "Error starting webhook server", sdklog.ErrorCode("WEBHOOK_START_ERROR"))
-					cancel() // Cancel context to trigger graceful shutdown instead of os.Exit
 				}
 			}()
 			setupLog.Info("Webhook server starting with TLS", sdklog.String("address", *webhookAddr), sdklog.Component("webhook"))
@@ -339,7 +299,6 @@ func main() {
 			go func() {
 				if err := webhookServer.Start(ctx); err != nil {
 					setupLog.Error(err, "Error starting webhook server", sdklog.ErrorCode("WEBHOOK_START_ERROR"))
-					cancel() // Cancel context to trigger graceful shutdown instead of os.Exit
 				}
 			}()
 		}
