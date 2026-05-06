@@ -168,7 +168,7 @@ rules:
 - ✅ Only affects leader election, not user workloads
 - ✅ Standard permission for HA controllers
 
-**Note**: If leader election is disabled (`--enable-leader-election=false`), this permission is not required.
+**Note**: If leader election is disabled (`--leader-election=false`), this permission is not required.
 
 ---
 

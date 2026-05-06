@@ -96,7 +96,7 @@ The controller supports the following environment variables:
 --kubeconfig=""                    # Path to kubeconfig file
 --master=""                        # Kubernetes API server address
 --metrics-addr=":8080"             # Metrics server address
---enable-leader-election=true      # Enable leader election for HA (default: true)
+--leader-election=true              # Enable leader election for HA (default: true)
 --leader-election-namespace=""     # Namespace for leader election lease (default: POD_NAMESPACE)
 ```
 
