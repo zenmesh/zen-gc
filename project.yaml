@@ -1,7 +1,7 @@
 projectType: controller
 projectName: zen-gc
-projectDescription: "Kube-ZEN component"
+projectDescription: "Zen-Mesh OSS garbage collection controller"
 goVersion: "1.25"
-imageName: "kubezen/zen-gc"
-hasHelmChart: true
+imageName: "zenmesh/gc-controller"
+hasHelmChart: false
 runsRace: true
