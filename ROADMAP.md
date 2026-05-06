@@ -2,7 +2,7 @@
 
 This document outlines the planned features and improvements for zen-gc. The roadmap is organized by theme and prioritized for upcoming releases.
 
-**Last Updated**: 2025-12-26
+**Last Updated**: 2026-01-15
 
 ---
 
