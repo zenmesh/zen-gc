@@ -377,6 +377,61 @@ kubectl wait --for condition=established crd/garbagecollectionpolicies.gc.zen-me
 - Check available resources: `docker system df`
 - Try deleting existing cluster: `kind delete cluster --name zen-gc-e2e`
 
+## Expected Test Results
+
+### Unit Tests
+
+```
+ok  	github.com/zenmesh/zen-gc/internal/backoff	0.004s	coverage: 100.0% of statements
+ok  	github.com/zenmesh/zen-gc/internal/config	0.003s	coverage: 56.1% of statements
+ok  	github.com/zenmesh/zen-gc/internal/election	0.008s	coverage: 45.3% of statements
+ok  	github.com/zenmesh/zen-gc/internal/errors	0.004s	coverage: 89.5% of statements
+ok  	github.com/zenmesh/zen-gc/internal/events	0.008s	coverage: 85.0% of statements
+ok  	github.com/zenmesh/zen-gc/internal/health	0.004s	coverage: 81.6% of statements
+ok  	github.com/zenmesh/zen-gc/internal/ratelimiter	12.5s	coverage: 100.0% of statements
+ok  	github.com/zenmesh/zen-gc/internal/ttl	0.004s	coverage: 81.2% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/config	0.003s	coverage: 95.0% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/controller	0.023s	coverage: 39.1% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/errors	0.003s	coverage: 100.0% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/validation	0.006s	coverage: 87.6% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/webhook	0.116s	coverage: 79.5% of statements
+```
+
+**Expected**: All tests pass, no failures.
+
+### E2E Tests
+
+```
+=== RUN   TestE2E_GCController
+--- PASS: TestE2E_GCController (5.03s)
+=== RUN   TestE2E_PolicyDeletion
+--- PASS: TestE2E_PolicyDeletion (4.01s)
+=== RUN   TestE2E_ResourceDeletion
+--- PASS: TestE2E_ResourceDeletion (15.03s)
+PASS
+ok  	github.com/zenmesh/zen-gc/test/e2e	24.077s
+```
+
+**Expected**: 3 tests pass:
+- `TestE2E_GCController` - Basic CRUD operations
+- `TestE2E_PolicyDeletion` - Policy deletion behavior
+- `TestE2E_ResourceDeletion` - Resource cleanup verification
+
+### Running Tests for CI Verification
+
+To verify your changes match expected results:
+
+```bash
+# Unit tests
+go test ./... -cover
+
+# E2E tests (requires kind cluster)
+kind create cluster --name zen-gc-test
+kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+KUBECONFIG=$(kind get kubeconfig --name zen-gc-test) go test -tags=e2e ./test/e2e/...
+kind delete cluster --name zen-gc-test
+```
+
 ## Performance Benchmarks
 
 See [BENCHMARKS.md](BENCHMARKS.md) for detailed performance benchmarks and test results.
