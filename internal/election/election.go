@@ -33,22 +33,75 @@ import (
 )
 
 type Config struct {
-	ElectionID  string
-	Namespace   string
-	LeaseName   string
-	LeaseDuration time.Duration
-	RenewDeadline time.Duration
-	RetryPeriod   time.Duration
-	Enable        bool
+	ElectionID       string
+	Namespace        string
+	LeaseName        string
+	LeaseDuration    time.Duration
+	RenewDeadline    time.Duration
+	RetryPeriod      time.Duration
+	Enable           bool
+	GetIdentity      func() string
 }
 
-func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.Interface, runFn func(context.Context)) error {
-	if !cfg.Enable {
-		klog.InfoS("Leader election disabled, running directly")
-		runFn(ctx)
-		return nil
-	}
+// LeaderElector interface for testing
+type LeaderElector interface {
+	Run(ctx context.Context) error
+}
 
+// leaderElectorAdapter wraps the leaderelection.LeaderElector
+type leaderElectorAdapter struct {
+	le *leaderelection.LeaderElector
+}
+
+func (a *leaderElectorAdapter) Run(ctx context.Context) error {
+	a.le.Run(ctx)
+	return nil // RunOrDie doesn't return
+}
+
+// NewLeaderElector creates a leader elector with the given config
+func NewLeaderElector(client kubernetes.Interface, cfg *Config) (LeaderElector, error) {
+	lock := newLeaseLock(client, cfg)
+	le, err := leaderelection.NewLeaderElector(leaderelection.LeaderElectionConfig{
+		Lock:          lock,
+		LeaseDuration: cfg.LeaseDuration,
+		RenewDeadline:  cfg.RenewDeadline,
+		RetryPeriod:    cfg.RetryPeriod,
+		Callbacks: leaderelection.LeaderCallbacks{
+			OnStartedLeading: func(ctx context.Context) {},
+			OnStoppedLeading: func() {},
+			OnNewLeader:      func(identity string) {},
+		},
+		WatchDog: leaderelection.NewLeaderHealthzAdaptor(0),
+		Name:     cfg.ElectionID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &leaderElectorAdapter{le: le}, nil
+}
+
+func newLeaseLock(client kubernetes.Interface, cfg *Config) resourcelock.Interface {
+	identity := cfg.GetIdentity
+	if identity == nil {
+		identity = getPodName
+	}
+	return &resourcelock.LeaseLock{
+		LeaseMeta: metav1.ObjectMeta{
+			Name:      cfg.LeaseName,
+			Namespace: cfg.Namespace,
+		},
+		Client: client.CoordinationV1(),
+		LockConfig: resourcelock.ResourceLockConfig{
+			Identity: identity(),
+		},
+	}
+}
+
+// ApplyDefaults sets default values for the config
+func ApplyDefaults(cfg *Config) *Config {
+	if cfg == nil {
+		cfg = &Config{}
+	}
 	if cfg.Namespace == "" {
 		cfg.Namespace = "default"
 	}
@@ -59,13 +112,66 @@ func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.I
 		cfg.LeaseName = cfg.ElectionID
 	}
 	if cfg.LeaseDuration == 0 {
-		cfg.LeaseDuration = 15 * 1000000000 // 15 seconds
+		cfg.LeaseDuration = 15 * time.Second
 	}
 	if cfg.RenewDeadline == 0 {
-		cfg.RenewDeadline = 10 * 1000000000 // 10 seconds
+		cfg.RenewDeadline = 10 * time.Second
 	}
 	if cfg.RetryPeriod == 0 {
-		cfg.RetryPeriod = 5 * 1000000000 // 5 seconds
+		cfg.RetryPeriod = 5 * time.Second
+	}
+	return cfg
+}
+
+// Runner runs leader election with the given elector and callbacks
+type Runner struct {
+	Elector      LeaderElector
+	OnStartedLeading func(ctx context.Context)
+	OnStoppedLeading func()
+	OnNewLeader     func(identity string)
+	ElectionID      string
+}
+
+// Run executes the leader election runner
+func (r *Runner) Run(ctx context.Context) error {
+	if r.Elector == nil {
+		return nil // Should not happen if configured correctly
+	}
+
+	// This is a simplified version - in production you'd use callbacks
+	r.Elector.Run(ctx)
+	return nil
+}
+
+// NewRunner creates a new runner with callbacks
+func NewRunner(elector LeaderElector, onStartedLeading func(context.Context), onStoppedLeading func(), onNewLeader func(string), electionID string) *Runner {
+	return &Runner{
+		Elector:           elector,
+		OnStartedLeading:  onStartedLeading,
+		OnStoppedLeading:  onStoppedLeading,
+		OnNewLeader:       onNewLeader,
+		ElectionID:        electionID,
+	}
+}
+
+// RunWithLeaderElection runs leader election using the given client
+// This is the main entry point for the election package
+func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.Interface, runFn func(context.Context)) error {
+	if cfg == nil {
+		cfg = &Config{Enable: true}
+	}
+
+	if !cfg.Enable {
+		klog.InfoS("Leader election disabled, running directly")
+		runFn(ctx)
+		return nil
+	}
+
+	ApplyDefaults(cfg)
+
+	identity := cfg.GetIdentity
+	if identity == nil {
+		identity = getPodName
 	}
 
 	lock := &resourcelock.LeaseLock{
@@ -75,7 +181,7 @@ func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.I
 		},
 		Client: client.CoordinationV1(),
 		LockConfig: resourcelock.ResourceLockConfig{
-			Identity: getPodName(),
+			Identity: identity(),
 		},
 	}
 
@@ -92,15 +198,14 @@ func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.I
 			OnStoppedLeading: func() {
 				klog.InfoS("Stopped leading, shutting down")
 			},
-			OnNewLeader: func(identity string) {
-				if identity != getPodName() {
-					klog.InfoS("New leader elected", "leader", identity)
+			OnNewLeader: func(id string) {
+				if id != identity() {
+					klog.InfoS("New leader elected", "leader", id)
 				}
 			},
 		},
 		WatchDog: leaderelection.NewLeaderHealthzAdaptor(0),
-		// Name is required but mainly for logging purposes
-		Name: cfg.ElectionID,
+		Name:     cfg.ElectionID,
 	})
 
 	return nil

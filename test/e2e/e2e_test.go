@@ -5,6 +5,7 @@ package e2e
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -315,6 +316,11 @@ func TestE2E_ResourceDeletion(t *testing.T) {
 }
 
 func getKubeConfig() (*rest.Config, error) {
+	// Use KUBECONFIG env variable if set
+	if kubeconfig := os.Getenv("KUBECONFIG"); kubeconfig != "" {
+		return clientcmd.BuildConfigFromFlags("", kubeconfig)
+	}
+
 	// Try in-cluster config first
 	if config, err := rest.InClusterConfig(); err == nil {
 		return config, nil

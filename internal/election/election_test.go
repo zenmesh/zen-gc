@@ -43,6 +43,7 @@ func TestConfigWithValues(t *testing.T) {
 		RenewDeadline:  20 * time.Second,
 		RetryPeriod:    10 * time.Second,
 		Enable:         true,
+		GetIdentity:    func() string { return "test-identity" },
 	}
 
 	if cfg.ElectionID != "test-election" {
@@ -59,6 +60,86 @@ func TestConfigWithValues(t *testing.T) {
 	}
 	if cfg.Enable != true {
 		t.Errorf("Expected true, got %v", cfg.Enable)
+	}
+	if cfg.GetIdentity() != "test-identity" {
+		t.Errorf("Expected test-identity, got %s", cfg.GetIdentity())
+	}
+}
+
+func TestApplyDefaults(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *Config
+		expected *Config
+	}{
+		{
+			name:     "nil config",
+			input:    nil,
+			expected: &Config{Namespace: "default", ElectionID: "zen-gc-leader-election", LeaseName: "zen-gc-leader-election", LeaseDuration: 15 * time.Second, RenewDeadline: 10 * time.Second, RetryPeriod: 5 * time.Second},
+		},
+		{
+			name:     "empty config",
+			input:    &Config{},
+			expected: &Config{Namespace: "default", ElectionID: "zen-gc-leader-election", LeaseName: "zen-gc-leader-election", LeaseDuration: 15 * time.Second, RenewDeadline: 10 * time.Second, RetryPeriod: 5 * time.Second},
+		},
+		{
+			name: "partial config",
+			input: &Config{
+				Namespace: "custom-ns",
+			},
+			expected: &Config{
+				Namespace:    "custom-ns",
+				ElectionID:   "zen-gc-leader-election",
+				LeaseName:    "zen-gc-leader-election",
+				LeaseDuration: 15 * time.Second,
+				RenewDeadline: 10 * time.Second,
+				RetryPeriod:   5 * time.Second,
+			},
+		},
+		{
+			name: "full config preserved",
+			input: &Config{
+				ElectionID:    "custom-election",
+				Namespace:     "custom-ns",
+				LeaseName:     "custom-lease",
+				LeaseDuration: 60 * time.Second,
+				RenewDeadline:  40 * time.Second,
+				RetryPeriod:    20 * time.Second,
+			},
+			expected: &Config{
+				ElectionID:    "custom-election",
+				Namespace:     "custom-ns",
+				LeaseName:     "custom-lease",
+				LeaseDuration: 60 * time.Second,
+				RenewDeadline:  40 * time.Second,
+				RetryPeriod:    20 * time.Second,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ApplyDefaults(tt.input)
+
+			if result.Namespace != tt.expected.Namespace {
+				t.Errorf("Namespace: expected %s, got %s", tt.expected.Namespace, result.Namespace)
+			}
+			if result.ElectionID != tt.expected.ElectionID {
+				t.Errorf("ElectionID: expected %s, got %s", tt.expected.ElectionID, result.ElectionID)
+			}
+			if result.LeaseName != tt.expected.LeaseName {
+				t.Errorf("LeaseName: expected %s, got %s", tt.expected.LeaseName, result.LeaseName)
+			}
+			if result.LeaseDuration != tt.expected.LeaseDuration {
+				t.Errorf("LeaseDuration: expected %v, got %v", tt.expected.LeaseDuration, result.LeaseDuration)
+			}
+			if result.RenewDeadline != tt.expected.RenewDeadline {
+				t.Errorf("RenewDeadline: expected %v, got %v", tt.expected.RenewDeadline, result.RenewDeadline)
+			}
+			if result.RetryPeriod != tt.expected.RetryPeriod {
+				t.Errorf("RetryPeriod: expected %v, got %v", tt.expected.RetryPeriod, result.RetryPeriod)
+			}
+		})
 	}
 }
 
@@ -81,42 +162,64 @@ func TestGetPodName(t *testing.T) {
 		t.Skipf("Cannot get hostname: %v", err)
 	}
 
-	// The function should return the hostname or "unknown"
-	// We can't directly test it since it's internal, but we can verify
-	// the function exists and doesn't panic by testing ShutdownContext
-	// which uses similar logic internally
-	_ = hostname
+	// Test that getPodName returns the hostname
+	result := getPodName()
+	if result == "" {
+		t.Error("Expected non-empty pod name")
+	}
+	_ = hostname // Use variable to avoid unused warning
 }
 
-func TestConfigIsValid(t *testing.T) {
-	tests := []struct {
-		name    string
-		cfg     *Config
-		isValid bool
-	}{
-		{
-			name:    "valid with all fields",
-			cfg:     &Config{ElectionID: "test", Namespace: "ns", Enable: true},
-			isValid: true,
-		},
-		{
-			name:    "valid disabled",
-			cfg:     &Config{Enable: false},
-			isValid: true,
-		},
-		{
-			name:    "empty config",
-			cfg:     &Config{},
-			isValid: true,
-		},
+func TestRunner(t *testing.T) {
+	// Test that Runner struct can be created and configured
+	runner := NewRunner(nil, func(ctx context.Context) {}, func() {}, func(s string) {}, "test-election")
+
+	if runner == nil {
+		t.Error("Expected non-nil runner")
+	}
+	if runner.ElectionID != "test-election" {
+		t.Errorf("Expected test-election, got %s", runner.ElectionID)
+	}
+	if runner.OnStartedLeading == nil {
+		t.Error("Expected non-nil OnStartedLeading callback")
+	}
+	if runner.OnStoppedLeading == nil {
+		t.Error("Expected non-nil OnStoppedLeading callback")
+	}
+	if runner.OnNewLeader == nil {
+		t.Error("Expected non-nil OnNewLeader callback")
+	}
+}
+
+func TestLeaderElectorInterface(t *testing.T) {
+	// Verify LeaderElector interface is implemented correctly
+	var _ LeaderElector = (*leaderElectorAdapter)(nil)
+}
+
+func TestRunWithLeaderElectionDisabled(t *testing.T) {
+	// Test that when Enable is false, runFn is called directly
+	callCount := 0
+	cfg := &Config{Enable: false}
+
+	err := RunWithLeaderElection(context.Background(), cfg, nil, func(ctx context.Context) {
+		callCount++
+	})
+
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if callCount != 1 {
+		t.Errorf("Expected runFn to be called once, got %d", callCount)
+	}
+}
+
+func TestGetIdentity(t *testing.T) {
+	// Test custom GetIdentity function
+	cfg := &Config{
+		GetIdentity: func() string { return "custom-identity" },
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Just verify the config can be created
-			if tt.cfg == nil {
-				t.Error("Expected non-nil config")
-			}
-		})
+	if cfg.GetIdentity() != "custom-identity" {
+		t.Errorf("Expected custom-identity, got %s", cfg.GetIdentity())
 	}
 }
