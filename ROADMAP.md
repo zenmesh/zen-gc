@@ -219,6 +219,12 @@ These items are under consideration but not yet planned for a specific release:
 - **Policy scheduling**: Time-based policy activation/deactivation
 - **Resource dependencies**: Handle resource dependencies during deletion
 
+### Future: Enhanced Leader Election
+
+- Improved failover latency
+- Better observability of election state
+- Reduced thundering herd on leader loss
+
 ---
 
 ## 📋 Prioritization
