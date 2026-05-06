@@ -24,8 +24,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )

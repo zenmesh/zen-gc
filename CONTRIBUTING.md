@@ -17,7 +17,7 @@ Thank you for your interest in contributing to zen-gc! This document provides gu
 
 1. **Fork and clone the repository:**
    ```bash
-   git clone https://github.com/kube-zen/zen-gc.git
+   git clone https://github.com/zen-mesh/zen-gc.git
    cd zen-gc
    ```
 
@@ -62,12 +62,12 @@ Thank you for your interest in contributing to zen-gc! This document provides gu
 2. **Build and deploy controller:**
    ```bash
    # Build image
-   docker build -t kube-zen/gc-controller:dev .
-   kind load docker-image kube-zen/gc-controller:dev --name zen-gc-e2e
+   docker build -t zen-mesh/gc-controller:dev .
+   kind load docker-image zen-mesh/gc-controller:dev --name zen-gc-e2e
    
    # Deploy
    kubectl apply -f deploy/manifests/
-   kubectl set image deployment/gc-controller gc-controller=kube-zen/gc-controller:dev -n gc-system
+   kubectl set image deployment/gc-controller gc-controller=zen-mesh/gc-controller:dev -n gc-system
    ```
 
 3. **Run controller locally (for faster iteration):**

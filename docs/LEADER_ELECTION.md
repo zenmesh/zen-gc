@@ -164,5 +164,5 @@ zen-gc (controller-runtime)
 ---
 
 **See also:**
-- [zen-sdk Documentation](https://github.com/kube-zen/zen-sdk)
-- [zen-lead Documentation](https://github.com/kube-zen/zen-lead) - For workload leader routing (not controller HA)
+- [zen-sdk Documentation](https://github.com/zen-mesh/zen-sdk)
+- [zen-lead Documentation](https://github.com/zen-mesh/zen-lead) - For workload leader routing (not controller HA)

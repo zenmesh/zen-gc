@@ -32,9 +32,9 @@ build-image:
 		--build-arg VERSION=$$VERSION \
 		--build-arg COMMIT=$$COMMIT \
 		--build-arg BUILD_DATE=$$BUILD_DATE \
-		-t kube-zen/gc-controller:$$VERSION \
-		-t kube-zen/gc-controller:latest .
-	@echo "✅ Docker image built: kube-zen/gc-controller:$$VERSION"
+		-t zenmesh/gc-controller:$$VERSION \
+		-t zenmesh/gc-controller:latest .
+	@echo "✅ Docker image built: zenmesh/gc-controller:$$VERSION"
 
 # Build multi-arch Docker images (requires Docker Buildx)
 build-image-multiarch:
@@ -47,10 +47,10 @@ build-image-multiarch:
 		--build-arg VERSION=$$VERSION \
 		--build-arg COMMIT=$$COMMIT \
 		--build-arg BUILD_DATE=$$BUILD_DATE \
-		-t kube-zen/gc-controller:$$VERSION \
-		-t kube-zen/gc-controller:latest \
+		-t zenmesh/gc-controller:$$VERSION \
+		-t zenmesh/gc-controller:latest \
 		--push .
-	@echo "✅ Multi-arch Docker images built: kube-zen/gc-controller:$$VERSION"
+	@echo "✅ Multi-arch Docker images built: zenmesh/gc-controller:$$VERSION"
 
 # Run all tests
 test: test-unit test-integration
@@ -223,7 +223,7 @@ install-tools:
 	@echo "✅ Development tools installed"
 
 # Helm charts are now in the helm-charts repository
-# See: https://github.com/kube-zen/helm-charts
+# See: https://github.com/zen-mesh/helm-charts
 
 check:
 	@scripts/ci/check.sh

@@ -38,7 +38,7 @@ kubectl apply -f deploy/manifests/
 ### 2. Create Your First Policy
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: temp-configmap-cleanup
@@ -76,7 +76,7 @@ A `GarbageCollectionPolicy` defines:
 ### Basic Policy Structure
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: <policy-name>
@@ -324,7 +324,7 @@ behavior:
 Delete temporary ConfigMaps after 1 hour:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: temp-configmap-cleanup
@@ -346,7 +346,7 @@ spec:
 Delete completed test pods after 30 minutes:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: test-pod-cleanup

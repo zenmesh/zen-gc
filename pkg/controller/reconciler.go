@@ -33,10 +33,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	"github.com/kube-zen/zen-gc/pkg/config"
-	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
-	"github.com/kube-zen/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/config"
+	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
+	"github.com/zenmesh/zen-gc/pkg/validation"
 	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )

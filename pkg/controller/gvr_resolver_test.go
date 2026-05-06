@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/kube-zen/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-gc/pkg/validation"
 )
 
 // TestGVRResolver_WithRESTMapper tests GVRResolver with RESTMapper.

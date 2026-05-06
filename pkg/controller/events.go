@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	sdkevents "github.com/zenmesh/zen-gc/internal/events"
 )
 

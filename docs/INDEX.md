@@ -15,7 +15,7 @@ Welcome to the {{ .projectName }} documentation.
 
 ## Resources
 
-- [GitHub Repository](https://github.com/kube-zen/{{ .projectName }})
+- [GitHub Repository](https://github.com/zen-mesh/{{ .projectName }})
 - [Security Policy](../SECURITY.md)
 - [Code of Conduct](../CODE_OF_CONDUCT.md)
 - [Changelog](../CHANGELOG.md)

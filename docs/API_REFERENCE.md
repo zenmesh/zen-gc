@@ -8,7 +8,7 @@ Complete API reference for the GarbageCollectionPolicy CRD.
 
 ### API Version
 
-- **Group**: `gc.kube-zen.io`
+- **Group**: `gc.zen-mesh.io`
 - **Version**: `v1alpha1`
 - **Kind**: `GarbageCollectionPolicy`
 - **Plural**: `garbagecollectionpolicies`
@@ -17,7 +17,7 @@ Complete API reference for the GarbageCollectionPolicy CRD.
 ### Schema
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: string
@@ -254,7 +254,7 @@ Field paths use dot notation for nested fields:
 Delete all ConfigMaps with `temp: "true"` label after 1 hour:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: temp-configmap-cleanup
@@ -274,7 +274,7 @@ spec:
 Delete resources based on TTL field in the resource itself:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: resource-controlled-ttl
@@ -291,7 +291,7 @@ spec:
 Different TTLs based on resource severity:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: severity-based-cleanup
@@ -314,7 +314,7 @@ spec:
 Delete resources relative to last activity timestamp:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: activity-based-cleanup
@@ -332,7 +332,7 @@ spec:
 Only delete completed Jobs:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: completed-jobs-cleanup
@@ -351,7 +351,7 @@ spec:
 Test policy without actually deleting:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: test-policy
@@ -370,7 +370,7 @@ spec:
 Delete resources quickly with high rate limit:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: fast-cleanup
@@ -393,7 +393,7 @@ spec:
 Delete resources with foreground propagation (wait for dependents):
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: foreground-deletion
@@ -417,13 +417,13 @@ The CRD includes OpenAPI v3 schema validation. You can extract the OpenAPI spec:
 
 ```bash
 # Get OpenAPI spec from CRD
-kubectl get crd garbagecollectionpolicies.gc.kube-zen.io -o jsonpath='{.spec.versions[0].schema.openAPIV3Schema}' | jq .
+kubectl get crd garbagecollectionpolicies.gc.zen-mesh.io -o jsonpath='{.spec.versions[0].schema.openAPIV3Schema}' | jq .
 
 # Or view the full CRD
-kubectl get crd garbagecollectionpolicies.gc.kube-zen.io -o yaml
+kubectl get crd garbagecollectionpolicies.gc.zen-mesh.io -o yaml
 ```
 
-The OpenAPI schema is also available in `deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml`.
+The OpenAPI schema is also available in `deploy/crds/gc.zen-mesh.io_garbagecollectionpolicies.yaml`.
 
 ---
 

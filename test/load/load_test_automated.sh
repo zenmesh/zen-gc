@@ -101,7 +101,7 @@ run_load_test() {
     
     # Create GC policy
     cat <<EOF | kubectl apply -f -
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: load-test-policy

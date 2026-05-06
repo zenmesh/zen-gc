@@ -356,7 +356,7 @@ make test-load
 **Solution**: 
 ```bash
 kubectl apply -f deploy/crds/
-kubectl wait --for condition=established crd/garbagecollectionpolicies.gc.kube-zen.io
+kubectl wait --for condition=established crd/garbagecollectionpolicies.gc.zen-mesh.io
 ```
 
 ### Load Tests Timeout

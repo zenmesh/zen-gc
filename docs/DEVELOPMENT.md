@@ -12,7 +12,7 @@ This guide covers development setup, workflows, and best practices for {{ .proje
 ## Installation
 
 ```bash
-git clone https://github.com/kube-zen/{{ .projectName }}.git
+git clone https://github.com/zen-mesh/{{ .projectName }}.git
 cd {{ .projectName }}
 go mod download
 ```

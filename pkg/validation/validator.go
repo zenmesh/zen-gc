@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 
-	gcapi "github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
+	gcapi "github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 var (

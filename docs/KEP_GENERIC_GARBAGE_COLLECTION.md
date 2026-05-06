@@ -108,7 +108,7 @@ Kubernetes currently lacks a generic mechanism for automatic, time-based resourc
 
 ### Core API: GarbageCollectionPolicy CRD
 
-**Group**: `gc.kube-zen.io`  
+**Group**: `gc.zen-mesh.io`  
 **Version**: `v1alpha1` (initial), `v1beta1` (after validation), `v1` (stable)  
 **Kind**: `GarbageCollectionPolicy`  
 **Scope**: `Namespaced` (for namespace-scoped resources) or `Cluster` (for cluster-scoped resources)
@@ -116,7 +116,7 @@ Kubernetes currently lacks a generic mechanism for automatic, time-based resourc
 #### Basic Schema
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: cleanup-temp-configmaps-policy
@@ -124,7 +124,7 @@ metadata:
 spec:
   # Target resource to apply GC policy
   targetResource:
-    apiVersion: gc.kube-zen.io/v1alpha1
+    apiVersion: gc.zen-mesh.io/v1alpha1
     kind: ConfigMap
     # Optional: label selector to filter resources
     labelSelector:
@@ -166,7 +166,7 @@ spec:
     dryRun: false
     
     # Finalizer: add finalizer before deletion (for graceful cleanup)
-    finalizer: "gc.kube-zen.io/cleanup"
+    finalizer: "gc.zen-mesh.io/cleanup"
 
 status:
   # Policy status
@@ -293,7 +293,7 @@ behavior:
   dryRun: false  # If true, log deletions but don't actually delete
   
   # Finalizer for graceful cleanup
-  finalizer: "gc.kube-zen.io/cleanup"  # Add finalizer, wait for removal before deletion
+  finalizer: "gc.zen-mesh.io/cleanup"  # Add finalizer, wait for removal before deletion
   
   # Deletion propagation
   propagationPolicy: Foreground  # Foreground, Background, Orphan
@@ -428,14 +428,14 @@ var (
 ### Example 1: ConfigMap Cleanup
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: cleanup-temp-configmaps
   namespace: zen-system
 spec:
   targetResource:
-    apiVersion: gc.kube-zen.io/v1alpha1
+    apiVersion: gc.zen-mesh.io/v1alpha1
     kind: ConfigMap
     labelSelector:
       matchLabels:
@@ -450,7 +450,7 @@ spec:
 ### Example 2: Temporary ConfigMap Cleanup
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: temp-configmap-cleanup
@@ -471,7 +471,7 @@ spec:
 ### Example 3: Test Pod Cleanup
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: test-pod-cleanup
@@ -494,7 +494,7 @@ spec:
 ### Example 4: Cluster-Scoped Resource Cleanup
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: cluster-namespace-cleanup

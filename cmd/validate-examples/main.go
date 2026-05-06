@@ -9,8 +9,8 @@ import (
 
 	"sigs.k8s.io/yaml"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	"github.com/kube-zen/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/validation"
 )
 
 func main() {

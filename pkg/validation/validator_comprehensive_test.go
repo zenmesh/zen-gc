@@ -5,7 +5,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 func TestValidateTargetResource(t *testing.T) {

@@ -19,7 +19,7 @@ package controller
 import (
 	"testing"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 func TestMatchesFieldOperatorShared(t *testing.T) {

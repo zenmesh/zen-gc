@@ -27,8 +27,8 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	clientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	"github.com/kube-zen/zen-gc/pkg/config"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/config"
 )
 
 // TestGCPolicyReconciler_recordPolicyPhaseMetrics tests the recordPolicyPhaseMetrics function.

@@ -5,7 +5,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 

@@ -73,6 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Links
 
-- [GitHub Releases](https://github.com/kube-zen/zen-gc/releases)
+- [GitHub Releases](https://github.com/zen-mesh/zen-gc/releases)
 - [KEP Document](docs/KEP_GENERIC_GARBAGE_COLLECTION.md)
 

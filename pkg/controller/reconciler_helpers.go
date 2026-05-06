@@ -27,9 +27,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
-	"github.com/kube-zen/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
+	"github.com/zenmesh/zen-gc/pkg/validation"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 

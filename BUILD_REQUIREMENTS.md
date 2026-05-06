@@ -2,7 +2,7 @@
 
 ## Tag Push Requirement
 
-The `zen-gc` module depends on `github.com/kube-zen/zen-sdk v0.2.0-alpha`. For Docker builds to succeed, this tag **must be pushed to the remote repository**.
+The `zen-gc` module depends on `github.com/zen-mesh/zen-sdk v0.2.0-alpha`. For Docker builds to succeed, this tag **must be pushed to the remote repository**.
 
 ### Current Status
 

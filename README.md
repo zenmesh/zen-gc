@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go)](https://go.dev/)
-[![CI](https://github.com/kube-zen/zen-gc/workflows/CI/badge.svg)](https://github.com/kube-zen/zen-gc/actions)
+[![CI](https://github.com/zen-mesh/zen-gc/workflows/CI/badge.svg)](https://github.com/zen-mesh/zen-gc/actions)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.26+-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 
 Kubernetes controller for garbage collection of orphaned resources.
@@ -92,7 +92,7 @@ Install zen-gc and create your first cleanup policy:
 
 ```bash
 # Add the Helm repository
-helm repo add zen-gc https://kube-zen.github.io/zen-gc
+helm repo add zen-gc https://zen-mesh.github.io/zen-gc
 helm repo update
 
 # Install zen-gc (specify version for now)
@@ -102,24 +102,24 @@ helm install gc-controller zen-gc/gc-controller --version 0.0.1-alpha --namespac
 # helm install gc-controller zen-gc/gc-controller --namespace gc-system --create-namespace
 
 # Create a cleanup policy
-kubectl apply -f https://raw.githubusercontent.com/kube-zen/zen-gc/main/examples/temp-configmap-cleanup.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
 ```
 
 **Using kubectl (alternative):**
 
 ```bash
 # Install zen-gc
-kubectl apply -f https://raw.githubusercontent.com/kube-zen/zen-gc/main/deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
-kubectl apply -f https://raw.githubusercontent.com/kube-zen/zen-gc/main/deploy/manifests/
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/crds/gc.zen-mesh.io_garbagecollectionpolicies.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/
 
 # Create a cleanup policy
-kubectl apply -f https://raw.githubusercontent.com/kube-zen/zen-gc/main/examples/temp-configmap-cleanup.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
 ```
 
 **Example Policy**: Clean up temporary ConfigMaps after 1 hour
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: cleanup-temp-configmaps
@@ -194,7 +194,7 @@ This is an early-stage proposal. Feedback and contributions are welcome!
 
 ## Links
 
-- **Website**: https://kube-zen.io
+- **Website**: https://zen-mesh.io
 - **Helm chart (Artifact Hub)**: https://artifacthub.io/packages/helm/zengc/gc-controller
 - **6-min explainer (no demo)**: https://www.youtube.com/watch?v=P8afhcgjWVQ&list=PL1AGc_sKXJBdInu0yffTJxN828oaCuqwx
 

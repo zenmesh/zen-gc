@@ -105,7 +105,7 @@ install_crds() {
     log_info "Installing CRDs..."
     kubectl apply -f ../../deploy/crds/
     log_info "Waiting for CRDs to be established..."
-    kubectl wait --for condition=established --timeout=60s crd/garbagecollectionpolicies.gc.kube-zen.io || true
+    kubectl wait --for condition=established --timeout=60s crd/garbagecollectionpolicies.gc.zen-mesh.io || true
 }
 
 deploy_controller() {
@@ -119,12 +119,12 @@ deploy_controller() {
     
     # Build and load image
     log_info "Building controller image..."
-    docker build -t kube-zen/gc-controller:test ../../.
-    kind load docker-image kube-zen/gc-controller:test --name "$CLUSTER_NAME"
+    docker build -t zenmesh/gc-controller:test ../../.
+    kind load docker-image zenmesh/gc-controller:test --name "$CLUSTER_NAME"
     
     # Apply deployment (modify image tag)
     kubectl apply -f ../../deploy/manifests/deployment.yaml
-    kubectl set image deployment/gc-controller gc-controller=kube-zen/gc-controller:test -n gc-system
+    kubectl set image deployment/gc-controller gc-controller=zenmesh/gc-controller:test -n gc-system
     
     log_info "Waiting for controller to be ready..."
     kubectl wait --for=condition=available --timeout=120s deployment/gc-controller -n gc-system

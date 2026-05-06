@@ -16,35 +16,20 @@
 # See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owners for everything in the repo
-* @kube-zen/maintainers
+* @zen-mesh/maintainers
 
-# Core controller code
-/pkg/ @kube-zen/maintainers
-/cmd/ @kube-zen/maintainers
-
-# CRD definitions
-/deploy/crds/ @kube-zen/maintainers
-
-# Helm chart
-/charts/ @kube-zen/maintainers
-
-# Documentation
-/docs/ @kube-zen/maintainers
-*.md @kube-zen/maintainers
-
-# CI/CD
-/.github/ @kube-zen/maintainers
-/.github/workflows/ @kube-zen/maintainers
-
-# Build and deployment
-/Makefile @kube-zen/maintainers
-/Dockerfile @kube-zen/maintainers
-/install.sh @kube-zen/maintainers
-
-# Dependencies
-/go.mod @kube-zen/maintainers
-/go.sum @kube-zen/maintainers
-
-# Examples
-/examples/ @kube-zen/maintainers
+/pkg/ @zen-mesh/maintainers
+/cmd/ @zen-mesh/maintainers
+/deploy/crds/ @zen-mesh/maintainers
+/charts/ @zen-mesh/maintainers
+/docs/ @zen-mesh/maintainers
+*.md @zen-mesh/maintainers
+/.github/ @zen-mesh/maintainers
+/.github/workflows/ @zen-mesh/maintainers
+/Makefile @zen-mesh/maintainers
+/Dockerfile @zen-mesh/maintainers
+/install.sh @zen-mesh/maintainers
+/go.mod @zen-mesh/maintainers
+/go.sum @zen-mesh/maintainers
+/examples/ @zen-mesh/maintainers
 

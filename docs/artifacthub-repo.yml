@@ -15,7 +15,7 @@ repositoryID: 932dd8e5-fce2-4781-b952-c3ecce7a5405
 # owners: List of owners to claim repository ownership (optional)
 owners:
   - name: Kube-ZEN Contributors
-    email: zen@kube-zen.io
+    email: zen@zen-mesh.io
 
 # ignore: Packages that should not be indexed by Artifact Hub (optional)
 # Currently, we want all packages indexed, so this is commented out:

@@ -31,7 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 func TestWebhookServer_handleValidate(t *testing.T) {
@@ -52,7 +52,7 @@ func TestWebhookServer_handleValidate(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "test-uid",
 					Kind: metav1.GroupVersionKind{
-						Group:   "gc.kube-zen.io",
+						Group:   "gc.zen-mesh.io",
 						Version: "v1alpha1",
 						Kind:    "GarbageCollectionPolicy",
 					},
@@ -81,7 +81,7 @@ func TestWebhookServer_handleValidate(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "test-uid-2",
 					Kind: metav1.GroupVersionKind{
-						Group:   "gc.kube-zen.io",
+						Group:   "gc.zen-mesh.io",
 						Version: "v1alpha1",
 						Kind:    "GarbageCollectionPolicy",
 					},
@@ -108,7 +108,7 @@ func TestWebhookServer_handleValidate(t *testing.T) {
 				Request: &admissionv1.AdmissionRequest{
 					UID: "test-uid-3",
 					Kind: metav1.GroupVersionKind{
-						Group:   "gc.kube-zen.io",
+						Group:   "gc.zen-mesh.io",
 						Version: "v1alpha1",
 						Kind:    "GarbageCollectionPolicy",
 					},

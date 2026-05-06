@@ -27,8 +27,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic/fake"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	"github.com/kube-zen/zen-gc/pkg/config"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/config"
 )
 
 func TestNewStatusUpdaterWithConfig(t *testing.T) {
@@ -81,7 +81,7 @@ func TestStatusUpdater_UpdateStatus(t *testing.T) {
 
 	// Create the policy in the fake client
 	gvr := schema.GroupVersionResource{
-		Group:    "gc.kube-zen.io",
+		Group:    "gc.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -128,7 +128,7 @@ func TestStatusUpdater_UpdateStatus_WithExistingStatus(t *testing.T) {
 
 	// Create the policy in the fake client with existing status
 	gvr := schema.GroupVersionResource{
-		Group:    "gc.kube-zen.io",
+		Group:    "gc.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}
@@ -177,7 +177,7 @@ func TestStatusUpdater_UpdateStatus_WithConfig(t *testing.T) {
 
 	// Create the policy in the fake client
 	gvr := schema.GroupVersionResource{
-		Group:    "gc.kube-zen.io",
+		Group:    "gc.zen-mesh.io",
 		Version:  "v1alpha1",
 		Resource: "garbagecollectionpolicies",
 	}

@@ -140,7 +140,7 @@ metadata:
     cert-manager.io/inject-ca-from: gc-system/gc-controller-webhook-cert
 spec:
   webhooks:
-  - name: validate-gc-policy.gc.kube-zen.io
+  - name: validate-gc-policy.gc.zen-mesh.io
     clientConfig:
       service:
         name: gc-controller-webhook

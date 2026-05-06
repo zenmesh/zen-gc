@@ -15,7 +15,7 @@ We release patches to fix security issues. Which versions are eligible for recei
 
 Instead, please report them via one of the following methods:
 
-1. **Email**: security@kube-zen.io (preferred)
+1. **Email**: security@zen-mesh.io (preferred)
 2. **GitHub Security Advisory**: Use the "Report a vulnerability" button on the repository's Security tab
 
 ### What to Include
@@ -93,7 +93,7 @@ Security updates will be announced via:
 
 ## Security Contact
 
-- **Email**: security@kube-zen.io
+- **Email**: security@zen-mesh.io
 - **GitHub**: Use Security tab on repository
 
 Thank you for helping keep zen-gc secure! 🔒

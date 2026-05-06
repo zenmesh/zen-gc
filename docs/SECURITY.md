@@ -155,7 +155,7 @@ rules:
   users: ["*"]
   verbs: ["create", "update", "patch", "delete"]
   resources:
-  - group: "gc.kube-zen.io"
+  - group: "gc.zen-mesh.io"
     resources: ["garbagecollectionpolicies"]
 ```
 
@@ -207,7 +207,7 @@ kind: ClusterRole
 metadata:
   name: gc-controller-namespaced
 rules:
-- apiGroups: ["gc.kube-zen.io"]
+- apiGroups: ["gc.zen-mesh.io"]
   resources: ["garbagecollectionpolicies"]
   verbs: ["get", "list", "watch", "update", "patch"]
 - apiGroups: [""]
@@ -220,7 +220,7 @@ rules:
 Use label selectors to limit which resources can be deleted:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 spec:
   targetResource:
@@ -251,7 +251,7 @@ metadata:
   name: gc-controller
   namespace: tenant-a
 rules:
-- apiGroups: ["gc.kube-zen.io"]
+- apiGroups: ["gc.zen-mesh.io"]
   resources: ["garbagecollectionpolicies"]
   verbs: ["*"]
 - apiGroups: ["*"]
@@ -264,7 +264,7 @@ rules:
 Use policy conditions to prevent cross-tenant deletions:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: tenant-a-policy
@@ -355,7 +355,7 @@ Use this checklist when deploying zen-gc:
 
 ## Reporting Security Issues
 
-If you discover a security vulnerability, please report it to: security@kube-zen.io
+If you discover a security vulnerability, please report it to: security@zen-mesh.io
 
 **Do not** open a public GitHub issue for security vulnerabilities.
 

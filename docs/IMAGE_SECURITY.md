@@ -110,13 +110,13 @@ sudo apt-get install trivy  # Ubuntu/Debian
 make build-image
 
 # Scan image
-trivy image kube-zen/gc-controller:latest
+trivy image zen-mesh/gc-controller:latest
 
 # Scan with specific severity
-trivy image --severity CRITICAL,HIGH kube-zen/gc-controller:latest
+trivy image --severity CRITICAL,HIGH zen-mesh/gc-controller:latest
 
 # Scan and save report
-trivy image --format json --output trivy-report.json kube-zen/gc-controller:latest
+trivy image --format json --output trivy-report.json zen-mesh/gc-controller:latest
 ```
 
 #### Scan Go Dependencies
@@ -205,10 +205,10 @@ FROM alpine:3.20@sha256:<NEW_SHA>
 make build-image
 
 # Run security scan
-trivy image kube-zen/gc-controller:test
+trivy image zen-mesh/gc-controller:test
 
 # Test the image
-docker run --rm kube-zen/gc-controller:test --help
+docker run --rm zen-mesh/gc-controller:test --help
 ```
 
 #### Step 6: Update Documentation
@@ -283,7 +283,7 @@ Consider implementing image signing with:
 If you discover a vulnerability:
 
 1. **Do NOT** create a public issue
-2. Email: security@kube-zen.io
+2. Email: security@zen-mesh.io
 3. Or use GitHub Security tab → Report a vulnerability
 
 ## Monitoring

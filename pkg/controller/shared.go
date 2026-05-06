@@ -29,9 +29,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kube-zen/zen-gc/pkg/api/v1alpha1"
-	"github.com/kube-zen/zen-gc/pkg/config"
-	gcerrors "github.com/kube-zen/zen-gc/pkg/errors"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/config"
+	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/internal/backoff"
 	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"

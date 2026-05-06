@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/kube-zen/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-gc/pkg/validation"
 )
 
 // GVRResolver provides GroupVersionResource resolution with caching.

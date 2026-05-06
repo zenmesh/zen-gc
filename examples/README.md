@@ -167,7 +167,7 @@ kubectl apply -f examples/old-secrets-cleanup.yaml
 Delete resources based on TTL field in the resource:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: resource-controlled-ttl
@@ -184,7 +184,7 @@ spec:
 Different TTLs based on resource severity:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: severity-based-cleanup
@@ -207,7 +207,7 @@ spec:
 Delete resources relative to last activity:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: activity-based-cleanup
@@ -225,7 +225,7 @@ spec:
 Only delete resources that meet multiple conditions:
 
 ```yaml
-apiVersion: gc.kube-zen.io/v1alpha1
+apiVersion: gc.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: multi-condition-cleanup
