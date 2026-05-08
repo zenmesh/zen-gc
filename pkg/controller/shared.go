@@ -76,19 +76,6 @@ const (
 	ErrorTypeEvaluationFailed = "evaluation_failed"
 )
 
-// resolveBatchSize returns the batch size for deletions: policy behavior overrides
-// controller config, which overrides DefaultBatchSize.
-func resolveBatchSize(policy *v1alpha1.GarbageCollectionPolicy, ctrlCfg *config.ControllerConfig) int {
-	batchSize := DefaultBatchSize
-	if ctrlCfg != nil {
-		batchSize = ctrlCfg.BatchSize
-	}
-	if policy.Spec.Behavior.BatchSize > 0 {
-		batchSize = policy.Spec.Behavior.BatchSize
-	}
-	return batchSize
-}
-
 // Constants for deletion propagation policies.
 const (
 	// PropagationPolicyForeground indicates foreground deletion propagation.
