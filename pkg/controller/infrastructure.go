@@ -28,9 +28,9 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 )
 
 // DefaultResourceInformer wraps a cache.SharedInformer to implement ResourceInformer interface.

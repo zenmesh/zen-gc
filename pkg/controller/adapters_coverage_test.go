@@ -64,10 +64,10 @@ func TestInformerStoreResourceLister_ListResources(t *testing.T) {
 	}
 }
 
-func TestGCPolicyReconcilerAdapter(t *testing.T) {
-	adapter := &GCPolicyReconcilerAdapter{}
-	if adapter == nil {
-		t.Fatal("Expected non-nil adapter")
+func TestGCPolicyReconcilerAdapter_zeroValue(t *testing.T) {
+	var adapter GCPolicyReconcilerAdapter
+	if adapter.reconciler != nil {
+		t.Error("expected nil reconciler on zero value")
 	}
 }
 

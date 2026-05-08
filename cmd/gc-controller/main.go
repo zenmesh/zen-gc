@@ -33,12 +33,12 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"github.com/zenmesh/zen-gc/internal/election"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	"github.com/zenmesh/zen-gc/pkg/controller"
 	gcwebhook "github.com/zenmesh/zen-gc/pkg/webhook"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
-	"github.com/zenmesh/zen-gc/internal/election"
 )
 
 var (
@@ -67,22 +67,21 @@ var (
 )
 
 var (
-	metricsAddr             = flag.String("metrics-addr", ":8080", "The address the metric endpoint binds to")
-	webhookAddr             = flag.String("webhook-addr", ":9443", "The address the webhook endpoint binds to")
-	webhookCertFile         = flag.String("webhook-cert-file", "/etc/webhook/certs/tls.crt", "Path to TLS certificate file")
-	webhookKeyFile          = flag.String("webhook-key-file", "/etc/webhook/certs/tls.key", "Path to TLS private key file")
-	leaderElection          = flag.Bool("leader-election", true, "Enable leader election (recommended for multi-replica)")
-	leaderElectionID        = flag.String("leader-election-id", "gc-controller-leader-election", "The ID for leader election")
-	leaderElectionNamespace = flag.String("leader-election-namespace", "default", "The namespace for leader election lock")
-	enableWebhook           = flag.Bool("enable-webhook", true, "Enable validating webhook server")
-	insecureWebhook         = flag.Bool("insecure-webhook", false, "Allow webhook to start without TLS (testing only)")
-	gcInterval              = flag.Duration("gc-interval", 1*time.Minute, "Interval between GC evaluation runs")
-	maxDeletionsPerSecond   = flag.Int("max-deletions-per-second", 10, "Default maximum deletions per second")
-	batchSize               = flag.Int("batch-size", DefaultBatchSize, "Default batch size for deletions")
+	metricsAddr              = flag.String("metrics-addr", ":8080", "The address the metric endpoint binds to")
+	webhookAddr              = flag.String("webhook-addr", ":9443", "The address the webhook endpoint binds to")
+	webhookCertFile          = flag.String("webhook-cert-file", "/etc/webhook/certs/tls.crt", "Path to TLS certificate file")
+	webhookKeyFile           = flag.String("webhook-key-file", "/etc/webhook/certs/tls.key", "Path to TLS private key file")
+	leaderElection           = flag.Bool("leader-election", true, "Enable leader election (recommended for multi-replica)")
+	leaderElectionID         = flag.String("leader-election-id", "gc-controller-leader-election", "The ID for leader election")
+	leaderElectionNamespace  = flag.String("leader-election-namespace", "default", "The namespace for leader election lock")
+	enableWebhook            = flag.Bool("enable-webhook", true, "Enable validating webhook server")
+	insecureWebhook          = flag.Bool("insecure-webhook", false, "Allow webhook to start without TLS (testing only)")
+	gcInterval               = flag.Duration("gc-interval", 1*time.Minute, "Interval between GC evaluation runs")
+	maxDeletionsPerSecond    = flag.Int("max-deletions-per-second", 10, "Default maximum deletions per second")
+	batchSize                = flag.Int("batch-size", DefaultBatchSize, "Default batch size for deletions")
 	maxConcurrentEvaluations = flag.Int("max-concurrent-evaluations", DefaultMaxConcurrentEvaluations, "Maximum number of policies to evaluate concurrently")
 )
 
-//nolint:gocyclo // main function complexity is acceptable for initialization logic
 func main() {
 	flag.Parse()
 
@@ -116,12 +115,6 @@ func main() {
 	if err := v1alpha1.AddToScheme(scheme); err != nil {
 		setupLog.Error(err, "Error adding scheme", sdklog.ErrorCode("SCHEME_ERROR"))
 		os.Exit(1)
-	}
-
-	// Get namespace from environment variable (required for leader election)
-	namespace := os.Getenv("POD_NAMESPACE")
-	if namespace == "" {
-		namespace = "default"
 	}
 
 	// Load controller configuration
@@ -169,13 +162,13 @@ func main() {
 
 	// Run with leader election using client-go
 	leConfig := &election.Config{
-		ElectionID:  *leaderElectionID,
-		Namespace:    *leaderElectionNamespace,
-		Enable:       *leaderElection,
+		ElectionID: *leaderElectionID,
+		Namespace:  *leaderElectionNamespace,
+		Enable:     *leaderElection,
 	}
 
 	if *leaderElection {
-		setupLog.Info("Leader election enabled", 
+		setupLog.Info("Leader election enabled",
 			sdklog.String("electionID", *leaderElectionID),
 			sdklog.String("namespace", *leaderElectionNamespace))
 	} else {

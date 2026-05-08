@@ -23,11 +23,11 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/pkg/validation"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // PolicyEvaluationService provides policy evaluation using injected dependencies.

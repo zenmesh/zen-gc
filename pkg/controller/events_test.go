@@ -26,8 +26,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	sdkevents "github.com/zenmesh/zen-gc/internal/events"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 var (

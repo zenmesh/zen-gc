@@ -192,6 +192,12 @@ issues:
         - staticcheck
       text: "SA9003:"
     
+    # client-go fake.NewSimpleClientset deprecation in tests; optional migration to NewClientset with apply configs.
+    - path: _test\.go
+      linters:
+        - staticcheck
+      text: "SA1019:.*NewSimpleClientset"
+    
     # Allow some common patterns
     - linters:
         - errcheck

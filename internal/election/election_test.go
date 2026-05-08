@@ -176,9 +176,6 @@ func TestRunner(t *testing.T) {
 	// Test that Runner struct can be created and configured
 	runner := NewRunner(nil, func(ctx context.Context) {}, func() {}, func(s string) {}, "test-election")
 
-	if runner == nil {
-		t.Error("Expected non-nil runner")
-	}
 	if runner.ElectionID != "test-election" {
 		t.Errorf("Expected test-election, got %s", runner.ElectionID)
 	}

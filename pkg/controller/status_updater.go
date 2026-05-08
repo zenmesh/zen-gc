@@ -9,10 +9,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // PolicyGVR is the GroupVersionResource for GarbageCollectionPolicy CRDs.

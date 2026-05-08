@@ -5,8 +5,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 func TestGCPolicyReconciler_meetsConditions_Phase(t *testing.T) {

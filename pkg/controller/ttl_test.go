@@ -7,8 +7,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 func TestGCPolicyReconciler_calculateExpirationTime_FixedTTL(t *testing.T) {

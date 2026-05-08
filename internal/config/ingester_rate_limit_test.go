@@ -34,7 +34,7 @@ func TestLoadIngesterRateLimitConfig(t *testing.T) {
 	os.Setenv("RATE_LIMIT_INGESTER_TEST_BURST", "100")
 	cfg = LoadIngesterRateLimitConfig("test", nil)
 	if cfg == nil {
-		t.Error("Expected non-nil config")
+		t.Fatal("Expected non-nil config")
 	}
 	if cfg.RequestsPerMinute != 1000 {
 		t.Errorf("Expected 1000, got %d", cfg.RequestsPerMinute)
@@ -51,7 +51,7 @@ func TestLoadIngesterRateLimitConfigWithCRD(t *testing.T) {
 	mockCRD := &mockCRDRateLimitConfig{rpm: 500, burst: 50}
 	cfg := LoadIngesterRateLimitConfig("test", mockCRD)
 	if cfg == nil {
-		t.Error("Expected non-nil config")
+		t.Fatal("Expected non-nil config")
 	}
 	if cfg.RequestsPerMinute != 500 {
 		t.Errorf("Expected 500, got %d", cfg.RequestsPerMinute)

@@ -6,8 +6,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 // DeleteResourceWithBackoff deletes a resource with exponential backoff retry logic.

@@ -88,7 +88,7 @@ func TestNewRecorderWithFakeClient(t *testing.T) {
 	client := fake.NewSimpleClientset()
 	recorder := NewRecorder(client, "test-component")
 	if recorder == nil {
-		t.Error("Expected non-nil recorder")
+		t.Fatal("Expected non-nil recorder")
 	}
 	if recorder.recorder == nil {
 		t.Error("Expected non-nil internal recorder")

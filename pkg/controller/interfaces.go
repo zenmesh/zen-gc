@@ -23,8 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 // ResourceInformer provides access to Kubernetes resource informers.

@@ -30,9 +30,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/validation"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 var (

@@ -33,14 +33,14 @@ import (
 )
 
 type Config struct {
-	ElectionID       string
-	Namespace        string
-	LeaseName        string
-	LeaseDuration    time.Duration
-	RenewDeadline    time.Duration
-	RetryPeriod      time.Duration
-	Enable           bool
-	GetIdentity      func() string
+	ElectionID    string
+	Namespace     string
+	LeaseName     string
+	LeaseDuration time.Duration
+	RenewDeadline time.Duration
+	RetryPeriod   time.Duration
+	Enable        bool
+	GetIdentity   func() string
 }
 
 // LeaderElector interface for testing
@@ -64,8 +64,8 @@ func NewLeaderElector(client kubernetes.Interface, cfg *Config) (LeaderElector, 
 	le, err := leaderelection.NewLeaderElector(leaderelection.LeaderElectionConfig{
 		Lock:          lock,
 		LeaseDuration: cfg.LeaseDuration,
-		RenewDeadline:  cfg.RenewDeadline,
-		RetryPeriod:    cfg.RetryPeriod,
+		RenewDeadline: cfg.RenewDeadline,
+		RetryPeriod:   cfg.RetryPeriod,
 		Callbacks: leaderelection.LeaderCallbacks{
 			OnStartedLeading: func(ctx context.Context) {},
 			OnStoppedLeading: func() {},
@@ -125,11 +125,11 @@ func ApplyDefaults(cfg *Config) *Config {
 
 // Runner runs leader election with the given elector and callbacks
 type Runner struct {
-	Elector      LeaderElector
+	Elector          LeaderElector
 	OnStartedLeading func(ctx context.Context)
 	OnStoppedLeading func()
-	OnNewLeader     func(identity string)
-	ElectionID      string
+	OnNewLeader      func(identity string)
+	ElectionID       string
 }
 
 // Run executes the leader election runner
@@ -146,11 +146,11 @@ func (r *Runner) Run(ctx context.Context) error {
 // NewRunner creates a new runner with callbacks
 func NewRunner(elector LeaderElector, onStartedLeading func(context.Context), onStoppedLeading func(), onNewLeader func(string), electionID string) *Runner {
 	return &Runner{
-		Elector:           elector,
-		OnStartedLeading:  onStartedLeading,
-		OnStoppedLeading:  onStoppedLeading,
-		OnNewLeader:       onNewLeader,
-		ElectionID:        electionID,
+		Elector:          elector,
+		OnStartedLeading: onStartedLeading,
+		OnStoppedLeading: onStoppedLeading,
+		OnNewLeader:      onNewLeader,
+		ElectionID:       electionID,
 	}
 }
 
@@ -186,10 +186,10 @@ func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.I
 	}
 
 	leaderelection.RunOrDie(ctx, leaderelection.LeaderElectionConfig{
-		Lock:            lock,
-		LeaseDuration:   cfg.LeaseDuration,
-		RenewDeadline:   cfg.RenewDeadline,
-		RetryPeriod:     cfg.RetryPeriod,
+		Lock:          lock,
+		LeaseDuration: cfg.LeaseDuration,
+		RenewDeadline: cfg.RenewDeadline,
+		RetryPeriod:   cfg.RetryPeriod,
 		Callbacks: leaderelection.LeaderCallbacks{
 			OnStartedLeading: func(ctx context.Context) {
 				klog.InfoS("Started leading", "electionID", cfg.ElectionID)
