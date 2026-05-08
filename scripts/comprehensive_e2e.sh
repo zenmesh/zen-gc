@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2025 Kube-ZEN Contributors
+# Copyright 2026 Kube-ZEN Contributors
 #
 # End-to-end validation on a disposable kind cluster: CRDs, controller (image),
 # validating webhook with locally generated TLS + caBundle, policy workloads,

@@ -7,7 +7,7 @@ This document describes performance benchmarks and test results for zen-gc.
 - **Kubernetes Version**: 1.31.5 (k3s)
 - **Cluster**: Single-node k3d cluster
 - **Controller Resources**: 100m CPU, 128Mi memory
-- **Test Date**: 2025-12-21
+- **Test Date**: 2026-05-08
 
 ## Benchmark Scenarios
 

@@ -160,7 +160,7 @@ ttl:
 - Retention based on last update time
 - Time-based cleanup relative to status changes
 
-**Example**: A resource with `status.lastProcessedAt: 2025-12-20T10:00:00Z` will be deleted on `2025-12-21T10:00:00Z` (1 day later).
+**Example**: A resource with `status.lastProcessedAt: 2026-12-20T10:00:00Z` will be deleted on `2026-12-21T10:00:00Z` (1 day later).
 
 ### Why These TTL Options Matter
 

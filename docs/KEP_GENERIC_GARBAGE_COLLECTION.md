@@ -1,7 +1,7 @@
 # KEP: Generic Garbage Collection Controller for Kubernetes
 
 **Status**: Draft (Future Consideration)  
-**Last Updated**: 2025-12-21  
+**Last Updated**: 2026-05-08  
 **Authors**: Kube-ZEN Community  
 **SIG**: sig-apps (primary), sig-architecture (secondary)  
 **KEP Number**: TBD
@@ -178,14 +178,14 @@ status:
   resourcesPending: 50
   
   # Last GC run
-  lastGCRun: "2025-12-21T10:30:00Z"
-  nextGCRun: "2025-12-21T11:30:00Z"
+  lastGCRun: "2026-12-21T10:30:00Z"
+  nextGCRun: "2026-12-21T11:30:00Z"
   
   # Conditions
   conditions:
     - type: Ready
       status: "True"
-      lastTransitionTime: "2025-12-21T10:00:00Z"
+      lastTransitionTime: "2026-12-21T10:00:00Z"
     - type: Error
       status: "False"
       message: ""
