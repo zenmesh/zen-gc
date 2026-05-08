@@ -1,7 +1,7 @@
 projectType: controller
 projectName: zen-gc
 projectDescription: "Zen-Mesh OSS garbage collection controller"
-goVersion: "1.25"
+goVersion: "1.26"
 imageName: "zenmesh/zen-gc-controller"
 hasHelmChart: false
 runsRace: true

@@ -19,14 +19,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.26'
           cache-dependency-path: go.sum
       
       - name: Verify Go version
         run: |
           go version
-          if ! go version | grep -q "go1.25"; then
-            echo "❌ Go version is not 1.25"
+          if ! go version | grep -q "go1.26"; then
+            echo "❌ Go version is not 1.26"
             exit 1
           fi
           echo "✅ Go version is correct"
@@ -34,18 +34,15 @@ jobs:
       - name: Install dependencies
         run: go mod download
       
-      - name: Build golangci-lint from source (Go 1.25)
-        # Workaround: Build golangci-lint from source with Go 1.25
-        # until official releases support Go 1.25
-        # This ensures the binary is built with the same Go version as the project
+      - name: Install golangci-lint
         run: |
-          echo "Building golangci-lint from source with Go 1.25..."
+          echo "Installing golangci-lint with Go 1.26..."
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
           GOBIN=$(go env GOPATH)/bin
           echo "$GOBIN" >> $GITHUB_PATH
           echo "Verifying golangci-lint installation..."
           $GOBIN/golangci-lint version
-          echo "golangci-lint built successfully with Go 1.25"
+          echo "golangci-lint installed successfully"
       
       - name: Run golangci-lint
         run: |
@@ -64,7 +61,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.26'
           cache-dependency-path: go.sum
       
       - name: Install dependencies
@@ -88,7 +85,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.26'
           cache-dependency-path: go.sum
       
       - name: Install dependencies

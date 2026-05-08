@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Go 1.25 Upgrade**: Upgraded to Go 1.25.0 for improved performance and new features
+- **Go 1.26 Upgrade**: Upgraded to Go 1.26.0 for improved performance and new features
+- Additional admission webhook tests (DELETE operations skip TTL/schema validation)
 
 ### Added
 - Leader election support for HA deployments

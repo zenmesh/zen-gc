@@ -206,6 +206,57 @@ func TestWebhookServer_handleValidate_InvalidJSON(t *testing.T) {
 	}
 }
 
+func TestWebhookServer_handleValidate_deleteOperationSkipsSchemaValidation(t *testing.T) {
+	server, err := NewWebhookServer(":0", "", "")
+	if err != nil {
+		t.Fatalf("Failed to create webhook server: %v", err)
+	}
+
+	review := admissionv1.AdmissionReview{
+		Request: &admissionv1.AdmissionRequest{
+			UID: "delete-uid",
+			Kind: metav1.GroupVersionKind{
+				Group:   "gc.ops.zen-mesh.io",
+				Version: "v1alpha1",
+				Kind:    "GarbageCollectionPolicy",
+			},
+			Operation: admissionv1.Delete,
+			Object: runtime.RawExtension{
+				Raw: marshalPolicy(t, &v1alpha1.GarbageCollectionPolicy{
+					Spec: v1alpha1.GarbageCollectionPolicySpec{
+						TargetResource: v1alpha1.TargetResourceSpec{
+							APIVersion: "v1",
+							Kind:       "ConfigMap",
+						},
+						TTL: v1alpha1.TTLSpec{},
+					},
+				}),
+			},
+		},
+	}
+
+	body, err := json.Marshal(review)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/validate-gc-policy", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	server.handleValidate(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d body=%s", rec.Code, rec.Body.String())
+	}
+	var out admissionv1.AdmissionReview
+	if err := json.NewDecoder(rec.Body).Decode(&out); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if out.Response == nil || !out.Response.Allowed {
+		t.Fatalf("delete admission should be allowed without TTL validation, got %+v", out.Response)
+	}
+}
+
 func TestWebhookServer_handleMutate_InvalidJSON(t *testing.T) {
 	server, err := NewWebhookServer(":0", "", "")
 	if err != nil {
