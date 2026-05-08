@@ -142,10 +142,10 @@ vet:
 lint:
 	@echo "Running golangci-lint..."
 	@if ! command -v golangci-lint >/dev/null 2>&1; then \
-		echo "⚠️  golangci-lint not found. Installing..."; \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin latest; \
+		echo "⚠️  golangci-lint not found. Installing v2..."; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest; \
 	fi
-	golangci-lint run
+	golangci-lint run --timeout=5m
 	@echo "✅ Linting passed"
 
 # Security checks
@@ -217,8 +217,8 @@ deps:
 install-tools:
 	@echo "Installing development tools..."
 	@if ! command -v golangci-lint >/dev/null 2>&1; then \
-		echo "Installing golangci-lint..."; \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin latest; \
+		echo "Installing golangci-lint v2..."; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest; \
 	fi
 	@if ! command -v govulncheck >/dev/null 2>&1; then \
 		echo "Installing govulncheck..."; \

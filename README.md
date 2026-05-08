@@ -5,117 +5,56 @@
 [![CI](https://github.com/zen-mesh/zen-gc/workflows/CI/badge.svg)](https://github.com/zen-mesh/zen-gc/actions)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.26+-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 
-Kubernetes controller for garbage collection of orphaned resources.
+Kubernetes controller for **declarative garbage collection**: define **`GarbageCollectionPolicy`** objects (TTL, selectors, dry-run, rate limits) and let zen-gc delete matching resources safely.
 
-## Overview
+**zen-gc** is open source (Apache-2.0) from **[Zen Mesh Inc.](https://zen-mesh.io)**. The commercial **[Zen Mesh](https://zen-mesh.io)** offering is separate; this repository is meant for community use, self-managed clusters, and contributions.
 
-`zen-gc` is a Kubernetes controller that performs garbage collection, cleaning up orphaned resources and maintaining cluster hygiene.
+**Security:** report vulnerabilities to **[security@zen-mesh.io](mailto:security@zen-mesh.io)** or via [GitHub Security Advisories](https://github.com/zen-mesh/zen-gc/security) — see [SECURITY.md](SECURITY.md).
 
-## Architecture
+Builds require **Go 1.26+** (see `go.mod`). Published container images are built with Go **1.26**.
 
-zen-gc is a Kubernetes-native controller built with:
-- **controller-runtime** for Kubernetes integration
-- **client-go** for leader election
-- **Prometheus** for metrics
-- Structured logging via internal logging package
+## Quick start
 
-**Automatically clean up any Kubernetes resource based on time-to-live policies**
+### With kubectl
 
-## Overview
-
-`zen-gc` is a Kubernetes controller that provides declarative, automatic garbage collection for any Kubernetes resource. Define cleanup policies once, and let zen-gc handle the rest—no custom controllers or manual cleanup scripts needed.
-
-**Why zen-gc?**
-
-Kubernetes only provides built-in TTL support for Jobs. For everything else (ConfigMaps, Secrets, Pods, CRDs, etc.), you're on your own. zen-gc fills this gap with a simple, Kubernetes-native solution.
-
-**What makes zen-gc special?**
-
-zen-gc's **powerful TTL system** offers four flexible modes—fixed, field-based, mapped, and relative TTL. This means you can build sophisticated cleanup policies that adapt to your actual needs, not just "delete after X days." See the [Powerful TTL Options](#powerful-ttl-options) section below.
-
-## Key Benefits
-
-- 🎯 **Works with Everything**: Clean up ConfigMaps, Secrets, Pods, Jobs, CRDs, or any Kubernetes resource
-- ⚡ **Zero Configuration**: Define policies as Kubernetes resources—no external tools or complex setup
-- 🔒 **Production-Ready**: Built-in rate limiting, metrics, and observability out of the box
-- 🎨 **Flexible**: Support for complex conditions, selectors, and custom TTL calculations
-- 🚀 **Easy to Use**: Simple YAML policies—no coding required
-- 📊 **Observable**: Prometheus metrics and Kubernetes events for full visibility
-
-## Powerful TTL Options
-
-zen-gc's flexible TTL system is what makes it shine. Choose from four powerful options:
-
-### 1. Fixed TTL
-Simple time-based cleanup—delete resources after a fixed period:
-```yaml
-ttl:
-  secondsAfterCreation: 604800  # 7 days
-```
-
-### 2. Field-Based TTL
-Extract TTL directly from resource fields—let resources define their own lifetime:
-```yaml
-ttl:
-  fieldPath: "spec.ttlSeconds"  # Resource controls its own TTL
-```
-
-### 3. Mapped TTL
-Different TTLs based on resource values—perfect for severity-based retention:
-```yaml
-ttl:
-  fieldPath: "spec.severity"
-  mappings:
-    CRITICAL: 1814400  # 3 weeks
-    HIGH: 1209600      # 2 weeks
-    MEDIUM: 604800     # 1 week
-    LOW: 259200        # 3 days
-  default: 604800
-```
-
-### 4. Relative TTL
-TTL relative to another timestamp—clean up after last activity:
-```yaml
-ttl:
-  relativeTo: "status.lastProcessedAt"
-  secondsAfter: 86400  # 1 day after last activity
-```
-
-**This flexibility means zen-gc adapts to your needs, not the other way around.**
-
-## Quick Start
-
-Install zen-gc and create your first cleanup policy:
-
-**Using Helm (recommended):**
+From a clone of this repo (paths match the tree layout):
 
 ```bash
-# Add the Helm repository
+kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f deploy/manifests/namespace.yaml
+kubectl apply -f deploy/manifests/rbac.yaml
+# Point deploy/manifests/deployment.yaml at your image (build locally or use a registry tag).
+kubectl apply -f deploy/manifests/deployment.yaml
+```
+
+The validating admission webhook requires **TLS** in the cluster before you rely on admission enforcement. **Recommended path:** cert-manager + Secret `gc-controller-webhook-cert` + `deploy/webhook/validating-webhook.yaml`. Full steps: **[docs/WEBHOOK_TLS.md](docs/WEBHOOK_TLS.md)** (includes the manual-CA flow used by `scripts/comprehensive_e2e.sh` on kind).
+
+Apply an example policy:
+
+```bash
+kubectl apply -f examples/temp-configmap-cleanup.yaml
+```
+
+**Remote raw manifests** (replace branch/tag as needed):
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/rbac.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/deployment.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
+```
+
+### With Helm
+
+```bash
 helm repo add zen-gc https://zen-mesh.github.io/zen-gc
 helm repo update
-
-# Install zen-gc (specify version for now)
 helm install gc-controller zen-gc/gc-controller --version 0.0.1-alpha --namespace gc-system --create-namespace
-
-# Note: Once multiple versions are available, you can install without --version to use latest:
-# helm install gc-controller zen-gc/gc-controller --namespace gc-system --create-namespace
-
-# Create a cleanup policy
 kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
 ```
 
-**Using kubectl (alternative):**
-
-```bash
-# Install zen-gc
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/
-
-# Create a cleanup policy
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
-```
-
-**Example Policy**: Clean up temporary ConfigMaps after 1 hour
+### Minimal policy example
 
 ```yaml
 apiVersion: gc.ops.zen-mesh.io/v1alpha1
@@ -130,61 +69,97 @@ spec:
       matchLabels:
         temporary: "true"
   ttl:
-    secondsAfterCreation: 3600  # 1 hour
+    secondsAfterCreation: 3600
   behavior:
     maxDeletionsPerSecond: 10
 ```
 
-## Use Cases
+## Why zen-gc?
 
-- **Clean up completed Jobs**: Automatically remove finished Jobs after 24 hours
-- **Remove old ConfigMaps/Secrets**: Delete temporary resources created during CI/CD
-- **Evicted Pod cleanup**: Quickly remove pods evicted due to resource pressure
-- **Orphaned ReplicaSet cleanup**: Remove ReplicaSets not owned by Deployments
-- **PVC cleanup**: Delete Released PersistentVolumeClaims
-- **Test resource cleanup**: Automatically remove test Pods, Services after completion
-- **Multi-tenant isolation**: Per-tenant cleanup policies for namespace-scoped resources
+Kubernetes only provides built-in TTL support for **Jobs**. For ConfigMaps, Secrets, Pods, CRDs, and everything else, you either write bespoke controllers or operate without automation. zen-gc fills that gap with plain YAML policies.
+
+## Powerful TTL options
+
+zen-gc supports **fixed**, **field-based**, **mapped**, and **relative** TTL modes — see [User Guide](docs/USER_GUIDE.md) for details.
+
+### Fixed TTL
+
+```yaml
+ttl:
+  secondsAfterCreation: 604800
+```
+
+### Field-based TTL
+
+```yaml
+ttl:
+  fieldPath: "spec.ttlSeconds"
+```
+
+### Mapped TTL
+
+```yaml
+ttl:
+  fieldPath: "spec.severity"
+  mappings:
+    CRITICAL: 1814400
+    HIGH: 1209600
+    MEDIUM: 604800
+    LOW: 259200
+  default: 604800
+```
+
+### Relative TTL
+
+```yaml
+ttl:
+  relativeTo: "status.lastProcessedAt"
+  secondsAfter: 86400
+```
+
+## Key benefits
+
+- Works with any Kubernetes resource type the API server exposes
+- Policies as CRDs — no custom binaries per workload
+- Rate limiting, metrics, events, leader election for HA
+- Dry-run mode to validate behavior before destructive deletes
+- Observable via Prometheus and Kubernetes events
+
+## Use cases
+
+- Clean up completed Jobs and temporary CI/CD ConfigMaps/Secrets
+- Remove evicted Pods, orphaned ReplicaSets, released PVCs
+- Namespace-scoped or cluster-scoped policies with selectors
 
 ## Documentation
 
-- **[KEP Document](docs/KEP_GENERIC_GARBAGE_COLLECTION.md)**: Complete Kubernetes Enhancement Proposal
-- **[API Reference](docs/API_REFERENCE.md)**: Complete API documentation
-- **[User Guide](docs/USER_GUIDE.md)**: How to create and use GC policies
-- **[Operator Guide](docs/OPERATOR_GUIDE.md)**: Installation, configuration, and maintenance
-- **[Metrics Documentation](docs/METRICS.md)**: Prometheus metrics reference
-- **[Grafana Dashboard](deploy/grafana/dashboard.json)**: Pre-built Grafana dashboard for monitoring
-- **[Benchmarks](docs/BENCHMARKS.md)**: Performance benchmarks and test results
-- **[Security Documentation](docs/SECURITY.md)**: Security best practices and guidelines
-- **[Disaster Recovery](docs/DISASTER_RECOVERY.md)**: Recovery procedures and backup strategies
-- **[Version Compatibility](docs/VERSION_COMPATIBILITY.md)**: Kubernetes versions and migration guides
-- **[Architecture](docs/ARCHITECTURE.md)**: System architecture and design diagrams
-- **[Examples](examples/)**: Example GC policies
-- **[Contributing](CONTRIBUTING.md)**: Development guidelines and contribution process
-- **[Governance](GOVERNANCE.md)**: Project governance model
-- **[Maintainers](MAINTAINERS.md)**: List of project maintainers
-- **[Releasing](RELEASING.md)**: Release process documentation
-- **[Adopters](ADOPTERS.md)**: Organizations using zen-gc
+- **[Webhook TLS (production)](docs/WEBHOOK_TLS.md)**: cert-manager vs manual CA — matches how we test on kind
+- **[Linting](docs/LINTING.md)**: golangci-lint scope and known debt
+- **[KEP-style design](docs/KEP_GENERIC_GARBAGE_COLLECTION.md)**: background and API notes
+- **[API Reference](docs/API_REFERENCE.md)**
+- **[User Guide](docs/USER_GUIDE.md)**
+- **[Operator Guide](docs/OPERATOR_GUIDE.md)**
+- **[Metrics](docs/METRICS.md)**
+- **[Security (operations)](docs/SECURITY.md)** and [SECURITY.md](SECURITY.md) (disclosure policy)
+- **[Secret / TLS storage](docs/SECRET_MANAGEMENT.md)**
+- **[Version compatibility](docs/VERSION_COMPATIBILITY.md)**
+- **[Architecture](docs/ARCHITECTURE.md)**
+- **[Examples](examples/)**
+- **[Contributing](CONTRIBUTING.md)**
+- **[Governance](GOVERNANCE.md)** · **[Maintainers](MAINTAINERS.md)** · **[Releasing](RELEASING.md)** · **[Adopters](ADOPTERS.md)**
 
 ## Features
 
-- ✅ **Generic Resource Support**: Works with any Kubernetes resource (CRDs, core resources)
-- ✅ **Four TTL Modes**: Fixed, field-based, mapped, or relative TTL—choose what fits your use case
-- ✅ **Powerful Selectors**: Label selectors, field selectors, and namespace scoping
-- ✅ **Condition Matching**: Match resources by phase, labels, annotations, or custom field conditions
-- ✅ **Rate Limiting**: Configurable deletion rate per policy to prevent API server overload
-- ✅ **Dry-Run Mode**: Test policies safely before enabling actual deletion
-- ✅ **Production Features**: Prometheus metrics, Kubernetes events, leader election for HA
-- ✅ **Well Tested**: >65% test coverage with comprehensive unit and integration tests
+- Generic resource support (including CRDs)
+- Four TTL modes: fixed, field-based, mapped, relative
+- Label / field selectors and conditions
+- Rate limiting and dry-run
+- Prometheus metrics, Kubernetes events, HA via leader election
+- Test suite with CI and optional kind e2e (`make e2e-kind`)
 
 ## Status
 
-zen-gc is **production-ready** and actively maintained. The project is open source and welcomes contributions.
-
-**Note**: This project may eventually be proposed as a Kubernetes Enhancement Proposal (KEP) based on community adoption and feedback, but the primary focus is on providing a useful, production-ready solution for Kubernetes operators.
-
-## Contributing
-
-This is an early-stage proposal. Feedback and contributions are welcome!
+zen-gc is actively maintained as OSS. Feedback and contributions are welcome.
 
 ## References
 
@@ -193,7 +168,6 @@ This is an early-stage proposal. Feedback and contributions are welcome!
 
 ## Links
 
-- **Website**: https://zen-mesh.io
-- **Helm chart (Artifact Hub)**: https://artifacthub.io/packages/helm/zengc/gc-controller
-- **6-min explainer (no demo)**: https://www.youtube.com/watch?v=P8afhcgjWVQ&list=PL1AGc_sKXJBdInu0yffTJxN828oaCuqwx
-
+- **Zen Mesh Inc.**: [zen-mesh.io](https://zen-mesh.io)
+- **Helm (Artifact Hub)**: [gc-controller chart](https://artifacthub.io/packages/helm/zengc/gc-controller)
+- **Explainer video**: [YouTube](https://www.youtube.com/watch?v=P8afhcgjWVQ&list=PL1AGc_sKXJBdInu0yffTJxN828oaCuqwx)

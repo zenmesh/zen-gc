@@ -41,10 +41,8 @@ import (
 	gcwebhook "github.com/zenmesh/zen-gc/pkg/webhook"
 )
 
-var (
-	// ErrWebhookTLSCertificatesMissing indicates that webhook TLS certificates are missing.
-	ErrWebhookTLSCertificatesMissing = errors.New("webhook TLS certificates not found")
-)
+// ErrWebhookTLSCertificatesMissing indicates that webhook TLS certificates are missing.
+var ErrWebhookTLSCertificatesMissing = errors.New("webhook TLS certificates not found")
 
 const (
 	// DefaultShutdownTimeout is the default timeout for graceful shutdown.

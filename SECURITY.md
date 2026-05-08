@@ -1,5 +1,7 @@
 # Security Policy
 
+**zen-gc** is developed in the open by **[Zen Mesh Inc.](https://zen-mesh.io)** as Apache-2.0 software. Vulnerability reports are handled independently of commercial Zen Mesh products; use the contacts below for this repository.
+
 ## Supported Versions
 
 We release patches to fix security issues. Which versions are eligible for receiving such patches depends on the CVSS v3.0 Rating:
@@ -96,8 +98,5 @@ Security updates will be announced via:
 - **Email**: security@zen-mesh.io
 - **GitHub**: Use Security tab on repository
 
-Thank you for helping keep zen-gc secure! 🔒
-
-
-
+Thank you for helping keep zen-gc secure.
 

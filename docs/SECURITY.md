@@ -1,6 +1,6 @@
 # Security Documentation
 
-This document provides comprehensive security guidance for deploying and operating zen-gc.
+This document provides security guidance for deploying and operating **zen-gc**. For **coordinated disclosure** and supported versions, see the root **[SECURITY.md](../SECURITY.md)** (contact: **security@zen-mesh.io**). **Zen Mesh Inc.** ([zen-mesh.io](https://zen-mesh.io)) sponsors OSS maintenance; commercial Zen Mesh offerings are governed separately.
 
 ## Table of Contents
 

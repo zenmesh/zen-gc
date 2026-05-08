@@ -6,7 +6,7 @@ Thank you for your interest in contributing to zen-gc! This document provides gu
 
 ### Prerequisites
 
-- **Go**: 1.24 or later ([Download](https://golang.org/dl/))
+- **Go**: 1.26 or later ([Download](https://golang.org/dl/)) — matches `go.mod` / CI
 - **kubectl**: Configured to access a Kubernetes cluster ([Install](https://kubernetes.io/docs/tasks/tools/))
 - **Docker**: For building images ([Install](https://docs.docker.com/get-docker/))
 - **Make**: For running common tasks ([Install](https://www.gnu.org/software/make/))
@@ -33,8 +33,8 @@ Thank you for your interest in contributing to zen-gc! This document provides gu
 
 4. **Install development tools:**
    ```bash
-   # Install golangci-lint
-   go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+   # Install golangci-lint v2 (required — see docs/LINTING.md)
+   go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
    
    # Install other tools (if Makefile has install-tools target)
    make install-tools
@@ -394,7 +394,7 @@ docs: update architecture documentation
 
 - Follow Go standard formatting (`gofmt`)
 - Run `make fmt` before committing
-- Follow the linter rules in `.golangci.yml`
+- Follow `.golangci.yml` and **[docs/LINTING.md](docs/LINTING.md)** (scope and known debt)
 - Add comments for exported functions/types
 - Keep functions focused and small
 

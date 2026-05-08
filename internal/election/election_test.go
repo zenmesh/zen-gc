@@ -2,6 +2,7 @@ package election
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
 	"time"
@@ -203,7 +204,6 @@ func TestRunWithLeaderElectionDisabled(t *testing.T) {
 	err := RunWithLeaderElection(context.Background(), cfg, nil, func(ctx context.Context) {
 		callCount++
 	})
-
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -238,7 +238,7 @@ func TestRunner_Run_invokesElector(t *testing.T) {
 	r := NewRunner(f, func(context.Context) {}, func() {}, func(string) {}, "eid")
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if err := r.Run(ctx); err != nil {
+	if err := r.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
 		t.Fatalf("Run: %v", err)
 	}
 	if !f.runCalled {

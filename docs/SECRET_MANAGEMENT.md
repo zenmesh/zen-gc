@@ -2,6 +2,8 @@
 
 This document describes how to securely manage sensitive configuration and secrets for zen-gc.
 
+For **production webhook TLS** end-to-end (cert-manager vs manual CA, `caBundle`, Service wiring), read **[WEBHOOK_TLS.md](WEBHOOK_TLS.md)** first.
+
 ## Overview
 
 zen-gc requires sensitive configuration for:

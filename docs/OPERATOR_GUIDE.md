@@ -24,7 +24,7 @@ This guide is for operators who need to install, configure, and maintain the GC 
 ### Step 1: Install CRD
 
 ```bash
-kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
+kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
 ```
 
 Verify installation:
@@ -415,10 +415,7 @@ If using network policies, allow:
 
 ### Admission Webhooks
 
-Consider using admission webhooks to:
-- Validate policy syntax
-- Prevent dangerous policies
-- Audit policy changes
+zen-gc ships a **validating** webhook for policies; it requires **TLS** and a correct **`ValidatingWebhookConfiguration`** (`caBundle` or cert-manager injection). Use **[WEBHOOK_TLS.md](WEBHOOK_TLS.md)** for the recommended production path (cert-manager) and a manual-CA option (including the kind e2e script).
 
 ---
 

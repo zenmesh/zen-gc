@@ -138,9 +138,7 @@ func (r *Runner) Run(ctx context.Context) error {
 		return nil // Should not happen if configured correctly
 	}
 
-	// This is a simplified version - in production you'd use callbacks
-	r.Elector.Run(ctx)
-	return nil
+	return r.Elector.Run(ctx)
 }
 
 // NewRunner creates a new runner with callbacks
