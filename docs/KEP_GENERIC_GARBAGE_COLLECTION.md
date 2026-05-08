@@ -178,14 +178,14 @@ status:
   resourcesPending: 50
   
   # Last GC run
-  lastGCRun: "2026-12-21T10:30:00Z"
-  nextGCRun: "2026-12-21T11:30:00Z"
+  lastGCRun: "2026-05-08T10:30:00Z"
+  nextGCRun: "2026-05-08T11:30:00Z"
   
   # Conditions
   conditions:
     - type: Ready
       status: "True"
-      lastTransitionTime: "2026-12-21T10:00:00Z"
+      lastTransitionTime: "2026-05-08T10:00:00Z"
     - type: Error
       status: "False"
       message: ""

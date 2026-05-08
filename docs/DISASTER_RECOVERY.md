@@ -311,7 +311,7 @@ kubectl rollout undo deployment/gc-controller -n gc-system --to-revision=<revisi
 
 ```bash
 # Restore policy from backup
-kubectl apply -f gc-policies-backup-20261221.yaml
+kubectl apply -f gc-policies-backup-20260508.yaml
 
 # Or restore specific policy
 kubectl apply -f gc-policy-<name>-backup.yaml
