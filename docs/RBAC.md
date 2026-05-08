@@ -16,7 +16,7 @@ The GC controller requires cluster-wide permissions to:
 
 ```yaml
 - apiGroups:
-    - gc.zen-mesh.io
+    - gc.ops.zen-mesh.io
   resources:
     - garbagecollectionpolicies
     - garbagecollectionpolicies/status
@@ -37,7 +37,7 @@ The GC controller requires cluster-wide permissions to:
 - **garbagecollectionpolicies/status**: Controller updates policy status to reflect evaluation results
 
 **Security Considerations:**
-- ✅ Scoped to specific API group (`gc.zen-mesh.io`)
+- ✅ Scoped to specific API group (`gc.ops.zen-mesh.io`)
 - ✅ Only affects GC policy resources, not user workloads
 - ⚠️ **Note**: `create`, `update`, `patch`, `delete` on policies may not be strictly necessary for basic operation, but are included for completeness and future features
 
@@ -76,7 +76,7 @@ The GC controller is designed to be **generic** - it must work with any Kubernet
 
 1. **Policy-Level Restrictions**: Use label selectors and conditions in policies to limit what can be deleted:
    ```yaml
-   apiVersion: gc.zen-mesh.io/v1alpha1
+   apiVersion: gc.ops.zen-mesh.io/v1alpha1
    kind: GarbageCollectionPolicy
    spec:
      targetResource:
@@ -104,7 +104,7 @@ metadata:
   name: gc-controller
   namespace: tenant-a
 rules:
-- apiGroups: ["gc.zen-mesh.io"]
+- apiGroups: ["gc.ops.zen-mesh.io"]
   resources: ["garbagecollectionpolicies"]
   verbs: ["get", "list", "watch", "update", "patch"]
 - apiGroups: ["*"]
@@ -201,7 +201,7 @@ rules:
 
 | Permission | Scope | Risk Level | Required? |
 |-----------|-------|------------|-----------|
-| GC Policy CRUD | `gc.zen-mesh.io` | Low | Yes (core functionality) |
+| GC Policy CRUD | `gc.ops.zen-mesh.io` | Low | Yes (core functionality) |
 | Resource Deletion | `*/*` | **High** | Yes (core functionality) |
 | Namespace Read | `""/namespaces` | Low | Yes (namespace filtering) |
 | Leader Election | `coordination.k8s.io/leases` | Low | Yes (if HA enabled) |
@@ -223,7 +223,7 @@ If policy management is handled separately (e.g., by administrators), you can re
 
 **Minimal Policy Permissions:**
 ```yaml
-- apiGroups: ["gc.zen-mesh.io"]
+- apiGroups: ["gc.ops.zen-mesh.io"]
   resources:
     - garbagecollectionpolicies
     - garbagecollectionpolicies/status

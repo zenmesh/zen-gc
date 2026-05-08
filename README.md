@@ -108,7 +108,7 @@ kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples
 
 ```bash
 # Install zen-gc
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/crds/gc.zen-mesh.io_garbagecollectionpolicies.yaml
+kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
 kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/
 
 # Create a cleanup policy
@@ -118,7 +118,7 @@ kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples
 **Example Policy**: Clean up temporary ConfigMaps after 1 hour
 
 ```yaml
-apiVersion: gc.zen-mesh.io/v1alpha1
+apiVersion: gc.ops.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: cleanup-temp-configmaps

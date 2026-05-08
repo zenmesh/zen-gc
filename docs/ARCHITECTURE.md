@@ -183,7 +183,7 @@ flowchart LR
 ```mermaid
 graph TB
     subgraph "Policy Informer"
-        PolicyGVR[Policy GVR<br/>gc.zen-mesh.io/v1alpha1]
+        PolicyGVR[Policy GVR<br/>gc.ops.zen-mesh.io/v1alpha1]
         PolicyInformer[Shared Informer]
         PolicyStore[Policy Store]
     end

@@ -34,7 +34,7 @@ kubectl delete deployment gc-controller -n gc-system
 kubectl get garbagecollectionpolicies --all-namespaces
 
 # Annotate policies to pause them (if supported)
-kubectl annotate garbagecollectionpolicy <policy-name> -n <namespace> gc.zen-mesh.io/paused=true
+kubectl annotate garbagecollectionpolicy <policy-name> -n <namespace> gc.ops.zen-mesh.io/paused=true
 
 # Or delete policies
 kubectl delete garbagecollectionpolicy <policy-name> -n <namespace>
@@ -336,10 +336,10 @@ If CRD schema changes cause issues:
 
 ```bash
 # List CRD versions
-kubectl get crd garbagecollectionpolicies.gc.zen-mesh.io -o yaml | grep -A 5 "versions:"
+kubectl get crd garbagecollectionpolicies.gc.ops.zen-mesh.io -o yaml | grep -A 5 "versions:"
 
 # Restore previous CRD version
-kubectl apply -f deploy/crds/gc.zen-mesh.io_garbagecollectionpolicies.yaml
+kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
 
 # Migrate existing resources (if needed)
 # This depends on the specific migration path

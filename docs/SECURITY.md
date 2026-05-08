@@ -155,7 +155,7 @@ rules:
   users: ["*"]
   verbs: ["create", "update", "patch", "delete"]
   resources:
-  - group: "gc.zen-mesh.io"
+  - group: "gc.ops.zen-mesh.io"
     resources: ["garbagecollectionpolicies"]
 ```
 
@@ -207,7 +207,7 @@ kind: ClusterRole
 metadata:
   name: gc-controller-namespaced
 rules:
-- apiGroups: ["gc.zen-mesh.io"]
+- apiGroups: ["gc.ops.zen-mesh.io"]
   resources: ["garbagecollectionpolicies"]
   verbs: ["get", "list", "watch", "update", "patch"]
 - apiGroups: [""]
@@ -220,7 +220,7 @@ rules:
 Use label selectors to limit which resources can be deleted:
 
 ```yaml
-apiVersion: gc.zen-mesh.io/v1alpha1
+apiVersion: gc.ops.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 spec:
   targetResource:
@@ -251,7 +251,7 @@ metadata:
   name: gc-controller
   namespace: tenant-a
 rules:
-- apiGroups: ["gc.zen-mesh.io"]
+- apiGroups: ["gc.ops.zen-mesh.io"]
   resources: ["garbagecollectionpolicies"]
   verbs: ["*"]
 - apiGroups: ["*"]
@@ -264,7 +264,7 @@ rules:
 Use policy conditions to prevent cross-tenant deletions:
 
 ```yaml
-apiVersion: gc.zen-mesh.io/v1alpha1
+apiVersion: gc.ops.zen-mesh.io/v1alpha1
 kind: GarbageCollectionPolicy
 metadata:
   name: tenant-a-policy
