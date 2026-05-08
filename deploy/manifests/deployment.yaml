@@ -44,7 +44,7 @@ spec:
             - --webhook-addr=:9443
             - --webhook-cert-file=/etc/webhook/certs/tls.crt
             - --webhook-key-file=/etc/webhook/certs/tls.key
-            - --enable-leader-election=true
+            - --leader-election=true
             - --leader-election-namespace=$(POD_NAMESPACE)
             - --enable-webhook=true
             - --gc-interval=1m

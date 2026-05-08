@@ -58,12 +58,10 @@ create_cluster() {
     # Check if cluster already exists
     if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
         log_warn "Cluster $CLUSTER_NAME already exists"
-        read -p "Delete existing cluster? (y/N) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [[ "${KIND_DELETE_EXISTING:-}" == "1" ]]; then
             kind delete cluster --name "$CLUSTER_NAME"
         else
-            log_info "Using existing cluster"
+            log_info "Reuse existing cluster (set KIND_DELETE_EXISTING=1 to recreate)"
             return
         fi
     fi
@@ -105,7 +103,7 @@ install_crds() {
     log_info "Installing CRDs..."
     kubectl apply -f ../../deploy/crds/
     log_info "Waiting for CRDs to be established..."
-    kubectl wait --for condition=established --timeout=60s crd/garbagecollectionpolicies.gc.zen-mesh.io || true
+    kubectl wait --for=condition=Established --timeout=120s crd/garbagecollectionpolicies.gc.ops.zen-mesh.io
 }
 
 deploy_controller() {

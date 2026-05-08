@@ -68,6 +68,10 @@ test-integration:
 	@echo "Running integration tests..."
 	go test -v -timeout=5m ./test/integration/...
 
+# Disposable kind cluster: build image, install CRDs/controller/webhook, run checks + Go e2e, delete cluster
+e2e-kind:
+	@./scripts/comprehensive_e2e.sh
+
 # Run E2E tests (requires Kubernetes cluster)
 # Usage: make test-e2e CLUSTER_NAME=zen-gc-e2e
 test-e2e:
