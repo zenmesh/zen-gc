@@ -33,12 +33,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // GCPolicyReconciler reconciles GarbageCollectionPolicy resources.
@@ -104,9 +104,9 @@ type GCPolicyReconciler struct {
 	// Uses RESTMapper if available, otherwise falls back to pluralization.
 	gvrResolver *GVRResolver
 
-	// PolicyEvaluationService for policy evaluation.
-	// Uses dependency injection for better testability.
-	// Protected by evaluationServiceMu mutex.
+	// PolicyEvaluationService for the primary (lister + DI) evaluation path.
+	// Lazily created and then cached; see getOrCreateEvaluationService.
+	// Protected by evaluationServiceMu.
 	evaluationService *PolicyEvaluationService
 
 	// Mutex to protect evaluationService.
@@ -269,9 +269,10 @@ func (r *GCPolicyReconciler) getRequeueIntervalForPolicy(policy *v1alpha1.Garbag
 	return interval
 }
 
-// getOrCreateEvaluationService creates or returns the PolicyEvaluationService.
-// Uses the adapter pattern to bridge GCPolicyReconciler with the evaluation service.
-// Thread-safe: uses double-checked locking pattern.
+// getOrCreateEvaluationService builds the lister-based PolicyEvaluationService once
+// (adapter pattern) and caches it on the reconciler. policy is only used when the
+// service is first constructed (resource lister wiring).
+// Thread-safe: double-checked locking under evaluationServiceMu.
 func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, policy *v1alpha1.GarbageCollectionPolicy) (*PolicyEvaluationService, error) {
 	// Fast path: check with read lock
 	r.evaluationServiceMu.RLock()
@@ -318,16 +319,14 @@ func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, p
 	return r.evaluationService, nil
 }
 
-// evaluatePolicy evaluates a single policy.
-// Uses PolicyEvaluationService for evaluation with dependency injection.
+// evaluatePolicy runs one evaluation cycle for policy: PolicyEvaluationService
+// (lister + DI) when available, otherwise the informer-store path in
+// evaluate_policy_shared.go.
 func (r *GCPolicyReconciler) evaluatePolicy(ctx context.Context, policy *v1alpha1.GarbageCollectionPolicy) error {
-	// Use PolicyEvaluationService for evaluation.
-	// The service uses dependency injection for better testability.
 	service, err := r.getOrCreateEvaluationService(ctx, policy)
 	if err == nil {
 		return service.EvaluatePolicy(ctx, policy)
 	}
-	// Fall back to direct evaluation on error
 	r.logger.Debug("Evaluation service unavailable, using direct evaluation", sdklog.Operation("evaluate_policy"), sdklog.Error(err))
 	// Use struct logger to avoid allocations
 	startTime := time.Now()
