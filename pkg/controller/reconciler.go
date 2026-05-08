@@ -33,12 +33,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/pkg/validation"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // GCPolicyReconciler reconciles GarbageCollectionPolicy resources.
@@ -311,6 +311,7 @@ func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, p
 		adapter.GetBatchDeleter(),
 		r.statusUpdater,
 		r.eventRecorder,
+		r.config,
 		r.logger,
 	)
 
@@ -545,14 +546,7 @@ func (r *GCPolicyReconciler) getConfig() *config.ControllerConfig {
 
 // getBatchSize returns the batch size for a policy.
 func (r *GCPolicyReconciler) getBatchSize(policy *v1alpha1.GarbageCollectionPolicy) int {
-	batchSize := DefaultBatchSize
-	if r.config != nil {
-		batchSize = r.config.BatchSize
-	}
-	if policy.Spec.Behavior.BatchSize > 0 {
-		batchSize = policy.Spec.Behavior.BatchSize
-	}
-	return batchSize
+	return resolveBatchSize(policy, r.config)
 }
 
 // deleteBatch deletes a batch of resources.

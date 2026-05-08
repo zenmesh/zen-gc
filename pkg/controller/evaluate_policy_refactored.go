@@ -22,12 +22,12 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
+	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/pkg/validation"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // PolicyEvaluationService provides policy evaluation using injected dependencies.
@@ -41,6 +41,7 @@ type PolicyEvaluationService struct {
 	batchDeleter        BatchDeleterCore
 	statusUpdater       *StatusUpdater
 	eventRecorder       *EventRecorder
+	controllerConfig    *config.ControllerConfig
 	logger              *sdklog.Logger
 }
 
@@ -54,6 +55,7 @@ func NewPolicyEvaluationService(
 	batchDeleter BatchDeleterCore,
 	statusUpdater *StatusUpdater,
 	eventRecorder *EventRecorder,
+	controllerConfig *config.ControllerConfig,
 	logger *sdklog.Logger,
 ) *PolicyEvaluationService {
 	if logger == nil {
@@ -68,6 +70,7 @@ func NewPolicyEvaluationService(
 		batchDeleter:        batchDeleter,
 		statusUpdater:       statusUpdater,
 		eventRecorder:       eventRecorder,
+		controllerConfig:    controllerConfig,
 		logger:              logger,
 	}
 }
@@ -83,8 +86,8 @@ func (s *PolicyEvaluationService) EvaluatePolicy(ctx context.Context, policy *v1
 
 	s.logger.Debug("Evaluating policy", sdklog.Operation("evaluate_policy"), sdklog.String("policy", fmt.Sprintf("%s/%s", policy.Namespace, policy.Name)))
 
-	// Parse GVR from policy
-	gvr, err := parseGVR(policy.Spec.TargetResource.APIVersion, policy.Spec.TargetResource.Kind)
+	// Parse GVR from policy (same validation as reconciler/informer path)
+	gvr, err := validation.ParseGVR(policy.Spec.TargetResource.APIVersion, policy.Spec.TargetResource.Kind)
 	if err != nil {
 		gcErr := gcerrors.Wrap(err, "invalid_gvr", "failed to parse GVR")
 		gcErr = gcErr.WithContext("policy_namespace", policy.Namespace)
@@ -320,25 +323,7 @@ func (s *PolicyEvaluationService) shouldDelete(resource *unstructured.Unstructur
 	return false, ReasonNotExpired
 }
 
-// getBatchSize returns the batch size for deletions.
+// getBatchSize returns the batch size for deletions (aligned with GCPolicyReconciler.getBatchSize).
 func (s *PolicyEvaluationService) getBatchSize(policy *v1alpha1.GarbageCollectionPolicy) int {
-	if policy.Spec.Behavior.BatchSize > 0 {
-		return policy.Spec.Behavior.BatchSize
-	}
-	return 10 // Default batch size
-}
-
-// parseGVR parses a GVR from API version and kind.
-func parseGVR(apiVersion, kind string) (schema.GroupVersionResource, error) {
-	gv, err := schema.ParseGroupVersion(apiVersion)
-	if err != nil {
-		return schema.GroupVersionResource{}, fmt.Errorf("invalid API version: %w", err)
-	}
-
-	resource := validation.PluralizeKind(kind)
-	return schema.GroupVersionResource{
-		Group:    gv.Group,
-		Version:  gv.Version,
-		Resource: resource,
-	}, nil
+	return resolveBatchSize(policy, s.controllerConfig)
 }

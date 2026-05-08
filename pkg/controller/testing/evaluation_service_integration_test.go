@@ -27,9 +27,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/controller"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // TestGetOrCreateEvaluationService_FirstCall tests creating the service for the first time.
@@ -69,6 +69,7 @@ func TestGetOrCreateEvaluationService_FirstCall(t *testing.T) {
 		mockDeleter,
 		nil,
 		nil,
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -101,6 +102,7 @@ func TestGetOrCreateEvaluationService_ReuseService(t *testing.T) {
 		mockDeleter,
 		nil,
 		nil,
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -112,6 +114,7 @@ func TestGetOrCreateEvaluationService_ReuseService(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),
@@ -229,6 +232,7 @@ func TestPolicyEvaluationService_WithAllMocks(t *testing.T) {
 		mockDeleter,
 		nil,
 		nil,
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -272,6 +276,7 @@ func TestPolicyEvaluationService_ErrorHandling(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),

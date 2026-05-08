@@ -28,9 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/controller"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // Static errors for testing.
@@ -117,6 +117,7 @@ func TestParseGVR(t *testing.T) {
 				nil,
 				mockRateLimiter,
 				mockDeleter,
+				nil,
 				nil,
 				nil,
 				sdklog.NewLogger("zen-gc"),
@@ -228,6 +229,7 @@ func TestPolicyEvaluationService_GetBatchSize(t *testing.T) {
 				nil,
 				mockRateLimiter,
 				mockDeleter,
+				nil,
 				nil,
 				nil,
 				sdklog.NewLogger("zen-gc"),
@@ -349,6 +351,7 @@ func TestPolicyEvaluationService_ShouldDelete(t *testing.T) {
 				mockDeleter,
 				nil,
 				nil,
+				nil,
 				sdklog.NewLogger("zen-gc"),
 			)
 
@@ -422,6 +425,7 @@ func TestPolicyEvaluationService_StatusUpdateTimeout(t *testing.T) {
 		mockRateLimiter,
 		mockDeleter,
 		nil, // StatusUpdater - nil is OK, error handling tested elsewhere
+		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
@@ -503,6 +507,7 @@ func TestPolicyEvaluationService_BatchDeletionErrors(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),
@@ -592,6 +597,7 @@ func TestPolicyEvaluationService_WildcardNamespace(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),

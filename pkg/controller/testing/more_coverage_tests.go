@@ -169,6 +169,7 @@ func TestPolicyEvaluationServiceWithConditions(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 	)
 
 	ctx := context.Background()
@@ -239,6 +240,7 @@ func TestPolicyEvaluationServiceConditionsNotMet(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 	)
 
 	ctx := context.Background()
@@ -300,6 +302,7 @@ func TestPolicyEvaluationServiceSelectorNotMatched(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		nil,
@@ -382,6 +385,7 @@ func TestPolicyEvaluationServiceBatchDeletion(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 	)
 
 	ctx := context.Background()
@@ -461,6 +465,7 @@ func TestPolicyEvaluationServiceDeletionErrors(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		nil,

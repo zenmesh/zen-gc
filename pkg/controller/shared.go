@@ -29,13 +29,13 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/zenmesh/zen-gc/internal/backoff"
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
-	"github.com/zenmesh/zen-gc/internal/backoff"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
-	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 var (
@@ -75,6 +75,19 @@ const (
 	// ErrorTypeEvaluationFailed indicates that policy evaluation failed.
 	ErrorTypeEvaluationFailed = "evaluation_failed"
 )
+
+// resolveBatchSize returns the batch size for deletions: policy behavior overrides
+// controller config, which overrides DefaultBatchSize.
+func resolveBatchSize(policy *v1alpha1.GarbageCollectionPolicy, ctrlCfg *config.ControllerConfig) int {
+	batchSize := DefaultBatchSize
+	if ctrlCfg != nil {
+		batchSize = ctrlCfg.BatchSize
+	}
+	if policy.Spec.Behavior.BatchSize > 0 {
+		batchSize = policy.Spec.Behavior.BatchSize
+	}
+	return batchSize
+}
 
 // Constants for deletion propagation policies.
 const (

@@ -55,10 +55,13 @@ build-image-multiarch:
 # Run all tests
 test: test-unit test-integration
 
+# Packages for unit tests and coverage (exclude no-test / tooling-only packages that break merge coverage on some Go builds)
+COVERAGE_PKGS := $(shell go list ./pkg/... ./internal/... 2>/dev/null | grep -v 'pkg/api/v1alpha1' | grep -v 'internal/logging')
+
 # Run unit tests
 test-unit:
 	@echo "Running unit tests..."
-	go test -v -race -coverprofile=coverage.out -covermode=atomic -timeout=10m ./pkg/...
+	go test -v -race -coverprofile=coverage.out -covermode=atomic -timeout=10m $(COVERAGE_PKGS)
 
 # Run integration tests
 test-integration:
@@ -108,15 +111,15 @@ coverage: test-unit
 	@echo "Coverage summary:"
 	@go tool cover -func=coverage.out | tail -1
 	@echo ""
-	@echo "Checking coverage threshold (minimum: 55%)..."
+	@echo "Checking coverage threshold (minimum: 65%)..."
 	@COVERAGE=$$(go tool cover -func=coverage.out | tail -1 | awk '{print $$3}' | sed 's/%//'); \
 	if [ -z "$$COVERAGE" ]; then \
 		echo "⚠️  Could not determine coverage percentage"; \
-	elif [ $$(echo "$$COVERAGE < 55" | bc -l) -eq 1 ]; then \
-		echo "❌ Coverage $$COVERAGE% is below the 55% threshold"; \
+	elif [ $$(echo "$$COVERAGE < 65" | bc -l) -eq 1 ]; then \
+		echo "❌ Coverage $$COVERAGE% is below the 65% threshold"; \
 		exit 1; \
 	else \
-		echo "✅ Coverage $$COVERAGE% meets the 55% threshold"; \
+		echo "✅ Coverage $$COVERAGE% meets the 65% threshold"; \
 	fi
 
 # Format code

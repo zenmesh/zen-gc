@@ -25,9 +25,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/controller"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 )
 
 // MockResourceInformer is a mock implementation of ResourceInformer for testing.

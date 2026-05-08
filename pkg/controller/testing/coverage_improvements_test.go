@@ -29,9 +29,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/controller"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // Static errors for testing.
@@ -72,6 +72,7 @@ func TestPolicyEvaluationService_NoResources(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),
@@ -139,6 +140,7 @@ func TestPolicyEvaluationService_NoConditions(t *testing.T) {
 		mockDeleter,
 		nil,
 		nil,
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -184,6 +186,7 @@ func TestPolicyEvaluationService_ListResourcesError(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),
@@ -259,6 +262,7 @@ func TestPolicyEvaluationService_ContextCancellationDuringEvaluation(t *testing.
 		mockDeleter,
 		nil,
 		nil,
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -331,6 +335,7 @@ func TestPolicyEvaluationService_StatusUpdater(t *testing.T) {
 		mockDeleter,
 		nil, // StatusUpdater - nil is OK for this test
 		nil, // EventRecorder - nil is OK for this test
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -398,6 +403,7 @@ func TestPolicyEvaluationService_EventRecorder(t *testing.T) {
 		mockDeleter,
 		nil,
 		nil, // EventRecorder - nil is OK
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 

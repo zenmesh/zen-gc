@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	kubernetesfake "k8s.io/client-go/kubernetes/fake"
 )
 
 func TestConfigDefaults(t *testing.T) {
@@ -36,14 +38,14 @@ func TestConfigDefaults(t *testing.T) {
 
 func TestConfigWithValues(t *testing.T) {
 	cfg := &Config{
-		ElectionID:     "test-election",
-		Namespace:      "test-ns",
-		LeaseName:      "test-lease",
-		LeaseDuration:  30 * time.Second,
-		RenewDeadline:  20 * time.Second,
-		RetryPeriod:    10 * time.Second,
-		Enable:         true,
-		GetIdentity:    func() string { return "test-identity" },
+		ElectionID:    "test-election",
+		Namespace:     "test-ns",
+		LeaseName:     "test-lease",
+		LeaseDuration: 30 * time.Second,
+		RenewDeadline: 20 * time.Second,
+		RetryPeriod:   10 * time.Second,
+		Enable:        true,
+		GetIdentity:   func() string { return "test-identity" },
 	}
 
 	if cfg.ElectionID != "test-election" {
@@ -88,9 +90,9 @@ func TestApplyDefaults(t *testing.T) {
 				Namespace: "custom-ns",
 			},
 			expected: &Config{
-				Namespace:    "custom-ns",
-				ElectionID:   "zen-gc-leader-election",
-				LeaseName:    "zen-gc-leader-election",
+				Namespace:     "custom-ns",
+				ElectionID:    "zen-gc-leader-election",
+				LeaseName:     "zen-gc-leader-election",
 				LeaseDuration: 15 * time.Second,
 				RenewDeadline: 10 * time.Second,
 				RetryPeriod:   5 * time.Second,
@@ -103,16 +105,16 @@ func TestApplyDefaults(t *testing.T) {
 				Namespace:     "custom-ns",
 				LeaseName:     "custom-lease",
 				LeaseDuration: 60 * time.Second,
-				RenewDeadline:  40 * time.Second,
-				RetryPeriod:    20 * time.Second,
+				RenewDeadline: 40 * time.Second,
+				RetryPeriod:   20 * time.Second,
 			},
 			expected: &Config{
 				ElectionID:    "custom-election",
 				Namespace:     "custom-ns",
 				LeaseName:     "custom-lease",
 				LeaseDuration: 60 * time.Second,
-				RenewDeadline:  40 * time.Second,
-				RetryPeriod:    20 * time.Second,
+				RenewDeadline: 40 * time.Second,
+				RetryPeriod:   20 * time.Second,
 			},
 		},
 	}
@@ -221,5 +223,60 @@ func TestGetIdentity(t *testing.T) {
 
 	if cfg.GetIdentity() != "custom-identity" {
 		t.Errorf("Expected custom-identity, got %s", cfg.GetIdentity())
+	}
+}
+
+type fakeLeaderElector struct {
+	runCalled bool
+}
+
+func (f *fakeLeaderElector) Run(ctx context.Context) error {
+	f.runCalled = true
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+func TestRunner_Run_invokesElector(t *testing.T) {
+	f := &fakeLeaderElector{}
+	r := NewRunner(f, func(context.Context) {}, func() {}, func(string) {}, "eid")
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := r.Run(ctx); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if !f.runCalled {
+		t.Error("expected LeaderElector.Run to be called")
+	}
+
+	rnil := NewRunner(nil, nil, nil, nil, "eid")
+	if err := rnil.Run(context.Background()); err != nil {
+		t.Fatalf("nil elector: %v", err)
+	}
+}
+
+func TestNewLeaderElector_andAdapterRun(t *testing.T) {
+	client := kubernetesfake.NewSimpleClientset()
+	cfg := ApplyDefaults(&Config{})
+	cfg.GetIdentity = func() string { return "unit-test-id" }
+
+	elector, err := NewLeaderElector(client, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	if err := elector.Run(ctx); err != nil && err != context.DeadlineExceeded && err != context.Canceled {
+		t.Logf("Run ended with: %v", err)
+	}
+}
+
+func TestNewLeaseLock_defaultIdentity(t *testing.T) {
+	client := kubernetesfake.NewSimpleClientset()
+	cfg := ApplyDefaults(&Config{})
+	cfg.GetIdentity = nil
+	lock := newLeaseLock(client, cfg)
+	if lock == nil {
+		t.Fatal("expected lease lock")
 	}
 }

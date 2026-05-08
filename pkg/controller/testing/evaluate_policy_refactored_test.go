@@ -26,9 +26,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 
+	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/controller"
-	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 )
 
 // TestPolicyEvaluationService_EvaluatePolicy demonstrates testing with interfaces and mocks.
@@ -108,6 +108,7 @@ func TestPolicyEvaluationService_EvaluatePolicy(t *testing.T) {
 		mockDeleter,
 		nil, // StatusUpdater (not needed for this test)
 		nil, // EventRecorder (not needed for this test)
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -153,6 +154,7 @@ func TestPolicyEvaluationService_EvaluatePolicy_EmptyResources(t *testing.T) {
 		mockDeleter,
 		nil,
 		nil,
+		nil,
 		sdklog.NewLogger("zen-gc"),
 	)
 
@@ -195,6 +197,7 @@ func TestPolicyEvaluationService_EvaluatePolicy_ContextCanceled(t *testing.T) {
 		nil,
 		mockRateLimiter,
 		mockDeleter,
+		nil,
 		nil,
 		nil,
 		sdklog.NewLogger("zen-gc"),

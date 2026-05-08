@@ -123,6 +123,7 @@ func TestGCPolicyReconciler_EvaluatePolicy_WithMocks(t *testing.T) {
 		mockDeleter,
 		nil, // StatusUpdater - nil is OK, status update logic tested elsewhere
 		reconciler.GetEventRecorder(),
+		nil,
 		reconciler.GetLogger(),
 	)
 
@@ -192,6 +193,7 @@ func TestGCPolicyReconciler_EvaluatePolicy_EmptyResources(t *testing.T) {
 		mockDeleter,
 		nil, // StatusUpdater - nil is OK, status update logic tested elsewhere
 		reconciler.GetEventRecorder(),
+		nil,
 		reconciler.GetLogger(),
 	)
 
@@ -260,6 +262,7 @@ func TestGCPolicyReconciler_EvaluatePolicy_ContextCancellation(t *testing.T) {
 		mockDeleter,
 		nil, // StatusUpdater - nil is OK, status update logic tested elsewhere
 		reconciler.GetEventRecorder(),
+		nil,
 		reconciler.GetLogger(),
 	)
 
