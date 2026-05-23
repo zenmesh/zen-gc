@@ -26,7 +26,7 @@ All PRs must pass:
 - ✅ Code formatting (`gofmt`)
 - ✅ Linting (`golangci-lint`)
 - ✅ Static analysis (`go vet`)
-- ✅ Unit tests (>65% coverage)
+- ✅ Unit tests with **65% coverage gate** (`make coverage` in CI)
 - ✅ Build verification
 - ✅ Security scanning (`govulncheck`, `gosec`)
 - ✅ YAML validation
@@ -96,8 +96,7 @@ This runs:
 #### Test Job
 
 - Runs unit tests with race detection (`go test -race ./...`)
-- Generates a coverage profile (`go test -coverprofile=coverage.out ./...`)
-- **65% gate**: enforced locally via `make coverage` (not yet enforced in this workflow)
+- **65% gate**: `make coverage` (unit tests + merged profile + fails below 65%)
 
 #### Build Job
 

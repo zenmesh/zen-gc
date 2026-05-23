@@ -644,12 +644,12 @@ See [METRICS.md](METRICS.md) for complete documentation.
 | `pkg/validation` | 87.6% | ✅ Excellent |
 | `pkg/webhook` | 80.3% | ✅ Good |
 | `internal/config` | 93.9% | ✅ Excellent |
-| `pkg/controller` | 51.4% | ⚠️ Below per-package target |
+| `pkg/controller` | 51.4% | ⚠️ Low unit % (see below) |
 
 **Coverage Requirements**:
-- **Minimum**: 65% overall (`make coverage`)
+- **Minimum**: 65% overall (`make coverage`; **enforced in CI** on every PR)
 - **Stretch goal**: >80% overall; >85% on critical packages
-- Integration and E2E tests add coverage beyond unit-test metrics
+- **`pkg/controller`**: Unit coverage is intentionally lower (~51%); critical paths are covered by [integration tests](TESTING.md#integration-tests) and **E2E/kind** (`make e2e-kind`). Do not treat controller unit % alone as a merge blocker—see [TESTING.md — pkg/controller unit coverage](TESTING.md#pkgcontroller-unit-coverage).
 
 ### Security
 

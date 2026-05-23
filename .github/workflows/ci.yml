@@ -67,11 +67,14 @@ jobs:
       - name: Install dependencies
         run: go mod download
       
+      - name: Install bc
+        run: sudo apt-get update && sudo apt-get install -y bc
+      
       - name: Run tests
         run: go test -v -race -timeout=15m ./...
       
       - name: Check coverage
-        run: go test -coverprofile=coverage.out ./...
+        run: make coverage
 
   build:
     name: Build

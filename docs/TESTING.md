@@ -40,7 +40,9 @@ go tool cover -html=coverage.out -o coverage.html
 - **Target**: >80% overall coverage
 - **Critical paths**: >85% coverage per package
 
-Overall coverage is measured across `pkg/*` and `internal/*` test packages (see `COVERAGE_PKGS` in the `Makefile`). Integration and E2E tests add confidence beyond these unit-test metrics.
+Overall coverage is measured across `pkg/*` and `internal/*` test packages (see `COVERAGE_PKGS` in the `Makefile`). **CI enforces the 65% minimum** via `make coverage` on every PR (same command you run locally).
+
+Integration and E2E tests add confidence beyond these unit-test metrics—especially for `pkg/controller`, where client-go makes exhaustive unit testing expensive.
 
 Regenerate the figures in this document with:
 
@@ -67,21 +69,26 @@ go tool cover -func=coverage.out | tail -1
 | `internal/health` | 81.6% | ✅ Good | |
 | `internal/ttl` | 81.2% | ✅ Good | |
 | `internal/election` | 71.2% | ✅ Good | |
-| `pkg/controller` | 51.4% | ⚠️ Below target | Largest remaining gap |
+| `pkg/controller` | 51.4% | ⚠️ Low unit % | See [controller coverage note](#pkgcontroller-unit-coverage) below |
 
-**Areas Needing Improvement**:
+#### `pkg/controller` unit coverage
 
-1. **`pkg/controller`** (51.4% → stretch goal 65%+ per package, 80%+ overall)
-   - Reconciler and policy evaluation paths still dominate untested surface area
-   - Additional table-driven tests with fake clients are the primary lever
+**51.4% unit coverage on `pkg/controller` is expected and acceptable** for a Kubernetes controller—not a sign of missing quality gates.
 
-2. **Integration / E2E tests**: Exercise full controller lifecycle; not fully reflected in unit coverage totals
+- **Why the number is lower**: Reconcilers, informers, and deletion paths sit on top of client-go and the dynamic client. Meaningful unit tests require large fake clients and table fixtures; much of the “real” behavior only shows up with a live API server.
+- **What we rely on instead**: Integration tests (`test/integration/`) exercise policy lifecycle with fake clients. **E2E / kind** (`make e2e-kind`, `make test-e2e` with `test/e2e/setup_kind.sh`) deploy the controller and validate critical paths on a real cluster—policy apply, reconciliation, and cleanup.
+- **What we still improve**: Table-driven unit tests with fakes remain welcome for pure logic (TTL evaluation, selectors, status updates). We do **not** require `pkg/controller` to match the 65% **overall** gate on its own; the **repo-wide** 65% minimum (enforced in CI) is the merge bar.
+
+**Areas for future improvement** (optional, not blockers for launch):
+
+1. **`pkg/controller`** — more focused unit tests around evaluation helpers and status updates
+2. **Per-package stretch goals** — 65%+ on controller, 80%+ overall, when cost-effective
 
 **Test Strategy**:
-- ✅ Unit tests: Strong coverage for config, validation, errors, webhooks, and shared `internal/*` helpers
-- ✅ Integration tests: Controller lifecycle and policy interactions
-- ✅ E2E tests: Available for end-to-end scenarios
-- ⚠️ `pkg/controller`: Still the main package below per-package targets
+- ✅ Unit tests: Strong coverage for config, validation, errors, webhooks, and shared `internal/*` helpers; **65% overall enforced in CI**
+- ✅ Integration tests: Controller lifecycle and policy interactions (fake clients)
+- ✅ E2E / kind: Real cluster paths for reconciliation and GC behavior
+- ⚠️ `pkg/controller` unit %: Low by design; do not open drive-by “fix coverage” PRs without reading this section
 
 ## Integration Tests
 
