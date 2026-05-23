@@ -608,7 +608,7 @@ zen-gc is **production-ready** with excellent metrics, comprehensive documentati
 | Category | Score | Status |
 |----------|-------|--------|
 | **Metrics** | 9/10 | ✅ Excellent |
-| **Tests** | 7/10 | ⚠️ Good (56% coverage, target 65%+) |
+| **Tests** | 8/10 | ✅ Good (65% overall coverage, 80%+ stretch goal) |
 | **Documentation** | 10/10 | ✅ Excellent |
 | **Alert Rules** | 8/10 | ✅ Good |
 | **Dashboards** | 8/10 | ✅ Good |
@@ -635,23 +635,21 @@ See [METRICS.md](METRICS.md) for complete documentation.
 
 ### Test Coverage
 
-**Current Coverage**: **56.0%** (Above 55% minimum, below 65% target)
+**Current Coverage**: **65.4%** overall ✅ (meets 65% minimum via `make coverage`; see [TESTING.md](TESTING.md))
 
 | Package | Coverage | Status |
 |---------|----------|--------|
-| `pkg/config` | 90.5% | ✅ Excellent |
+| `pkg/config` | 95.0% | ✅ Excellent |
 | `pkg/errors` | 100.0% | ✅ Perfect |
 | `pkg/validation` | 87.6% | ✅ Excellent |
-| `pkg/webhook` | 79.5% | ✅ Good |
-| `pkg/controller` | 56.8% | ⚠️ Below target |
+| `pkg/webhook` | 80.3% | ✅ Good |
+| `internal/config` | 93.9% | ✅ Excellent |
+| `pkg/controller` | 51.4% | ⚠️ Below per-package target |
 
 **Coverage Requirements**:
-- **Minimum (CI)**: 55% code coverage (CI will fail if below)
-- **Target**: >65% coverage
-- **Stretch Goal**: >80% coverage
-- **Critical paths**: >85% coverage
-
-**Note**: The 55% threshold is pragmatic given that many controller functions require complex Kubernetes client setup. Integration tests provide additional coverage not captured in unit test metrics.
+- **Minimum**: 65% overall (`make coverage`)
+- **Stretch goal**: >80% overall; >85% on critical packages
+- Integration and E2E tests add coverage beyond unit-test metrics
 
 ### Security
 
@@ -675,7 +673,7 @@ See [SECURITY.md](../SECURITY.md) and [SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.m
 ✅ **No immediate action required** - Component is production-ready.
 
 **Future Enhancements** (optional):
-- Improve controller test coverage to 65%+
+- Raise `pkg/controller` coverage toward 65%+ per package and 80%+ overall
 - Enhanced health checks with informer sync verification
 - Shared informer architecture for >100 policies
 

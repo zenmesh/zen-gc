@@ -26,49 +26,62 @@ go test -v ./pkg/controller/...
 # Run tests with race detection
 go test -race ./pkg/...
 
-# Run tests with coverage
-go test -coverprofile=coverage.out ./pkg/...
-go tool cover -html=coverage.out
+# Run tests with coverage (same packages as CI/Makefile; excludes generated API types and internal/logging)
+make coverage
+
+# Or manually:
+make test-unit
+go tool cover -html=coverage.out -o coverage.html
 ```
 
 ### Coverage Requirements
 
-- **Minimum (CI)**: 55% code coverage (CI will fail if below)
-- **Target**: >65% coverage
-- **Stretch Goal**: >80% coverage
-- **Critical paths**: >85% coverage
+- **Minimum**: 65% code coverage (`make coverage` fails below this threshold)
+- **Target**: >80% overall coverage
+- **Critical paths**: >85% coverage per package
 
-Coverage is checked automatically in CI and will fail if below 55%.
+Overall coverage is measured across `pkg/*` and `internal/*` test packages (see `COVERAGE_PKGS` in the `Makefile`). Integration and E2E tests add confidence beyond these unit-test metrics.
 
-**Note**: The 55% threshold is pragmatic given that many controller functions require complex Kubernetes client setup. Integration tests provide additional coverage not captured in unit test metrics.
+Regenerate the figures in this document with:
+
+```bash
+make coverage
+go tool cover -func=coverage.out | tail -1
+```
 
 ### Current Coverage Status
 
-**Overall Coverage**: **56.0%** ⚠️ (Above minimum, below target)
+**Overall Coverage**: **65.4%** ✅ (meets 65% minimum; last verified with `make test-unit`)
 
 | Package | Coverage | Status | Notes |
 |---------|----------|--------|-------|
-| `pkg/config` | 90.5% | ✅ Excellent | Comprehensive coverage |
-| `pkg/errors` | 100.0% | ✅ Perfect | Complete coverage |
-| `pkg/validation` | 87.6% | ✅ Excellent | Well tested |
-| `pkg/webhook` | 79.5% | ✅ Good | Good coverage |
-| `pkg/controller` | 56.8% | ⚠️ Below target | Needs improvement |
+| `pkg/config` | 95.0% | ✅ Excellent | |
+| `pkg/errors` | 100.0% | ✅ Perfect | |
+| `pkg/validation` | 87.6% | ✅ Excellent | |
+| `pkg/webhook` | 80.3% | ✅ Good | |
+| `internal/config` | 93.9% | ✅ Excellent | |
+| `internal/backoff` | 100.0% | ✅ Perfect | |
+| `internal/ratelimiter` | 100.0% | ✅ Perfect | |
+| `internal/events` | 85.0% | ✅ Good | |
+| `internal/errors` | 89.2% | ✅ Excellent | |
+| `internal/health` | 81.6% | ✅ Good | |
+| `internal/ttl` | 81.2% | ✅ Good | |
+| `internal/election` | 71.2% | ✅ Good | |
+| `pkg/controller` | 51.4% | ⚠️ Below target | Largest remaining gap |
 
 **Areas Needing Improvement**:
 
-1. **Controller Coverage** (56.8% → Target: 65%+)
-   - `recordPolicyPhaseMetrics()` - Not tested (quick win)
-   - `evaluatePolicies()` - 40% coverage
-   - `evaluatePoliciesSequential()` - 28.6% coverage
-   - `evaluatePoliciesParallel()` - Low coverage
+1. **`pkg/controller`** (51.4% → stretch goal 65%+ per package, 80%+ overall)
+   - Reconciler and policy evaluation paths still dominate untested surface area
+   - Additional table-driven tests with fake clients are the primary lever
 
-2. **Integration Tests**: Provide significant additional coverage not captured in unit test metrics
+2. **Integration / E2E tests**: Exercise full controller lifecycle; not fully reflected in unit coverage totals
 
 **Test Strategy**:
-- ✅ Unit tests: Good coverage for validation, errors, config
-- ✅ Integration tests: Comprehensive coverage of controller lifecycle
+- ✅ Unit tests: Strong coverage for config, validation, errors, webhooks, and shared `internal/*` helpers
+- ✅ Integration tests: Controller lifecycle and policy interactions
 - ✅ E2E tests: Available for end-to-end scenarios
-- ⚠️ Controller evaluation logic: Low coverage (needs improvement)
+- ⚠️ `pkg/controller`: Still the main package below per-package targets
 
 ## Integration Tests
 
@@ -382,22 +395,23 @@ kubectl wait --for condition=established crd/garbagecollectionpolicies.gc.ops.ze
 ### Unit Tests
 
 ```
-ok  	github.com/zenmesh/zen-gc/internal/backoff	0.004s	coverage: 100.0% of statements
-ok  	github.com/zenmesh/zen-gc/internal/config	0.003s	coverage: 56.1% of statements
-ok  	github.com/zenmesh/zen-gc/internal/election	0.008s	coverage: 45.3% of statements
-ok  	github.com/zenmesh/zen-gc/internal/errors	0.004s	coverage: 89.5% of statements
-ok  	github.com/zenmesh/zen-gc/internal/events	0.008s	coverage: 85.0% of statements
-ok  	github.com/zenmesh/zen-gc/internal/health	0.004s	coverage: 81.6% of statements
-ok  	github.com/zenmesh/zen-gc/internal/ratelimiter	12.5s	coverage: 100.0% of statements
-ok  	github.com/zenmesh/zen-gc/internal/ttl	0.004s	coverage: 81.2% of statements
-ok  	github.com/zenmesh/zen-gc/pkg/config	0.003s	coverage: 95.0% of statements
-ok  	github.com/zenmesh/zen-gc/pkg/controller	0.023s	coverage: 39.1% of statements
-ok  	github.com/zenmesh/zen-gc/pkg/errors	0.003s	coverage: 100.0% of statements
-ok  	github.com/zenmesh/zen-gc/pkg/validation	0.006s	coverage: 87.6% of statements
-ok  	github.com/zenmesh/zen-gc/pkg/webhook	0.116s	coverage: 79.5% of statements
+ok  	github.com/zenmesh/zen-gc/internal/backoff	…	coverage: 100.0% of statements
+ok  	github.com/zenmesh/zen-gc/internal/config	…	coverage: 93.9% of statements
+ok  	github.com/zenmesh/zen-gc/internal/election	…	coverage: 71.2% of statements
+ok  	github.com/zenmesh/zen-gc/internal/errors	…	coverage: 89.2% of statements
+ok  	github.com/zenmesh/zen-gc/internal/events	…	coverage: 85.0% of statements
+ok  	github.com/zenmesh/zen-gc/internal/health	…	coverage: 81.6% of statements
+ok  	github.com/zenmesh/zen-gc/internal/ratelimiter	…	coverage: 100.0% of statements
+ok  	github.com/zenmesh/zen-gc/internal/ttl	…	coverage: 81.2% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/config	…	coverage: 95.0% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/controller	…	coverage: 51.4% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/errors	…	coverage: 100.0% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/validation	…	coverage: 87.6% of statements
+ok  	github.com/zenmesh/zen-gc/pkg/webhook	…	coverage: 80.3% of statements
+total:										(statements)					65.4%
 ```
 
-**Expected**: All tests pass, no failures.
+**Expected**: All tests pass; `go tool cover -func=coverage.out | tail -1` reports ≥65% total.
 
 ### E2E Tests
 

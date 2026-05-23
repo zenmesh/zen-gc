@@ -178,8 +178,8 @@ func deleteBatchShared(
 	deleter BatchDeleter,
 ) (int64, []error) {
 	deletedCount := int64(0)
-	// Pre-allocate errors slice with batch size (worst case: all deletions fail)
-	errors := make([]error, 0, len(batch))
+	// Pre-allocate errs slice with batch size (worst case: all deletions fail)
+	errs := make([]error, 0, len(batch))
 
 	resourceAPIVersion := policy.Spec.TargetResource.APIVersion
 	resourceKind := policy.Spec.TargetResource.Kind
@@ -190,14 +190,14 @@ func deleteBatchShared(
 		if i%contextCheckInterval == 0 {
 			select {
 			case <-ctx.Done():
-				return deletedCount, errors
+				return deletedCount, errs
 			default:
 			}
 		}
 
 		// Rate limiting (per resource)
 		if err := rateLimiter.Wait(ctx); err != nil {
-			errors = append(errors, fmt.Errorf("rate limiter error: %w", err))
+			errs = append(errs, fmt.Errorf("rate limiter error: %w", err))
 			continue
 		}
 
@@ -211,7 +211,7 @@ func deleteBatchShared(
 			)
 			gcErr.Type = "deletion_failed"
 			recordError(policy.Namespace, policy.Name, "deletion_failed")
-			errors = append(errors, gcErr)
+			errs = append(errs, gcErr)
 			continue
 		}
 
@@ -228,7 +228,7 @@ func deleteBatchShared(
 		logger.Info("Deleted resource", sdklog.Operation("delete_batch"), sdklog.String("resource", fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName())), sdklog.String("reason", reason))
 	}
 
-	return deletedCount, errors
+	return deletedCount, errs
 }
 
 // TTLCalculator provides methods needed for TTL calculation.
@@ -300,11 +300,12 @@ func deleteResourceWithBackoffShared(
 		}
 
 		var err error
-		if deleterWithCtx != nil {
+		switch {
+		case deleterWithCtx != nil:
 			err = deleterWithCtx.DeleteResourceWithContext(ctx, resource, policy, rateLimiter)
-		} else if deleterWithoutCtx != nil {
+		case deleterWithoutCtx != nil:
 			err = deleterWithoutCtx.DeleteResourceWithoutContext(resource, policy, rateLimiter)
-		} else {
+		default:
 			return fmt.Errorf("%w", ErrNoDeleter)
 		}
 

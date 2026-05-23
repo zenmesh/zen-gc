@@ -82,7 +82,10 @@ var (
 
 func main() {
 	flag.Parse()
+	os.Exit(runMain())
+}
 
+func runMain() int {
 	// Initialize zen-sdk logger (configures controller-runtime logger automatically)
 	logger = sdklog.NewLogger("zen-gc")
 	setupLog = logger.WithComponent("setup")
@@ -98,28 +101,28 @@ func main() {
 	dynamicClient, err := dynamic.NewForConfig(restCfg)
 	if err != nil {
 		setupLog.Error(err, "Error building dynamic client", sdklog.ErrorCode("CLIENT_ERROR"))
-		os.Exit(1)
+		return 1
 	}
 
 	// Create Kubernetes client for events
 	kubeClient, err := kubernetes.NewForConfig(restCfg)
 	if err != nil {
 		setupLog.Error(err, "Error building Kubernetes client", sdklog.ErrorCode("CLIENT_ERROR"))
-		os.Exit(1)
+		return 1
 	}
 
 	// Create scheme and add GarbageCollectionPolicy types
 	scheme := runtime.NewScheme()
 	if err := v1alpha1.AddToScheme(scheme); err != nil {
 		setupLog.Error(err, "Error adding scheme", sdklog.ErrorCode("SCHEME_ERROR"))
-		os.Exit(1)
+		return 1
 	}
 
 	// Load controller configuration
 	controllerConfig := config.NewControllerConfig()
 	if err := controllerConfig.LoadFromEnv(); err != nil {
 		setupLog.Error(err, "Error loading configuration from environment", sdklog.ErrorCode("CONFIG_LOAD_ERROR"))
-		os.Exit(1)
+		return 1
 	}
 	controllerConfig.WithGCInterval(*gcInterval)
 	controllerConfig.WithMaxDeletionsPerSecond(*maxDeletionsPerSecond)
@@ -174,19 +177,20 @@ func main() {
 	}
 
 	err = election.RunWithLeaderElection(ctx, leConfig, kubeClient, func(runCtx context.Context) {
-		runController(runCtx, restCfg, mgrOpts, scheme, dynamicClient, statusUpdater, eventRecorder, controllerConfig)
+		runController(runCtx, restCfg, &mgrOpts, scheme, dynamicClient, statusUpdater, eventRecorder, controllerConfig)
 	})
 	if err != nil {
 		setupLog.Error(err, "Leader election failed", sdklog.ErrorCode("LEADER_ELECTION_ERROR"))
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }
 
-// runController runs the controller manager and all components
-func runController(ctx context.Context, restCfg *rest.Config, mgrOpts ctrl.Options, scheme *runtime.Scheme, dynamicClient dynamic.Interface, statusUpdater *controller.StatusUpdater, eventRecorder *controller.EventRecorder, controllerConfig *config.ControllerConfig) {
+// runController runs the controller manager and all components.
+func runController(ctx context.Context, restCfg *rest.Config, mgrOpts *ctrl.Options, scheme *runtime.Scheme, dynamicClient dynamic.Interface, statusUpdater *controller.StatusUpdater, eventRecorder *controller.EventRecorder, controllerConfig *config.ControllerConfig) {
 	setupLog := logger.WithComponent("controller")
 
-	mgr, err := ctrl.NewManager(restCfg, mgrOpts)
+	mgr, err := ctrl.NewManager(restCfg, *mgrOpts)
 	if err != nil {
 		setupLog.Error(err, "Error creating controller manager", sdklog.ErrorCode("MANAGER_CREATE_ERROR"))
 		os.Exit(1)

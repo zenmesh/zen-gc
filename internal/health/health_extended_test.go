@@ -80,9 +80,7 @@ func TestInformerSyncCheckerStartupCheck(t *testing.T) {
 }
 
 func TestActivityCheckerRecentlyActive(t *testing.T) {
-	checker := NewActivityChecker(func() time.Time {
-		return time.Now()
-	}, 5*time.Minute)
+	checker := NewActivityChecker(time.Now, 5*time.Minute)
 
 	err := checker.ReadinessCheck(nil)
 	if err != nil {
@@ -102,9 +100,7 @@ func TestActivityCheckerInactiveTooLong(t *testing.T) {
 }
 
 func TestActivityCheckerLivenessCheck(t *testing.T) {
-	checker := NewActivityChecker(func() time.Time {
-		return time.Now()
-	}, 5*time.Minute)
+	checker := NewActivityChecker(time.Now, 5*time.Minute)
 
 	err := checker.LivenessCheck(nil)
 	if err != nil {
@@ -113,9 +109,7 @@ func TestActivityCheckerLivenessCheck(t *testing.T) {
 }
 
 func TestActivityCheckerStartupCheck(t *testing.T) {
-	checker := NewActivityChecker(func() time.Time {
-		return time.Now()
-	}, 5*time.Minute)
+	checker := NewActivityChecker(time.Now, 5*time.Minute)
 
 	err := checker.StartupCheck(nil)
 	if err != nil {

@@ -35,7 +35,7 @@ func TestHealthChecker_probes(t *testing.T) {
 	h.SetMaxTimeSinceLastEvaluation(time.Minute)
 	h.UpdateLastEvaluationTime()
 
-	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	req := httptest.NewRequest(http.MethodGet, "/healthz", http.NoBody)
 	if err := h.ReadinessCheck(req); err != nil {
 		t.Errorf("ReadinessCheck: %v", err)
 	}

@@ -53,7 +53,7 @@ var (
 // 1. Fixed TTL: SecondsAfterCreation (e.g., 3600 = 1 hour after creation)
 // 2. Dynamic TTL: FieldPath pointing to int64 field (e.g., spec.ttlSeconds)
 // 3. Mapped TTL: FieldPath pointing to string field + Mappings (e.g., severity -> TTL)
-// 4. Relative TTL: RelativeTo timestamp field + SecondsAfter (e.g., 2 hours after last processed)
+// 4. Relative TTL: RelativeTo timestamp field + SecondsAfter (e.g., 2 hours after last processed).
 func CalculateExpirationTime(resource *unstructured.Unstructured, spec *Spec) (time.Time, error) {
 	if spec == nil {
 		return time.Time{}, ErrNoValidTTLConfiguration
@@ -142,7 +142,7 @@ func IsExpired(resource *unstructured.Unstructured, spec *Spec) (bool, error) {
 
 // parseFieldPath parses a dot-separated field path into a slice for nested field access.
 // Example: "spec.severity" -> ["spec", "severity"]
-// Example: "status.lastProcessedAt" -> ["status", "lastProcessedAt"]
+// Example: "status.lastProcessedAt" -> ["status", "lastProcessedAt"].
 func parseFieldPath(path string) []string {
 	if path == "" {
 		return nil

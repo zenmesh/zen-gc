@@ -38,19 +38,19 @@ import (
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
-// Logger wraps zap.Logger with component-specific context
+// Logger wraps zap.Logger with component-specific context.
 type Logger struct {
 	*zap.Logger
 	componentName string
 }
 
-// Info logs an info message
+// Info logs an info message.
 func (l *Logger) Info(msg string, fields ...zap.Field) {
 	l.Logger.Info(msg, fields...)
 }
 
 // Error logs an error message with enhanced context
-// If fields don't already include error_code or error_category, they are automatically added
+// If fields don't already include error_code or error_category, they are automatically added.
 func (l *Logger) Error(err error, msg string, fields ...zap.Field) {
 	if err == nil {
 		l.Logger.Error(msg, fields...)
@@ -85,17 +85,17 @@ func (l *Logger) Error(err error, msg string, fields ...zap.Field) {
 	l.Logger.Error(msg, append(fields, errorFields...)...)
 }
 
-// Debug logs a debug message
+// Debug logs a debug message.
 func (l *Logger) Debug(msg string, fields ...zap.Field) {
 	l.Logger.Debug(msg, fields...)
 }
 
-// Warn logs a warning message
+// Warn logs a warning message.
 func (l *Logger) Warn(msg string, fields ...zap.Field) {
 	l.Logger.Warn(msg, fields...)
 }
 
-// LoggerConfig holds configuration for logger creation
+// LoggerConfig holds configuration for logger creation.
 type LoggerConfig struct {
 	// ComponentName is the name of the component
 	ComponentName string
@@ -108,7 +108,7 @@ type LoggerConfig struct {
 	EnableStackTraces bool
 }
 
-// NewLogger creates a new structured logger for a component with default configuration
+// NewLogger creates a new structured logger for a component with default configuration.
 func NewLogger(componentName string) *Logger {
 	config := LoggerConfig{
 		ComponentName: componentName,
@@ -117,7 +117,7 @@ func NewLogger(componentName string) *Logger {
 	return NewLoggerWithConfig(config)
 }
 
-// NewLoggerWithConfig creates a new structured logger with custom configuration
+// NewLoggerWithConfig creates a new structured logger with custom configuration.
 func NewLoggerWithConfig(config LoggerConfig) *Logger {
 	if config.ComponentName == "" {
 		config.ComponentName = "unknown"
@@ -196,7 +196,7 @@ func NewLoggerWithConfig(config LoggerConfig) *Logger {
 	}
 }
 
-// getLogLevel parses log level from string or environment variable
+// getLogLevel parses log level from string or environment variable.
 func getLogLevel(level string) zapcore.Level {
 	if level == "" {
 		level = os.Getenv("LOG_LEVEL")
@@ -219,7 +219,7 @@ func getLogLevel(level string) zapcore.Level {
 	}
 }
 
-// WithComponent adds component name to log context
+// WithComponent adds component name to log context.
 func (l *Logger) WithComponent(component string) *Logger {
 	return &Logger{
 		Logger:        l.Logger.With(zap.String("component", component)),
@@ -227,7 +227,7 @@ func (l *Logger) WithComponent(component string) *Logger {
 	}
 }
 
-// WithField adds a field to the log context
+// WithField adds a field to the log context.
 func (l *Logger) WithField(key string, value interface{}) *Logger {
 	return &Logger{
 		Logger:        l.Logger.With(zap.Any(key, value)),
@@ -235,7 +235,7 @@ func (l *Logger) WithField(key string, value interface{}) *Logger {
 	}
 }
 
-// WithFields adds multiple fields to the log context
+// WithFields adds multiple fields to the log context.
 func (l *Logger) WithFields(fields map[string]interface{}) *Logger {
 	zapFields := make([]zap.Field, 0, len(fields))
 	for k, v := range fields {
@@ -250,7 +250,7 @@ func (l *Logger) WithFields(fields map[string]interface{}) *Logger {
 
 // WithContext creates a logger with context values automatically extracted
 // Extracts standard context values: request_id, tenant_id, user_id, cluster_id, trace_id, span_id
-// This follows Kubernetes logging best practices for context propagation
+// This follows Kubernetes logging best practices for context propagation.
 func (l *Logger) WithContext(ctx context.Context) *Logger {
 	if ctx == nil {
 		return l
@@ -294,31 +294,31 @@ func (l *Logger) WithContext(ctx context.Context) *Logger {
 
 // Context-aware logging methods (generic, follows Kubernetes patterns)
 
-// InfoC logs an info message with context (extracts context values automatically)
+// InfoC logs an info message with context (extracts context values automatically).
 func (l *Logger) InfoC(ctx context.Context, msg string, fields ...zap.Field) {
 	logger := l.WithContext(ctx)
 	logger.Info(msg, fields...)
 }
 
-// DebugC logs a debug message with context
+// DebugC logs a debug message with context.
 func (l *Logger) DebugC(ctx context.Context, msg string, fields ...zap.Field) {
 	logger := l.WithContext(ctx)
 	logger.Debug(msg, fields...)
 }
 
-// WarnC logs a warning message with context
+// WarnC logs a warning message with context.
 func (l *Logger) WarnC(ctx context.Context, msg string, fields ...zap.Field) {
 	logger := l.WithContext(ctx)
 	logger.Warn(msg, fields...)
 }
 
-// ErrorC logs an error message with context
+// ErrorC logs an error message with context.
 func (l *Logger) ErrorC(ctx context.Context, err error, msg string, fields ...zap.Field) {
 	logger := l.WithContext(ctx)
 	logger.Error(err, msg, fields...)
 }
 
-// isDevelopment checks if we're in development mode
+// isDevelopment checks if we're in development mode.
 func isDevelopment() bool {
 	return os.Getenv("LOG_LEVEL") == "debug" ||
 		os.Getenv("DEVELOPMENT") == "true" ||

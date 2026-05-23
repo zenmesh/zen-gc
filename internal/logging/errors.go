@@ -25,41 +25,41 @@ import (
 	"go.uber.org/zap"
 )
 
-// ErrorCategory represents the category of an error
+// ErrorCategory represents the category of an error.
 type ErrorCategory string
 
 const (
-	// ErrorCategoryUnknown represents an unknown/unclassified error
+	// ErrorCategoryUnknown represents an unknown/unclassified error.
 	ErrorCategoryUnknown ErrorCategory = "unknown"
-	// ErrorCategoryValidation represents a validation error (user input)
+	// ErrorCategoryValidation represents a validation error (user input).
 	ErrorCategoryValidation ErrorCategory = "validation"
-	// ErrorCategoryAuthentication represents an authentication error
+	// ErrorCategoryAuthentication represents an authentication error.
 	ErrorCategoryAuthentication ErrorCategory = "authentication"
-	// ErrorCategoryAuthorization represents an authorization error (permissions)
+	// ErrorCategoryAuthorization represents an authorization error (permissions).
 	ErrorCategoryAuthorization ErrorCategory = "authorization"
-	// ErrorCategoryNotFound represents a resource not found error
+	// ErrorCategoryNotFound represents a resource not found error.
 	ErrorCategoryNotFound ErrorCategory = "not_found"
-	// ErrorCategoryConflict represents a conflict error (e.g., duplicate resource)
+	// ErrorCategoryConflict represents a conflict error (e.g., duplicate resource).
 	ErrorCategoryConflict ErrorCategory = "conflict"
-	// ErrorCategoryRateLimit represents a rate limiting error
+	// ErrorCategoryRateLimit represents a rate limiting error.
 	ErrorCategoryRateLimit ErrorCategory = "rate_limit"
-	// ErrorCategoryTimeout represents a timeout error
+	// ErrorCategoryTimeout represents a timeout error.
 	ErrorCategoryTimeout ErrorCategory = "timeout"
-	// ErrorCategoryNetwork represents a network error
+	// ErrorCategoryNetwork represents a network error.
 	ErrorCategoryNetwork ErrorCategory = "network"
-	// ErrorCategoryDatabase represents a database error
+	// ErrorCategoryDatabase represents a database error.
 	ErrorCategoryDatabase ErrorCategory = "database"
-	// ErrorCategoryExternal represents an external service error
+	// ErrorCategoryExternal represents an external service error.
 	ErrorCategoryExternal ErrorCategory = "external"
-	// ErrorCategoryInternal represents an internal/system error
+	// ErrorCategoryInternal represents an internal/system error.
 	ErrorCategoryInternal ErrorCategory = "internal"
-	// ErrorCategoryConfig represents a configuration error
+	// ErrorCategoryConfig represents a configuration error.
 	ErrorCategoryConfig ErrorCategory = "config"
-	// ErrorCategoryTemporary represents a temporary/transient error
+	// ErrorCategoryTemporary represents a temporary/transient error.
 	ErrorCategoryTemporary ErrorCategory = "temporary"
 )
 
-// ErrorContext holds enhanced error context information
+// ErrorContext holds enhanced error context information.
 type ErrorContext struct {
 	Category   ErrorCategory
 	Code       string
@@ -69,7 +69,7 @@ type ErrorContext struct {
 	Fields     []zap.Field
 }
 
-// CategorizeError attempts to categorize an error based on its message and type
+// CategorizeError attempts to categorize an error based on its message and type.
 func CategorizeError(err error) ErrorCategory {
 	if err == nil {
 		return ErrorCategoryUnknown
@@ -105,7 +105,7 @@ func CategorizeError(err error) ErrorCategory {
 }
 
 // GetStackTrace returns the stack trace for the current goroutine
-// Only includes stack frames up to the caller (skips logging package frames)
+// Only includes stack frames up to the caller (skips logging package frames).
 func GetStackTrace(skip int) string {
 	if !isDevelopment() {
 		return "" // Stack traces only in development/debug mode
@@ -133,7 +133,7 @@ func GetStackTrace(skip int) string {
 	return strings.Join(lines[start:maxFrames], "\n")
 }
 
-// ExtractErrorContext extracts enhanced context from an error
+// ExtractErrorContext extracts enhanced context from an error.
 func ExtractErrorContext(err error, skipStack int) ErrorContext {
 	if err == nil {
 		return ErrorContext{
@@ -159,12 +159,12 @@ func ExtractErrorContext(err error, skipStack int) ErrorContext {
 	}
 }
 
-// ErrorCategoryField creates a zap field for error category
+// ErrorCategoryField creates a zap field for error category.
 func ErrorCategoryField(category ErrorCategory) zap.Field {
 	return zap.String("error_category", string(category))
 }
 
-// ErrorStackField creates a zap field for error stack trace (only in debug mode)
+// ErrorStackField creates a zap field for error stack trace (only in debug mode).
 func ErrorStackField(stack string) zap.Field {
 	if stack == "" || !isDevelopment() {
 		return zap.Skip()
@@ -173,7 +173,7 @@ func ErrorStackField(stack string) zap.Field {
 }
 
 // ErrorFields extracts all error-related fields for logging
-// This is a convenience function that extracts category, code, and optionally stack trace
+// This is a convenience function that extracts category, code, and optionally stack trace.
 func ErrorFields(err error, errorCode string) []zap.Field {
 	if err == nil {
 		return []zap.Field{}
@@ -196,18 +196,18 @@ func ErrorFields(err error, errorCode string) []zap.Field {
 	return fields
 }
 
-// EnhancedErrorLogger is a helper for logging errors with enhanced context
+// EnhancedErrorLogger is a helper for logging errors with enhanced context.
 type EnhancedErrorLogger struct {
 	logger *Logger
 }
 
-// NewEnhancedErrorLogger creates a new enhanced error logger
+// NewEnhancedErrorLogger creates a new enhanced error logger.
 func NewEnhancedErrorLogger(logger *Logger) *EnhancedErrorLogger {
 	return &EnhancedErrorLogger{logger: logger}
 }
 
-// LogError logs an error with enhanced context
-func (e *EnhancedErrorLogger) LogError(err error, msg string, errorCode string, fields ...zap.Field) {
+// LogError logs an error with enhanced context.
+func (e *EnhancedErrorLogger) LogError(err error, msg, errorCode string, fields ...zap.Field) {
 	if err == nil {
 		return
 	}
@@ -231,7 +231,7 @@ func (e *EnhancedErrorLogger) LogError(err error, msg string, errorCode string, 
 }
 
 // WrapError wraps an error with additional context
-// Returns a new error that includes the original error and context
+// Returns a new error that includes the original error and context.
 func WrapError(err error, msg string) error {
 	if err == nil {
 		return nil
@@ -239,7 +239,7 @@ func WrapError(err error, msg string) error {
 	return fmt.Errorf("%s: %w", msg, err)
 }
 
-// WrapErrorf wraps an error with formatted additional context
+// WrapErrorf wraps an error with formatted additional context.
 func WrapErrorf(err error, format string, args ...interface{}) error {
 	if err == nil {
 		return nil
@@ -249,7 +249,7 @@ func WrapErrorf(err error, format string, args ...interface{}) error {
 
 // isDevelopment is defined in logging.go
 
-// ErrorWithCode creates an error with an associated error code
+// ErrorWithCode creates an error with an associated error code.
 type ErrorWithCode struct {
 	Code    string
 	Message string
@@ -267,7 +267,7 @@ func (e *ErrorWithCode) Unwrap() error {
 	return e.Err
 }
 
-// NewErrorWithCode creates a new error with an associated code
+// NewErrorWithCode creates a new error with an associated code.
 func NewErrorWithCode(code, message string) error {
 	return &ErrorWithCode{
 		Code:    code,
@@ -275,7 +275,7 @@ func NewErrorWithCode(code, message string) error {
 	}
 }
 
-// NewErrorWithCodeAndCause creates a new error with code and underlying cause
+// NewErrorWithCodeAndCause creates a new error with code and underlying cause.
 func NewErrorWithCodeAndCause(code, message string, cause error) error {
 	return &ErrorWithCode{
 		Code:    code,
@@ -284,7 +284,7 @@ func NewErrorWithCodeAndCause(code, message string, cause error) error {
 	}
 }
 
-// ExtractErrorCode extracts the error code from an error if it implements ErrorWithCode
+// ExtractErrorCode extracts the error code from an error if it implements ErrorWithCode.
 func ExtractErrorCode(err error) string {
 	var errWithCode *ErrorWithCode
 	if errors.As(err, &errWithCode) {
@@ -293,7 +293,7 @@ func ExtractErrorCode(err error) string {
 	return ""
 }
 
-// IsRetryableError checks if an error is likely retryable based on its category
+// IsRetryableError checks if an error is likely retryable based on its category.
 func IsRetryableError(err error) bool {
 	if err == nil {
 		return false
@@ -306,7 +306,7 @@ func IsRetryableError(err error) bool {
 		(category == ErrorCategoryRateLimit) // Rate limits are retryable after backoff
 }
 
-// IsClientError checks if an error is a client error (4xx)
+// IsClientError checks if an error is a client error (4xx).
 func IsClientError(err error) bool {
 	if err == nil {
 		return false
@@ -319,7 +319,7 @@ func IsClientError(err error) bool {
 		category == ErrorCategoryConflict
 }
 
-// IsServerError checks if an error is a server error (5xx)
+// IsServerError checks if an error is a server error (5xx).
 func IsServerError(err error) bool {
 	if err == nil {
 		return false
@@ -331,7 +331,7 @@ func IsServerError(err error) bool {
 		category == ErrorCategoryConfig
 }
 
-// WithZapFields adds zap fields to an error context for structured logging
+// WithZapFields adds zap fields to an error context for structured logging.
 func (ctx *ErrorContext) WithZapFields(fields ...zap.Field) *ErrorContext {
 	ctx.Fields = append(ctx.Fields, fields...)
 	return ctx

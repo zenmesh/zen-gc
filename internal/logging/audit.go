@@ -22,53 +22,53 @@ import (
 	"go.uber.org/zap"
 )
 
-// AuditAction represents the type of action being audited
+// AuditAction represents the type of action being audited.
 type AuditAction string
 
 const (
-	// AuditActionCreate represents a create operation
+	// AuditActionCreate represents a create operation.
 	AuditActionCreate AuditAction = "create"
-	// AuditActionRead represents a read/access operation
+	// AuditActionRead represents a read/access operation.
 	AuditActionRead AuditAction = "read"
-	// AuditActionUpdate represents an update operation
+	// AuditActionUpdate represents an update operation.
 	AuditActionUpdate AuditAction = "update"
-	// AuditActionDelete represents a delete operation
+	// AuditActionDelete represents a delete operation.
 	AuditActionDelete AuditAction = "delete"
-	// AuditActionLogin represents a login/authentication operation
+	// AuditActionLogin represents a login/authentication operation.
 	AuditActionLogin AuditAction = "login"
-	// AuditActionLogout represents a logout operation
+	// AuditActionLogout represents a logout operation.
 	AuditActionLogout AuditAction = "logout"
-	// AuditActionAuthorize represents an authorization decision
+	// AuditActionAuthorize represents an authorization decision.
 	AuditActionAuthorize AuditAction = "authorize"
-	// AuditActionConfigChange represents a configuration change
+	// AuditActionConfigChange represents a configuration change.
 	AuditActionConfigChange AuditAction = "config_change"
-	// AuditActionDataAccess represents access to sensitive data
+	// AuditActionDataAccess represents access to sensitive data.
 	AuditActionDataAccess AuditAction = "data_access"
 )
 
-// AuditResult represents the result of an audit action
+// AuditResult represents the result of an audit action.
 type AuditResult string
 
 const (
-	// AuditResultSuccess represents a successful operation
+	// AuditResultSuccess represents a successful operation.
 	AuditResultSuccess AuditResult = "success"
-	// AuditResultFailure represents a failed operation
+	// AuditResultFailure represents a failed operation.
 	AuditResultFailure AuditResult = "failure"
-	// AuditResultDenied represents a denied operation
+	// AuditResultDenied represents a denied operation.
 	AuditResultDenied AuditResult = "denied"
 )
 
-// AuditLogger provides standardized audit logging helpers for security-sensitive operations
+// AuditLogger provides standardized audit logging helpers for security-sensitive operations.
 type AuditLogger struct {
 	logger *Logger
 }
 
-// NewAuditLogger creates a new audit logger
+// NewAuditLogger creates a new audit logger.
 func NewAuditLogger(logger *Logger) *AuditLogger {
 	return &AuditLogger{logger: logger}
 }
 
-// LogUserAction logs a user action for audit purposes
+// LogUserAction logs a user action for audit purposes.
 func (al *AuditLogger) LogUserAction(ctx context.Context, action AuditAction, resourceType, resourceID string, result AuditResult, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("audit_type", "user_action"),
@@ -87,7 +87,7 @@ func (al *AuditLogger) LogUserAction(ctx context.Context, action AuditAction, re
 	al.logger.WithContext(ctx).Info("Audit: User action", allFields...)
 }
 
-// LogLogin logs a login/authentication event
+// LogLogin logs a login/authentication event.
 func (al *AuditLogger) LogLogin(ctx context.Context, result AuditResult, ipAddress, userAgent string, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("audit_type", "authentication"),
@@ -106,7 +106,7 @@ func (al *AuditLogger) LogLogin(ctx context.Context, result AuditResult, ipAddre
 	al.logger.WithContext(ctx).Info("Audit: Login attempt", allFields...)
 }
 
-// LogAuthorization logs an authorization decision
+// LogAuthorization logs an authorization decision.
 func (al *AuditLogger) LogAuthorization(ctx context.Context, resourceType, resourceID, permission string, result AuditResult, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("audit_type", "authorization"),
@@ -126,7 +126,7 @@ func (al *AuditLogger) LogAuthorization(ctx context.Context, resourceType, resou
 	al.logger.WithContext(ctx).Info("Audit: Authorization decision", allFields...)
 }
 
-// LogConfigChange logs a configuration change
+// LogConfigChange logs a configuration change.
 func (al *AuditLogger) LogConfigChange(ctx context.Context, configKey string, oldValue, newValue interface{}, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("audit_type", "config_change"),
@@ -170,7 +170,7 @@ func (al *AuditLogger) LogDataAccess(ctx context.Context, dataType, resourceID s
 	al.logger.WithContext(ctx).Info("Audit: Data access", allFields...)
 }
 
-// LogResourceOperation logs a create/update/delete operation on a resource
+// LogResourceOperation logs a create/update/delete operation on a resource.
 func (al *AuditLogger) LogResourceOperation(ctx context.Context, action AuditAction, resourceType, resourceID string, result AuditResult, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("audit_type", "resource_operation"),
@@ -191,32 +191,32 @@ func (al *AuditLogger) LogResourceOperation(ctx context.Context, action AuditAct
 
 // Audit field helpers
 
-// AuditActionField creates an audit_action field
+// AuditActionField creates an audit_action field.
 func AuditActionField(action AuditAction) zap.Field {
 	return zap.String("audit_action", string(action))
 }
 
-// AuditResultField creates an audit_result field
+// AuditResultField creates an audit_result field.
 func AuditResultField(result AuditResult) zap.Field {
 	return zap.String("audit_result", string(result))
 }
 
-// AuditTypeField creates an audit_type field
+// AuditTypeField creates an audit_type field.
 func AuditTypeField(auditType string) zap.Field {
 	return zap.String("audit_type", auditType)
 }
 
-// PermissionField creates a permission field (for authorization audits)
+// PermissionField creates a permission field (for authorization audits).
 func PermissionField(permission string) zap.Field {
 	return zap.String("permission", permission)
 }
 
-// ConfigKeyField creates a config_key field (for config change audits)
+// ConfigKeyField creates a config_key field (for config change audits).
 func ConfigKeyField(key string) zap.Field {
 	return zap.String("config_key", key)
 }
 
-// DataTypeField creates a data_type field (for data access audits)
+// DataTypeField creates a data_type field (for data access audits).
 func DataTypeField(dataType string) zap.Field {
 	return zap.String("data_type", dataType)
 }

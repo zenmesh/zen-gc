@@ -24,7 +24,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// SamplerConfig configures log sampling behavior
+// SamplerConfig configures log sampling behavior.
 type SamplerConfig struct {
 	// InfoSamplingRate is the rate at which INFO level logs are sampled (0.0-1.0)
 	// 0.1 means 10% of INFO logs will be logged
@@ -46,7 +46,7 @@ type SamplerConfig struct {
 	WarnSamplingRate float64
 }
 
-// DefaultSamplerConfig returns a config with sensible defaults
+// DefaultSamplerConfig returns a config with sensible defaults.
 func DefaultSamplerConfig() SamplerConfig {
 	return SamplerConfig{
 		InfoSamplingRate:    0.1,  // 10% of INFO logs
@@ -57,7 +57,7 @@ func DefaultSamplerConfig() SamplerConfig {
 	}
 }
 
-// Sampler provides log sampling functionality
+// Sampler provides log sampling functionality.
 type Sampler struct {
 	config         SamplerConfig
 	infoCounter    uint64
@@ -66,14 +66,14 @@ type Sampler struct {
 	mu             sync.Mutex
 }
 
-// NewSampler creates a new log sampler with the given configuration
+// NewSampler creates a new log sampler with the given configuration.
 func NewSampler(config SamplerConfig) *Sampler {
 	return &Sampler{
 		config: config,
 	}
 }
 
-// ShouldLog determines if a log entry should be logged based on sampling rate
+// ShouldLog determines if a log entry should be logged based on sampling rate.
 func (s *Sampler) ShouldLog(level zapcore.Level, isSuccess bool) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -102,7 +102,7 @@ func (s *Sampler) ShouldLog(level zapcore.Level, isSuccess bool) bool {
 	}
 }
 
-// shouldSample determines if a log should be sampled based on rate (simple probability)
+// shouldSample determines if a log should be sampled based on rate (simple probability).
 func (s *Sampler) shouldSample(rate float64) bool {
 	if rate >= 1.0 {
 		return true
@@ -115,7 +115,7 @@ func (s *Sampler) shouldSample(rate float64) bool {
 	return time.Now().UnixNano()%100 < int64(rate*100)
 }
 
-// shouldSampleWithCounter uses a counter-based approach for more consistent sampling
+// shouldSampleWithCounter uses a counter-based approach for more consistent sampling.
 func (s *Sampler) shouldSampleWithCounter(rate float64, counter *uint64) bool {
 	if rate >= 1.0 {
 		return true
@@ -129,7 +129,7 @@ func (s *Sampler) shouldSampleWithCounter(rate float64, counter *uint64) bool {
 	return *counter%threshold == 0
 }
 
-// RateLimiter provides rate limiting for log entries to prevent log flooding
+// RateLimiter provides rate limiting for log entries to prevent log flooding.
 type RateLimiter struct {
 	// maxLogsPerSecond is the maximum number of logs allowed per second per key
 	maxLogsPerSecond int
@@ -146,7 +146,7 @@ type RateLimiter struct {
 	lastCleanup     time.Time
 }
 
-// RateLimiterConfig configures rate limiting behavior
+// RateLimiterConfig configures rate limiting behavior.
 type RateLimiterConfig struct {
 	// MaxLogsPerSecond is the maximum number of logs allowed per second per key
 	MaxLogsPerSecond int
@@ -158,7 +158,7 @@ type RateLimiterConfig struct {
 	CleanupInterval time.Duration
 }
 
-// DefaultRateLimiterConfig returns a config with sensible defaults
+// DefaultRateLimiterConfig returns a config with sensible defaults.
 func DefaultRateLimiterConfig() RateLimiterConfig {
 	return RateLimiterConfig{
 		MaxLogsPerSecond: 10,          // Allow 10 logs per second per key
@@ -167,7 +167,7 @@ func DefaultRateLimiterConfig() RateLimiterConfig {
 	}
 }
 
-// NewRateLimiter creates a new rate limiter
+// NewRateLimiter creates a new rate limiter.
 func NewRateLimiter(config RateLimiterConfig) *RateLimiter {
 	return &RateLimiter{
 		maxLogsPerSecond: config.MaxLogsPerSecond,
@@ -179,7 +179,7 @@ func NewRateLimiter(config RateLimiterConfig) *RateLimiter {
 }
 
 // Allow checks if a log entry with the given key should be allowed (not rate limited)
-// Returns true if the log should be allowed, false if it should be rate limited
+// Returns true if the log should be allowed, false if it should be rate limited.
 func (rl *RateLimiter) Allow(key string) bool {
 	if rl.maxLogsPerSecond <= 0 {
 		return true // Rate limiting disabled
@@ -225,7 +225,7 @@ func (rl *RateLimiter) Allow(key string) bool {
 	return true
 }
 
-// cleanup removes old entries that are outside the window
+// cleanup removes old entries that are outside the window.
 func (rl *RateLimiter) cleanup(now time.Time) {
 	windowStart := now.Add(-rl.windowSize * 2) // Clean up entries older than 2 windows
 	for key, timestamps := range rl.entries {
@@ -243,14 +243,14 @@ func (rl *RateLimiter) cleanup(now time.Time) {
 	}
 }
 
-// SampledLogger wraps a Logger with sampling and rate limiting
+// SampledLogger wraps a Logger with sampling and rate limiting.
 type SampledLogger struct {
 	logger      *Logger
 	sampler     *Sampler
 	rateLimiter *RateLimiter
 }
 
-// NewSampledLogger creates a new sampled logger
+// NewSampledLogger creates a new sampled logger.
 func NewSampledLogger(logger *Logger, samplerConfig SamplerConfig, rateLimiterConfig RateLimiterConfig) *SampledLogger {
 	return &SampledLogger{
 		logger:      logger,
@@ -259,7 +259,7 @@ func NewSampledLogger(logger *Logger, samplerConfig SamplerConfig, rateLimiterCo
 	}
 }
 
-// Info logs an info message with sampling and rate limiting
+// Info logs an info message with sampling and rate limiting.
 func (sl *SampledLogger) Info(msg string, isSuccess bool, key string, fields ...zap.Field) {
 	if !sl.rateLimiter.Allow(key) {
 		return // Rate limited
@@ -270,8 +270,8 @@ func (sl *SampledLogger) Info(msg string, isSuccess bool, key string, fields ...
 	sl.logger.Info(msg, fields...)
 }
 
-// Debug logs a debug message with sampling and rate limiting
-func (sl *SampledLogger) Debug(msg string, key string, fields ...zap.Field) {
+// Debug logs a debug message with sampling and rate limiting.
+func (sl *SampledLogger) Debug(msg, key string, fields ...zap.Field) {
 	if !sl.rateLimiter.Allow(key) {
 		return // Rate limited
 	}
@@ -281,8 +281,8 @@ func (sl *SampledLogger) Debug(msg string, key string, fields ...zap.Field) {
 	sl.logger.Debug(msg, fields...)
 }
 
-// Warn logs a warning message with rate limiting (warnings are not sampled)
-func (sl *SampledLogger) Warn(msg string, key string, fields ...zap.Field) {
+// Warn logs a warning message with rate limiting (warnings are not sampled).
+func (sl *SampledLogger) Warn(msg, key string, fields ...zap.Field) {
 	if !sl.rateLimiter.Allow(key) {
 		return // Rate limited
 	}
@@ -290,8 +290,8 @@ func (sl *SampledLogger) Warn(msg string, key string, fields ...zap.Field) {
 	sl.logger.Warn(msg, fields...)
 }
 
-// Error logs an error message with rate limiting (errors are not sampled)
-func (sl *SampledLogger) Error(err error, msg string, key string, fields ...zap.Field) {
+// Error logs an error message with rate limiting (errors are not sampled).
+func (sl *SampledLogger) Error(err error, msg, key string, fields ...zap.Field) {
 	if !sl.rateLimiter.Allow(key) {
 		return // Rate limited
 	}

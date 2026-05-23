@@ -39,42 +39,42 @@ const (
 	instanceIDKey contextKey = "instance_id"
 )
 
-// WithRequestID adds request ID to context
+// WithRequestID adds request ID to context.
 func WithRequestID(ctx context.Context, requestID string) context.Context {
 	return context.WithValue(ctx, requestIDKey, requestID)
 }
 
-// WithTenantID adds tenant ID to context
+// WithTenantID adds tenant ID to context.
 func WithTenantID(ctx context.Context, tenantID string) context.Context {
 	return context.WithValue(ctx, tenantIDKey, tenantID)
 }
 
-// WithClusterID adds cluster ID to context
+// WithClusterID adds cluster ID to context.
 func WithClusterID(ctx context.Context, clusterID string) context.Context {
 	return context.WithValue(ctx, clusterIDKey, clusterID)
 }
 
-// WithUserID adds user ID to context
+// WithUserID adds user ID to context.
 func WithUserID(ctx context.Context, userID string) context.Context {
 	return context.WithValue(ctx, userIDKey, userID)
 }
 
-// WithTraceID adds trace ID to context (W3C TraceContext)
+// WithTraceID adds trace ID to context (W3C TraceContext).
 func WithTraceID(ctx context.Context, traceID string) context.Context {
 	return context.WithValue(ctx, traceIDKey, traceID)
 }
 
-// WithSpanID adds span ID to context (W3C TraceContext)
+// WithSpanID adds span ID to context (W3C TraceContext).
 func WithSpanID(ctx context.Context, spanID string) context.Context {
 	return context.WithValue(ctx, spanIDKey, spanID)
 }
 
-// WithResourceID adds a generic resource ID to context (for multi-tenant systems)
+// WithResourceID adds a generic resource ID to context (for multi-tenant systems).
 func WithResourceID(ctx context.Context, resourceID string) context.Context {
 	return context.WithValue(ctx, resourceIDKey, resourceID)
 }
 
-// GetRequestID retrieves request ID from context
+// GetRequestID retrieves request ID from context.
 func GetRequestID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -85,7 +85,7 @@ func GetRequestID(ctx context.Context) string {
 	return ""
 }
 
-// GetTenantID retrieves tenant ID from context
+// GetTenantID retrieves tenant ID from context.
 func GetTenantID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -96,7 +96,7 @@ func GetTenantID(ctx context.Context) string {
 	return ""
 }
 
-// GetClusterID retrieves cluster ID from context
+// GetClusterID retrieves cluster ID from context.
 func GetClusterID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -107,7 +107,7 @@ func GetClusterID(ctx context.Context) string {
 	return ""
 }
 
-// GetUserID retrieves user ID from context
+// GetUserID retrieves user ID from context.
 func GetUserID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -118,7 +118,7 @@ func GetUserID(ctx context.Context) string {
 	return ""
 }
 
-// GetTraceID retrieves trace ID from context (tries OpenTelemetry first, then custom key)
+// GetTraceID retrieves trace ID from context (tries OpenTelemetry first, then custom key).
 func GetTraceID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -140,7 +140,7 @@ func GetTraceID(ctx context.Context) string {
 	return ""
 }
 
-// GetSpanID retrieves span ID from context (tries OpenTelemetry first, then custom key)
+// GetSpanID retrieves span ID from context (tries OpenTelemetry first, then custom key).
 func GetSpanID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -162,7 +162,7 @@ func GetSpanID(ctx context.Context) string {
 	return ""
 }
 
-// GetResourceID retrieves a generic resource ID from context
+// GetResourceID retrieves a generic resource ID from context.
 func GetResourceID(ctx context.Context) string {
 	if ctx == nil {
 		return ""
@@ -174,7 +174,7 @@ func GetResourceID(ctx context.Context) string {
 }
 
 // ExtractTraceContext extracts trace context from HTTP request headers
-// Supports W3C TraceContext (via OpenTelemetry) and custom headers
+// Supports W3C TraceContext (via OpenTelemetry) and custom headers.
 func ExtractTraceContext(req *http.Request) context.Context {
 	ctx := req.Context()
 
@@ -224,7 +224,7 @@ func ExtractTraceContext(req *http.Request) context.Context {
 }
 
 // PropagateTraceHeaders adds trace headers to HTTP requests for unified distributed tracing
-// Supports W3C TraceContext format and custom headers
+// Supports W3C TraceContext format and custom headers.
 func PropagateTraceHeaders(ctx context.Context, req *http.Request) {
 	if ctx == nil || req == nil {
 		return

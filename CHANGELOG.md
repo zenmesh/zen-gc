@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Proper CRD status updates (replaces TODO)
 - Kubernetes events for policy lifecycle and resource deletions
 - Exponential backoff retry logic for transient errors
-- Comprehensive test suite (>75% coverage)
+- Comprehensive test suite (>65% unit test coverage; see `make coverage`)
 - CI/CD pipeline with GitHub Actions
 - golangci-lint configuration
 - CONTRIBUTING.md guide

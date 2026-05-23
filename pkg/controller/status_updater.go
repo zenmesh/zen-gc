@@ -15,6 +15,9 @@ import (
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 )
 
+// statusSubresourceKey is the unstructured object key for CRD status.
+const statusSubresourceKey = "status"
+
 // PolicyGVR is the GroupVersionResource for GarbageCollectionPolicy CRDs.
 var PolicyGVR = schema.GroupVersionResource{
 	Group:    "gc.ops.zen-mesh.io",
@@ -100,17 +103,17 @@ func (s *StatusUpdater) UpdateStatus(
 	// Ready condition
 	readyCondition := map[string]interface{}{
 		"type":               "Ready",
-		"status":             "True",
+		statusSubresourceKey: "True",
 		"lastTransitionTime": nowStr,
 		"reason":             "PolicyActive",
 		"message":            "Policy is active and processing resources",
 	}
 	if phase == PolicyPhaseError {
-		readyCondition["status"] = "False"
+		readyCondition[statusSubresourceKey] = "False"
 		readyCondition["reason"] = "PolicyError"
 		readyCondition["message"] = "Policy evaluation encountered errors"
 	} else if phase == PolicyPhasePaused {
-		readyCondition["status"] = "False"
+		readyCondition[statusSubresourceKey] = "False"
 		readyCondition["reason"] = "PolicyPaused"
 		readyCondition["message"] = "Policy is paused"
 	}
@@ -120,7 +123,7 @@ func (s *StatusUpdater) UpdateStatus(
 	if phase == PolicyPhaseError {
 		errorCondition := map[string]interface{}{
 			"type":               PolicyPhaseError,
-			"status":             "True",
+			statusSubresourceKey: "True",
 			"lastTransitionTime": nowStr,
 			"reason":             "EvaluationFailed",
 			"message":            "Policy evaluation failed - check logs for details",
@@ -136,15 +139,15 @@ func (s *StatusUpdater) UpdateStatus(
 	statusObj["conditions"] = conditionsInterface
 
 	// Merge status (preserve existing fields, update only provided fields)
-	if existingStatus, ok := unstructuredPolicy.Object["status"].(map[string]interface{}); ok {
+	if existingStatus, ok := unstructuredPolicy.Object[statusSubresourceKey].(map[string]interface{}); ok {
 		// Merge: update provided fields, keep others
 		for k, v := range statusObj {
 			existingStatus[k] = v
 		}
-		unstructuredPolicy.Object["status"] = existingStatus
+		unstructuredPolicy.Object[statusSubresourceKey] = existingStatus
 	} else {
 		// No existing status, set new status
-		unstructuredPolicy.Object["status"] = statusObj
+		unstructuredPolicy.Object[statusSubresourceKey] = statusObj
 	}
 
 	// Update status subresource

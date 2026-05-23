@@ -13,10 +13,12 @@ Use **Go 1.26+** (matches `go.mod`).
 
 ## What is enforced today
 
-The active linters focus on correctness and safety (for example `govet`, `staticcheck`, `errcheck`, `ineffassign`, `unused`, `gosec`, formatters). See `.golangci.yml` for the exact list.
+CI runs **`golangci-lint`** with correctness linters (`govet`, `staticcheck`, `errcheck`, `errorlint`, …), **`gosec`**, formatters, and style rules including **`goconst`**, **`godot`**, **`dupl`**, **`revive`**, **`err113`**, **`mnd`**, and **`gocritic`**. See `.golangci.yml` for the exact list and exclusions.
 
-## Known debt (not enforced yet)
+**Test-only carve-outs:** **`_test.go`** files skip **`godot`**, **`err113`**, **`dupl`**, and **`goconst`** so tests stay readable. Production packages (including **`internal/logging`** and **`pkg/controller/testing`**) are fully linted.
 
-Broader stylistic rules — **`goconst`**, **`godot`**, **`dupl`**, **`revive` package-comments**, **`err113`**, strict **`mnd`**, and heavy **`gocritic`** — are **not** enabled yet. Turning them on currently produces hundreds of findings across legacy helpers (including `internal/logging`). They are candidates for incremental cleanup; contributions that chip away at that debt are welcome.
+Environment validation in **`internal/config`** exports sentinel errors (for example **`ErrEnvRequired`**) so callers can use **`errors.Is`**; messages still include the variable name via **`fmt.Errorf`** wrapping.
 
-If you run a stricter profile locally, please do not force-enable those linters in CI without a coordinated cleanup PR.
+## Tuning
+
+**`goconst`** uses **`min-occurrences: 6`**. Shared Kubernetes literals for controller tests live in **`pkg/controller/testing/k8s_literals_test.go`**.

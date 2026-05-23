@@ -95,7 +95,7 @@ func (ws *WebhookServer) Start(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		logger.Info("Shutting down webhook server...")
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		if err := ws.server.Shutdown(shutdownCtx); err != nil {
 			logger.Error(err, "Error shutting down webhook server")
@@ -117,7 +117,7 @@ func (ws *WebhookServer) StartTLS(ctx context.Context, certFile, keyFile string)
 	go func() {
 		<-ctx.Done()
 		logger.Info("Shutting down webhook server...")
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		defer cancel()
 		if err := ws.server.Shutdown(shutdownCtx); err != nil {
 			logger.Error(err, "Error shutting down webhook server")

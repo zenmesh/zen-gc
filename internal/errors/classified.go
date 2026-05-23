@@ -120,10 +120,11 @@ func classifyWithConfig(err error, cfg ClassifyConfig) *ClassifiedError {
 	// Unwrap wrapped errors to find existing ClassifiedError.
 	unwrapped := err
 	for {
-		if ce, ok := unwrapped.(*ClassifiedError); ok {
+		var ce *ClassifiedError
+		if errors.As(unwrapped, &ce) {
 			return ce
 		}
-		if n := unwrapOnce(unwrapped); n != nil {
+		if n := errors.Unwrap(unwrapped); n != nil {
 			unwrapped = n
 		} else {
 			break
@@ -184,15 +185,6 @@ func extractHTTPStatus(msg string) int {
 		}
 	}
 	return 0
-}
-
-func unwrapOnce(err error) error {
-	switch v := err.(type) {
-	case interface{ Unwrap() error }:
-		return v.Unwrap()
-	default:
-		return nil
-	}
 }
 
 func isNetworkError(err error) bool {

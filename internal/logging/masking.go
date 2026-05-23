@@ -22,7 +22,7 @@ import (
 )
 
 // MaskUUID masks a UUID for logging (shows first 8 chars)
-// Security: Prevents leaking full UUIDs in logs
+// Security: Prevents leaking full UUIDs in logs.
 func MaskUUID(uuid string) string {
 	if uuid == "" {
 		return ""
@@ -34,7 +34,7 @@ func MaskUUID(uuid string) string {
 }
 
 // MaskToken masks a token/API key (shows first 4 chars)
-// Security: Prevents leaking credentials in logs
+// Security: Prevents leaking credentials in logs.
 func MaskToken(token string) string {
 	if token == "" {
 		return ""
@@ -46,7 +46,7 @@ func MaskToken(token string) string {
 }
 
 // MaskEmail masks an email address (shows first 3 chars + domain)
-// Security: Protects PII in logs
+// Security: Protects PII in logs.
 func MaskEmail(email string) string {
 	if email == "" {
 		return ""
@@ -62,7 +62,7 @@ func MaskEmail(email string) string {
 }
 
 // MaskIP masks IP addresses (shows first octet)
-// Security: Protects client IP addresses
+// Security: Protects client IP addresses.
 func MaskIP(ip string) string {
 	if ip == "" {
 		return ""
@@ -75,7 +75,7 @@ func MaskIP(ip string) string {
 }
 
 // SanitizeSQL sanitizes SQL queries for logging (removes values, keeps structure)
-// Security: Prevents leaking sensitive data from SQL queries
+// Security: Prevents leaking sensitive data from SQL queries.
 func SanitizeSQL(query string) string {
 	if query == "" {
 		return ""
@@ -102,13 +102,13 @@ func SanitizeSQL(query string) string {
 }
 
 // RedactPassword ensures passwords are never logged
-// Security: Hard redaction for passwords
+// Security: Hard redaction for passwords.
 func RedactPassword(password string) string {
 	return "[REDACTED]"
 }
 
 // RedactSecret ensures secrets are never logged
-// Security: Hard redaction for secrets
+// Security: Hard redaction for secrets.
 func RedactSecret(secret string) string {
 	return "[REDACTED]"
 }

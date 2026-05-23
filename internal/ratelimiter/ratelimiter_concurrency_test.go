@@ -19,6 +19,7 @@ package ratelimiter
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -83,7 +84,7 @@ func TestRateLimiter_ConcurrentWait(t *testing.T) {
 					atomic.AddInt64(&successCount, 1)
 				} else {
 					// Context timeout is acceptable for this test
-					if err == context.DeadlineExceeded {
+					if errors.Is(err, context.DeadlineExceeded) {
 						atomic.AddInt64(&errorCount, 1)
 					} else {
 						t.Errorf("Unexpected error: %v", err)

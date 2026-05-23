@@ -263,7 +263,7 @@ func TestNewLeaderElector_andAdapterRun(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
-	if err := elector.Run(ctx); err != nil && err != context.DeadlineExceeded && err != context.Canceled {
+	if err := elector.Run(ctx); err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
 		t.Logf("Run ended with: %v", err)
 	}
 }

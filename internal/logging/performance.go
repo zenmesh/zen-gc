@@ -23,17 +23,17 @@ import (
 	"go.uber.org/zap"
 )
 
-// PerformanceLogger provides standardized performance logging helpers
+// PerformanceLogger provides standardized performance logging helpers.
 type PerformanceLogger struct {
 	logger *Logger
 }
 
-// NewPerformanceLogger creates a new performance logger
+// NewPerformanceLogger creates a new performance logger.
 func NewPerformanceLogger(logger *Logger) *PerformanceLogger {
 	return &PerformanceLogger{logger: logger}
 }
 
-// LogRequestProcessed logs a processed request with standardized fields
+// LogRequestProcessed logs a processed request with standardized fields.
 func (pl *PerformanceLogger) LogRequestProcessed(ctx context.Context, operation string, duration time.Duration, statusCode int, requestSize, responseSize int64, fields ...zap.Field) {
 	allFields := []zap.Field{
 		Operation(operation),
@@ -47,7 +47,7 @@ func (pl *PerformanceLogger) LogRequestProcessed(ctx context.Context, operation 
 	pl.logger.WithContext(ctx).Info("Request processed", allFields...)
 }
 
-// LogDBCall logs a database operation with standardized fields
+// LogDBCall logs a database operation with standardized fields.
 func (pl *PerformanceLogger) LogDBCall(ctx context.Context, operation, query string, duration time.Duration, rowsAffected int64, err error, fields ...zap.Field) {
 	allFields := []zap.Field{
 		Operation(operation),
@@ -64,7 +64,7 @@ func (pl *PerformanceLogger) LogDBCall(ctx context.Context, operation, query str
 	}
 }
 
-// LogCacheOperation logs a cache operation with standardized fields
+// LogCacheOperation logs a cache operation with standardized fields.
 func (pl *PerformanceLogger) LogCacheOperation(ctx context.Context, operation, key string, hit bool, duration time.Duration, err error, fields ...zap.Field) {
 	allFields := []zap.Field{
 		Operation(operation),
@@ -86,7 +86,7 @@ func (pl *PerformanceLogger) LogCacheOperation(ctx context.Context, operation, k
 	}
 }
 
-// LogExternalAPICall logs an external API call with standardized fields
+// LogExternalAPICall logs an external API call with standardized fields.
 func (pl *PerformanceLogger) LogExternalAPICall(ctx context.Context, service, endpoint, method string, statusCode int, duration time.Duration, requestSize, responseSize int64, err error, fields ...zap.Field) {
 	allFields := []zap.Field{
 		Operation("external_api_call"),
@@ -107,7 +107,7 @@ func (pl *PerformanceLogger) LogExternalAPICall(ctx context.Context, service, en
 	}
 }
 
-// LogMessageQueueOperation logs a message queue operation with standardized fields
+// LogMessageQueueOperation logs a message queue operation with standardized fields.
 func (pl *PerformanceLogger) LogMessageQueueOperation(ctx context.Context, operation, queueName string, messageCount int, duration time.Duration, err error, fields ...zap.Field) {
 	allFields := []zap.Field{
 		Operation(operation),
@@ -124,7 +124,7 @@ func (pl *PerformanceLogger) LogMessageQueueOperation(ctx context.Context, opera
 	}
 }
 
-// LogFileOperation logs a file operation with standardized fields
+// LogFileOperation logs a file operation with standardized fields.
 func (pl *PerformanceLogger) LogFileOperation(ctx context.Context, operation, filePath string, fileSize int64, duration time.Duration, err error, fields ...zap.Field) {
 	allFields := []zap.Field{
 		Operation(operation),
@@ -141,7 +141,7 @@ func (pl *PerformanceLogger) LogFileOperation(ctx context.Context, operation, fi
 	}
 }
 
-// MeasureDuration is a helper function that measures duration and logs it
+// MeasureDuration is a helper function that measures duration and logs it.
 func (pl *PerformanceLogger) MeasureDuration(ctx context.Context, operation string, fn func() error) error {
 	start := time.Now()
 	err := fn()
@@ -161,7 +161,7 @@ func (pl *PerformanceLogger) MeasureDuration(ctx context.Context, operation stri
 	return err
 }
 
-// MeasureDurationWithFields is like MeasureDuration but accepts additional fields
+// MeasureDurationWithFields is like MeasureDuration but accepts additional fields.
 func (pl *PerformanceLogger) MeasureDurationWithFields(ctx context.Context, operation string, fields []zap.Field, fn func() error) error {
 	start := time.Now()
 	err := fn()
@@ -184,57 +184,57 @@ func (pl *PerformanceLogger) MeasureDurationWithFields(ctx context.Context, oper
 
 // Performance metrics field helpers (for manual logging)
 
-// RequestSizeBytes creates a request_size_bytes field
+// RequestSizeBytes creates a request_size_bytes field.
 func RequestSizeBytes(size int64) zap.Field {
 	return Int64("request_size_bytes", size)
 }
 
-// ResponseSizeBytes creates a response_size_bytes field
+// ResponseSizeBytes creates a response_size_bytes field.
 func ResponseSizeBytes(size int64) zap.Field {
 	return Int64("response_size_bytes", size)
 }
 
-// RowsAffected creates a rows_affected field
+// RowsAffected creates a rows_affected field.
 func RowsAffected(count int64) zap.Field {
 	return Int64("rows_affected", count)
 }
 
-// QueueName creates a queue_name field
+// QueueName creates a queue_name field.
 func QueueName(name string) zap.Field {
 	return String("queue_name", name)
 }
 
-// MessageCount creates a message_count field
+// MessageCount creates a message_count field.
 func MessageCount(count int) zap.Field {
 	return Int("message_count", count)
 }
 
-// ExternalService creates an external_service field
+// ExternalService creates an external_service field.
 func ExternalService(service string) zap.Field {
 	return String("external_service", service)
 }
 
-// ExternalEndpoint creates an external_endpoint field
+// ExternalEndpoint creates an external_endpoint field.
 func ExternalEndpoint(endpoint string) zap.Field {
 	return String("external_endpoint", endpoint)
 }
 
-// FilePath creates a file_path field (be careful with sensitive paths)
+// FilePath creates a file_path field (be careful with sensitive paths).
 func FilePath(path string) zap.Field {
 	return String("file_path", path)
 }
 
-// FileSizeBytes creates a file_size_bytes field
+// FileSizeBytes creates a file_size_bytes field.
 func FileSizeBytes(size int64) zap.Field {
 	return Int64("file_size_bytes", size)
 }
 
-// ThroughputBytesPerSecond creates a throughput_bytes_per_second field
+// ThroughputBytesPerSecond creates a throughput_bytes_per_second field.
 func ThroughputBytesPerSecond(throughput float64) zap.Field {
 	return Float64("throughput_bytes_per_second", throughput)
 }
 
-// ConcurrentOperations creates a concurrent_operations field
+// ConcurrentOperations creates a concurrent_operations field.
 func ConcurrentOperations(count int) zap.Field {
 	return Int("concurrent_operations", count)
 }

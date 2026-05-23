@@ -62,7 +62,7 @@ type Recorder struct {
 }
 
 // NewRecorder creates a new event recorder.
-// component is the component name (e.g., "gc-controller", "zen-lock-controller").
+// Component is the component name (e.g., "gc-controller", "zen-lock-controller").
 func NewRecorder(client kubernetes.Interface, component string) *Recorder {
 	// Create event broadcaster
 	eventBroadcaster := record.NewBroadcaster()

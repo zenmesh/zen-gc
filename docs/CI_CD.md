@@ -95,9 +95,9 @@ This runs:
 
 #### Test Job
 
-- Runs unit tests with race detection
-- Generates coverage report
-- Uploads coverage to Codecov
+- Runs unit tests with race detection (`go test -race ./...`)
+- Generates a coverage profile (`go test -coverprofile=coverage.out ./...`)
+- **65% gate**: enforced locally via `make coverage` (not yet enforced in this workflow)
 
 #### Build Job
 
@@ -117,9 +117,9 @@ This runs:
 
 ## Coverage Requirements
 
-- **Minimum**: 65% code coverage
-- **Target**: >80% coverage
-- **Critical paths**: >85% coverage
+- **Minimum**: 65% overall (`make coverage`; currently **~65.4%** — see [TESTING.md](TESTING.md))
+- **Target**: >80% overall
+- **Critical paths**: >85% per package
 
 ## Linting Configuration
 

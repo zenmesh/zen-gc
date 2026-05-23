@@ -52,8 +52,8 @@ func TestContextError_Unwrap(t *testing.T) {
 	underlying := errors.New("underlying error")
 	err := Wrap(underlying, "test_type", "wrapped message")
 
-	if got := err.Unwrap(); got != underlying {
-		t.Errorf("ContextError.Unwrap() = %v, want %v", got, underlying)
+	if !errors.Is(err, underlying) {
+		t.Errorf("ContextError should wrap underlying: %v", underlying)
 	}
 }
 
@@ -112,7 +112,7 @@ func TestWrapf(t *testing.T) {
 	if err.Message != "formatted message: value" {
 		t.Errorf("Wrapf message = %v, want %v", err.Message, "formatted message: value")
 	}
-	if err.Unwrap() != underlying {
-		t.Errorf("Wrapf underlying error = %v, want %v", err.Unwrap(), underlying)
+	if !errors.Is(err, underlying) {
+		t.Errorf("Wrapf should wrap underlying error: %v", underlying)
 	}
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2026 Kube-ZEN Contributors
+Copyright 2025 Kube-ZEN Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -115,20 +115,20 @@ type GCPolicyReconciler struct {
 
 // NewGCPolicyReconciler creates a new GC policy reconciler.
 func NewGCPolicyReconciler(
-	client client.Client,
+	kubeClient client.Client,
 	scheme *runtime.Scheme,
 	dynamicClient dynamic.Interface,
 	statusUpdater *StatusUpdater,
 	eventRecorder *EventRecorder,
 	cfg *config.ControllerConfig,
 ) *GCPolicyReconciler {
-	return NewGCPolicyReconcilerWithRESTMapper(client, scheme, dynamicClient, nil, statusUpdater, eventRecorder, cfg)
+	return NewGCPolicyReconcilerWithRESTMapper(kubeClient, scheme, dynamicClient, nil, statusUpdater, eventRecorder, cfg)
 }
 
 // NewGCPolicyReconcilerWithRESTMapper creates a new GC policy reconciler with RESTMapper.
 // RESTMapper is optional - if nil, falls back to pluralization-based resolution.
 func NewGCPolicyReconcilerWithRESTMapper(
-	client client.Client,
+	kubeClient client.Client,
 	scheme *runtime.Scheme,
 	dynamicClient dynamic.Interface,
 	restMapper meta.RESTMapper,
@@ -145,7 +145,7 @@ func NewGCPolicyReconcilerWithRESTMapper(
 	gvrResolver := NewGVRResolver(restMapper)
 
 	return &GCPolicyReconciler{
-		Client:                    client,
+		Client:                    kubeClient,
 		Scheme:                    scheme,
 		dynamicClient:             dynamicClient,
 		config:                    cfg,
@@ -166,7 +166,7 @@ func NewGCPolicyReconcilerWithRESTMapper(
 // NewGCPolicyReconcilerWithLeaderCheck creates a new GC policy reconciler with leader check function.
 // Leader election is handled by controller-runtime Manager, so shouldReconcile is ignored (always returns true).
 func NewGCPolicyReconcilerWithLeaderCheck(
-	client client.Client,
+	kubeClient client.Client,
 	scheme *runtime.Scheme,
 	dynamicClient dynamic.Interface,
 	statusUpdater *StatusUpdater,
@@ -182,7 +182,7 @@ func NewGCPolicyReconcilerWithLeaderCheck(
 	// Leader election is handled by controller-runtime Manager.
 	// Manager only calls Reconcile on the leader.
 	return &GCPolicyReconciler{
-		Client:                    client,
+		Client:                    kubeClient,
 		Scheme:                    scheme,
 		dynamicClient:             dynamicClient,
 		config:                    cfg,
@@ -269,9 +269,8 @@ func (r *GCPolicyReconciler) getRequeueIntervalForPolicy(policy *v1alpha1.Garbag
 	return interval
 }
 
-// getOrCreateEvaluationService builds the lister-based PolicyEvaluationService once
-// (adapter pattern) and caches it on the reconciler. policy is only used when the
-// service is first constructed (resource lister wiring).
+// getOrCreateEvaluationService builds the lister-based PolicyEvaluationService once (adapter pattern)
+// and caches it on the reconciler. Policy is only used when the service is first constructed (resource lister wiring).
 // Thread-safe: double-checked locking under evaluationServiceMu.
 func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, policy *v1alpha1.GarbageCollectionPolicy) (*PolicyEvaluationService, error) {
 	// Fast path: check with read lock

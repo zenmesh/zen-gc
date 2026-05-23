@@ -37,26 +37,26 @@ func TestPolicyEvaluationService_EvaluatePolicy(t *testing.T) {
 	now := time.Now()
 	expiredResource := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "v1",
-			"kind":       "ConfigMap",
-			"metadata": map[string]interface{}{
-				"name":              "expired-cm",
-				"namespace":         "default",
-				"uid":               "expired-uid",
-				"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+			k8sKeyAPIVersion: k8sAPIV1,
+			k8sKeyKind:       k8sKindConfigMap,
+			k8sKeyMetadata: map[string]interface{}{
+				k8sKeyName:       "expired-cm",
+				k8sKeyNamespace:  k8sNSDefault,
+				k8sKeyUID:        "expired-uid",
+				k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
 			},
 		},
 	}
 
 	validResource := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "v1",
-			"kind":       "ConfigMap",
-			"metadata": map[string]interface{}{
-				"name":              "valid-cm",
-				"namespace":         "default",
-				"uid":               "valid-uid",
-				"creationTimestamp": metav1.NewTime(now.Add(-30 * time.Minute)).Format(time.RFC3339),
+			k8sKeyAPIVersion: k8sAPIV1,
+			k8sKeyKind:       k8sKindConfigMap,
+			k8sKeyMetadata: map[string]interface{}{
+				k8sKeyName:       "valid-cm",
+				k8sKeyNamespace:  k8sNSDefault,
+				k8sKeyUID:        "valid-uid",
+				k8sKeyCreationTS: metav1.NewTime(now.Add(-30 * time.Minute)).Format(time.RFC3339),
 			},
 		},
 	}
@@ -64,14 +64,14 @@ func TestPolicyEvaluationService_EvaluatePolicy(t *testing.T) {
 	// Create test policy
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
+				APIVersion: k8sAPIV1,
+				Kind:       k8sKindConfigMap,
 				Namespace:  "default",
 			},
 			TTL: v1alpha1.TTLSpec{
@@ -82,7 +82,7 @@ func TestPolicyEvaluationService_EvaluatePolicy(t *testing.T) {
 
 	// Create mocks - this is MUCH simpler than setting up real Kubernetes clients!
 	mockLister := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+	gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 	mockLister.SetResources(gvr, "default", []*unstructured.Unstructured{expiredResource, validResource})
 
 	mockSelectorMatcher := NewMockSelectorMatcher()
@@ -124,14 +124,14 @@ func TestPolicyEvaluationService_EvaluatePolicy(t *testing.T) {
 func TestPolicyEvaluationService_EvaluatePolicy_EmptyResources(t *testing.T) {
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
+				APIVersion: k8sAPIV1,
+				Kind:       k8sKindConfigMap,
 			},
 			TTL: v1alpha1.TTLSpec{
 				SecondsAfterCreation: func() *int64 { v := int64(3600); return &v }(),
@@ -169,14 +169,14 @@ func TestPolicyEvaluationService_EvaluatePolicy_EmptyResources(t *testing.T) {
 func TestPolicyEvaluationService_EvaluatePolicy_ContextCanceled(t *testing.T) {
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
+				APIVersion: k8sAPIV1,
+				Kind:       k8sKindConfigMap,
 			},
 			TTL: v1alpha1.TTLSpec{
 				SecondsAfterCreation: func() *int64 { v := int64(3600); return &v }(),

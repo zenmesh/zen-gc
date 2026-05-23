@@ -1,5 +1,5 @@
 /*
-Copyright 2026 Kube-ZEN Contributors
+Copyright 2025 Kube-ZEN Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ func TestParseGVR(t *testing.T) {
 		{
 			name:        "core API group",
 			apiVersion:  "v1",
-			kind:        "ConfigMap",
+			kind:        k8sKindConfigMap,
 			expectError: false,
-			expectedGVR: schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"},
+			expectedGVR: schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps},
 		},
 		{
 			name:        "apps API group",
@@ -89,8 +89,8 @@ func TestParseGVR(t *testing.T) {
 			// since it's not exported. We'll test it via EvaluatePolicy with invalid GVR
 			policy := &v1alpha1.GarbageCollectionPolicy{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-policy",
-					Namespace: "default",
+					Name:      k8sPolicyNameTest,
+					Namespace: k8sNSDefault,
 					UID:       types.UID("policy-uid"),
 				},
 				Spec: v1alpha1.GarbageCollectionPolicySpec{
@@ -170,13 +170,13 @@ func TestPolicyEvaluationService_GetBatchSize(t *testing.T) {
 			for i := 0; i < 20; i++ {
 				resources = append(resources, &unstructured.Unstructured{
 					Object: map[string]interface{}{
-						"apiVersion": "v1",
-						"kind":       "ConfigMap",
-						"metadata": map[string]interface{}{
-							"name":              fmt.Sprintf("test-cm-%d", i),
-							"namespace":         "default",
-							"uid":               types.UID(fmt.Sprintf("uid-%d", i)),
-							"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+						k8sKeyAPIVersion: k8sAPIV1,
+						k8sKeyKind:       k8sKindConfigMap,
+						k8sKeyMetadata: map[string]interface{}{
+							k8sKeyName:       fmt.Sprintf("test-cm-%d", i),
+							k8sKeyNamespace:  k8sNSDefault,
+							k8sKeyUID:        types.UID(fmt.Sprintf("uid-%d", i)),
+							k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
 						},
 					},
 				})
@@ -184,14 +184,14 @@ func TestPolicyEvaluationService_GetBatchSize(t *testing.T) {
 
 			policy := &v1alpha1.GarbageCollectionPolicy{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-policy",
-					Namespace: "default",
+					Name:      k8sPolicyNameTest,
+					Namespace: k8sNSDefault,
 					UID:       types.UID("policy-uid"),
 				},
 				Spec: v1alpha1.GarbageCollectionPolicySpec{
 					TargetResource: v1alpha1.TargetResourceSpec{
-						APIVersion: "v1",
-						Kind:       "ConfigMap",
+						APIVersion: k8sAPIV1,
+						Kind:       k8sKindConfigMap,
 					},
 					TTL: v1alpha1.TTLSpec{
 						SecondsAfterCreation: func() *int64 { v := int64(3600); return &v }(),
@@ -203,7 +203,7 @@ func TestPolicyEvaluationService_GetBatchSize(t *testing.T) {
 			}
 
 			mockLister := NewMockResourceLister()
-			gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+			gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 			mockLister.SetResources(gvr, "default", resources)
 
 			mockSelectorMatcher := NewMockSelectorMatcher()
@@ -292,27 +292,27 @@ func TestPolicyEvaluationService_ShouldDelete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			resource := &unstructured.Unstructured{
 				Object: map[string]interface{}{
-					"apiVersion": "v1",
-					"kind":       "ConfigMap",
-					"metadata": map[string]interface{}{
-						"name":              "test-cm",
-						"namespace":         "default",
-						"uid":               "test-uid",
-						"creationTimestamp": metav1.NewTime(tt.creationTime).Format(time.RFC3339),
+					k8sKeyAPIVersion: k8sAPIV1,
+					k8sKeyKind:       k8sKindConfigMap,
+					k8sKeyMetadata: map[string]interface{}{
+						k8sKeyName:       k8sNameTestCM,
+						k8sKeyNamespace:  k8sNSDefault,
+						k8sKeyUID:        k8sUIDTest,
+						k8sKeyCreationTS: metav1.NewTime(tt.creationTime).Format(time.RFC3339),
 					},
 				},
 			}
 
 			policy := &v1alpha1.GarbageCollectionPolicy{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test-policy",
-					Namespace: "default",
+					Name:      k8sPolicyNameTest,
+					Namespace: k8sNSDefault,
 					UID:       types.UID("policy-uid"),
 				},
 				Spec: v1alpha1.GarbageCollectionPolicySpec{
 					TargetResource: v1alpha1.TargetResourceSpec{
-						APIVersion: "v1",
-						Kind:       "ConfigMap",
+						APIVersion: k8sAPIV1,
+						Kind:       k8sKindConfigMap,
 					},
 					TTL: v1alpha1.TTLSpec{
 						SecondsAfterCreation: func() *int64 {
@@ -327,7 +327,7 @@ func TestPolicyEvaluationService_ShouldDelete(t *testing.T) {
 			}
 
 			mockLister := NewMockResourceLister()
-			gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+			gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 			mockLister.SetResources(gvr, "default", []*unstructured.Unstructured{resource})
 
 			mockSelectorMatcher := NewMockSelectorMatcher()
@@ -369,61 +369,18 @@ func TestPolicyEvaluationService_ShouldDelete(t *testing.T) {
 
 // TestPolicyEvaluationService_StatusUpdateTimeout tests status update timeout handling.
 func TestPolicyEvaluationService_StatusUpdateTimeout(t *testing.T) {
-	now := time.Now()
-	resource := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "v1",
-			"kind":       "ConfigMap",
-			"metadata": map[string]interface{}{
-				"name":              "test-cm",
-				"namespace":         "default",
-				"uid":               "test-uid",
-				"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
-			},
-		},
-	}
-
-	policy := &v1alpha1.GarbageCollectionPolicy{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
-			UID:       types.UID("policy-uid"),
-		},
-		Spec: v1alpha1.GarbageCollectionPolicySpec{
-			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
-			},
-			TTL: v1alpha1.TTLSpec{
-				SecondsAfterCreation: func() *int64 { v := int64(3600); return &v }(),
-			},
-		},
-	}
-
-	mockLister := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
-	mockLister.SetResources(gvr, "default", []*unstructured.Unstructured{resource})
-
-	mockSelectorMatcher := NewMockSelectorMatcher()
-	mockSelectorMatcher.SetMatch(resource, true)
-
-	mockConditionMatcher := NewMockConditionMatcher()
-	mockConditionMatcher.SetMeetsConditions(resource, true)
-
-	mockRateLimiter := NewMockRateLimiterProvider()
-	mockDeleter := NewMockBatchDeleterCore()
-	mockDeleter.SetDeleteResult(resource, nil)
+	f := newStdPolicyEvalFixture(t)
 
 	// StatusUpdater is a concrete type, not an interface.
 	// We'll test status update errors by passing nil and testing the error path.
 	// The actual status update error handling is tested in status_updater_test.go.
 	service := controller.NewPolicyEvaluationService(
-		mockLister,
-		mockSelectorMatcher,
-		mockConditionMatcher,
+		f.Lister,
+		f.Sel,
+		f.Cond,
 		nil,
-		mockRateLimiter,
-		mockDeleter,
+		f.RL,
+		f.Deleter,
 		nil, // StatusUpdater - nil is OK, error handling tested elsewhere
 		nil,
 		nil,
@@ -431,7 +388,7 @@ func TestPolicyEvaluationService_StatusUpdateTimeout(t *testing.T) {
 	)
 
 	ctx := context.Background()
-	err := service.EvaluatePolicy(ctx, policy)
+	err := service.EvaluatePolicy(ctx, f.Policy)
 	// Should handle status update error gracefully
 	if err != nil {
 		t.Logf("EvaluatePolicy returned error (may be expected): %v", err)
@@ -445,13 +402,13 @@ func TestPolicyEvaluationService_BatchDeletionErrors(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		resources = append(resources, &unstructured.Unstructured{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":              fmt.Sprintf("test-cm-%d", i),
-					"namespace":         "default",
-					"uid":               types.UID(fmt.Sprintf("uid-%d", i)),
-					"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:       fmt.Sprintf("test-cm-%d", i),
+					k8sKeyNamespace:  k8sNSDefault,
+					k8sKeyUID:        types.UID(fmt.Sprintf("uid-%d", i)),
+					k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
 				},
 			},
 		})
@@ -459,14 +416,14 @@ func TestPolicyEvaluationService_BatchDeletionErrors(t *testing.T) {
 
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
+				APIVersion: k8sAPIV1,
+				Kind:       k8sKindConfigMap,
 			},
 			TTL: v1alpha1.TTLSpec{
 				SecondsAfterCreation: func() *int64 { v := int64(3600); return &v }(),
@@ -478,7 +435,7 @@ func TestPolicyEvaluationService_BatchDeletionErrors(t *testing.T) {
 	}
 
 	mockLister := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+	gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 	mockLister.SetResources(gvr, "default", resources)
 
 	mockSelectorMatcher := NewMockSelectorMatcher()
@@ -527,25 +484,25 @@ func TestPolicyEvaluationService_WildcardNamespace(t *testing.T) {
 	resources := []*unstructured.Unstructured{
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":              "test-cm-1",
-					"namespace":         "default",
-					"uid":               "uid-1",
-					"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:       "test-cm-1",
+					k8sKeyNamespace:  k8sNSDefault,
+					k8sKeyUID:        "uid-1",
+					k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
 				},
 			},
 		},
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":              "test-cm-2",
-					"namespace":         "kube-system",
-					"uid":               "uid-2",
-					"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:       "test-cm-2",
+					"namespace":      "kube-system",
+					k8sKeyUID:        "uid-2",
+					k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
 				},
 			},
 		},
@@ -553,14 +510,14 @@ func TestPolicyEvaluationService_WildcardNamespace(t *testing.T) {
 
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
+				APIVersion: k8sAPIV1,
+				Kind:       k8sKindConfigMap,
 				// Empty namespace means wildcard
 			},
 			TTL: v1alpha1.TTLSpec{
@@ -570,7 +527,7 @@ func TestPolicyEvaluationService_WildcardNamespace(t *testing.T) {
 	}
 
 	mockLister := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+	gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 	// Set resources for wildcard namespace
 	mockLister.SetResources(gvr, "*", resources)
 

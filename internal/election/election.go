@@ -12,10 +12,9 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-package election provides simple leader election using client-go.
 */
 
+// Package election provides simple leader election using client-go.
 package election
 
 import (
@@ -32,6 +31,10 @@ import (
 	"k8s.io/klog/v2"
 )
 
+// DefaultElectionID is the default leader election lock identity when none is set.
+const DefaultElectionID = "zen-gc-leader-election"
+
+// Config holds client-go leader election parameters.
 type Config struct {
 	ElectionID    string
 	Namespace     string
@@ -43,12 +46,12 @@ type Config struct {
 	GetIdentity   func() string
 }
 
-// LeaderElector interface for testing
+// LeaderElector is implemented by types that run leader election until cancel.
 type LeaderElector interface {
 	Run(ctx context.Context) error
 }
 
-// leaderElectorAdapter wraps the leaderelection.LeaderElector
+// leaderElectorAdapter wraps leaderelection.LeaderElector.
 type leaderElectorAdapter struct {
 	le *leaderelection.LeaderElector
 }
@@ -58,7 +61,7 @@ func (a *leaderElectorAdapter) Run(ctx context.Context) error {
 	return nil // RunOrDie doesn't return
 }
 
-// NewLeaderElector creates a leader elector with the given config
+// NewLeaderElector creates a leader elector from the given config.
 func NewLeaderElector(client kubernetes.Interface, cfg *Config) (LeaderElector, error) {
 	lock := newLeaseLock(client, cfg)
 	le, err := leaderelection.NewLeaderElector(leaderelection.LeaderElectionConfig{
@@ -97,7 +100,7 @@ func newLeaseLock(client kubernetes.Interface, cfg *Config) resourcelock.Interfa
 	}
 }
 
-// ApplyDefaults sets default values for the config
+// ApplyDefaults fills in missing fields on cfg (nil-safe).
 func ApplyDefaults(cfg *Config) *Config {
 	if cfg == nil {
 		cfg = &Config{}
@@ -106,7 +109,7 @@ func ApplyDefaults(cfg *Config) *Config {
 		cfg.Namespace = "default"
 	}
 	if cfg.ElectionID == "" {
-		cfg.ElectionID = "zen-gc-leader-election"
+		cfg.ElectionID = DefaultElectionID
 	}
 	if cfg.LeaseName == "" {
 		cfg.LeaseName = cfg.ElectionID
@@ -123,7 +126,7 @@ func ApplyDefaults(cfg *Config) *Config {
 	return cfg
 }
 
-// Runner runs leader election with the given elector and callbacks
+// Runner wires callbacks around a LeaderElector.
 type Runner struct {
 	Elector          LeaderElector
 	OnStartedLeading func(ctx context.Context)
@@ -132,7 +135,7 @@ type Runner struct {
 	ElectionID       string
 }
 
-// Run executes the leader election runner
+// Run starts the configured elector (no-op if missing).
 func (r *Runner) Run(ctx context.Context) error {
 	if r.Elector == nil {
 		return nil // Should not happen if configured correctly
@@ -141,7 +144,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	return r.Elector.Run(ctx)
 }
 
-// NewRunner creates a new runner with callbacks
+// NewRunner builds a Runner with the given elector and callbacks.
 func NewRunner(elector LeaderElector, onStartedLeading func(context.Context), onStoppedLeading func(), onNewLeader func(string), electionID string) *Runner {
 	return &Runner{
 		Elector:          elector,
@@ -152,8 +155,8 @@ func NewRunner(elector LeaderElector, onStartedLeading func(context.Context), on
 	}
 }
 
-// RunWithLeaderElection runs leader election using the given client
-// This is the main entry point for the election package
+// RunWithLeaderElection runs runFn on the leader using client-go election.
+// It is the main entry point for this package.
 func RunWithLeaderElection(ctx context.Context, cfg *Config, client kubernetes.Interface, runFn func(context.Context)) error {
 	if cfg == nil {
 		cfg = &Config{Enable: true}
@@ -216,6 +219,7 @@ func getPodName() string {
 	return "unknown"
 }
 
+// ShutdownContext returns a context that is canceled on SIGINT or SIGTERM.
 func ShutdownContext(ctx context.Context, name string) (context.Context, context.CancelFunc) {
 	return signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 }

@@ -40,11 +40,11 @@ func TestGetOrCreateEvaluationService_FirstCall(t *testing.T) {
 
 	resource := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "v1",
-			"kind":       "ConfigMap",
-			"metadata": map[string]interface{}{
-				"name":      "test-cm",
-				"namespace": "default",
+			k8sKeyAPIVersion: k8sAPIV1,
+			k8sKeyKind:       k8sKindConfigMap,
+			k8sKeyMetadata: map[string]interface{}{
+				k8sKeyName:      k8sNameTestCM,
+				k8sKeyNamespace: k8sNSDefault,
 			},
 		},
 	}
@@ -135,43 +135,43 @@ func TestPolicyEvaluationService_WithAllMocks(t *testing.T) {
 	resources := []*unstructured.Unstructured{
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":              "expired-cm-1",
-					"namespace":         "default",
-					"uid":               "uid-1",
-					"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
-					"labels": map[string]interface{}{
-						"app": "test",
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:       "expired-cm-1",
+					k8sKeyNamespace:  k8sNSDefault,
+					k8sKeyUID:        "uid-1",
+					k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+					k8sKeyLabels: map[string]interface{}{
+						k8sLabelKeyApp: k8sLabelValTest,
 					},
 				},
 			},
 		},
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":              "expired-cm-2",
-					"namespace":         "default",
-					"uid":               "uid-2",
-					"creationTimestamp": metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
-					"labels": map[string]interface{}{
-						"app": "test",
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:       "expired-cm-2",
+					k8sKeyNamespace:  k8sNSDefault,
+					k8sKeyUID:        "uid-2",
+					k8sKeyCreationTS: metav1.NewTime(now.Add(-2 * time.Hour)).Format(time.RFC3339),
+					k8sKeyLabels: map[string]interface{}{
+						k8sLabelKeyApp: k8sLabelValTest,
 					},
 				},
 			},
 		},
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":              "valid-cm",
-					"namespace":         "default",
-					"uid":               "uid-3",
-					"creationTimestamp": metav1.NewTime(now.Add(-30 * time.Minute)).Format(time.RFC3339),
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:       "valid-cm",
+					k8sKeyNamespace:  k8sNSDefault,
+					k8sKeyUID:        "uid-3",
+					k8sKeyCreationTS: metav1.NewTime(now.Add(-30 * time.Minute)).Format(time.RFC3339),
 				},
 			},
 		},
@@ -179,14 +179,14 @@ func TestPolicyEvaluationService_WithAllMocks(t *testing.T) {
 
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
-				APIVersion: "v1",
-				Kind:       "ConfigMap",
+				APIVersion: k8sAPIV1,
+				Kind:       k8sKindConfigMap,
 				Namespace:  "default",
 			},
 			TTL: v1alpha1.TTLSpec{
@@ -205,7 +205,7 @@ func TestPolicyEvaluationService_WithAllMocks(t *testing.T) {
 
 	// Create comprehensive mocks
 	mockLister := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+	gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 	mockLister.SetResources(gvr, "default", resources)
 
 	mockSelectorMatcher := NewMockSelectorMatcher()
@@ -247,14 +247,14 @@ func TestPolicyEvaluationService_WithAllMocks(t *testing.T) {
 func TestPolicyEvaluationService_ErrorHandling(t *testing.T) {
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 		Spec: v1alpha1.GarbageCollectionPolicySpec{
 			TargetResource: v1alpha1.TargetResourceSpec{
 				APIVersion: "invalid/api/version", // Invalid API version
-				Kind:       "ConfigMap",
+				Kind:       k8sKindConfigMap,
 			},
 			TTL: v1alpha1.TTLSpec{
 				SecondsAfterCreation: func() *int64 { v := int64(3600); return &v }(),

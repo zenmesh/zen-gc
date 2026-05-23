@@ -24,18 +24,18 @@ import (
 )
 
 // MonitoringLogger provides logging helpers that integrate with monitoring systems
-// These helpers ensure logs contain fields that are useful for metrics extraction
+// These helpers ensure logs contain fields that are useful for metrics extraction.
 type MonitoringLogger struct {
 	logger *Logger
 }
 
-// NewMonitoringLogger creates a new monitoring logger
+// NewMonitoringLogger creates a new monitoring logger.
 func NewMonitoringLogger(logger *Logger) *MonitoringLogger {
 	return &MonitoringLogger{logger: logger}
 }
 
 // LogMetric logs a metric event that can be extracted for monitoring
-// Use this for custom metrics that aren't covered by standard performance logging
+// Use this for custom metrics that aren't covered by standard performance logging.
 func (ml *MonitoringLogger) LogMetric(ctx context.Context, metricName string, value float64, unit string, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("metric_name", metricName),
@@ -48,7 +48,7 @@ func (ml *MonitoringLogger) LogMetric(ctx context.Context, metricName string, va
 	ml.logger.WithContext(ctx).Info("Metric event", allFields...)
 }
 
-// LogCounter logs a counter increment event
+// LogCounter logs a counter increment event.
 func (ml *MonitoringLogger) LogCounter(ctx context.Context, counterName string, increment int64, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("counter_name", counterName),
@@ -60,7 +60,7 @@ func (ml *MonitoringLogger) LogCounter(ctx context.Context, counterName string, 
 	ml.logger.WithContext(ctx).Info("Counter event", allFields...)
 }
 
-// LogHistogram logs a histogram value for latency/request size distribution
+// LogHistogram logs a histogram value for latency/request size distribution.
 func (ml *MonitoringLogger) LogHistogram(ctx context.Context, histogramName string, value float64, bucket string, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("histogram_name", histogramName),
@@ -73,7 +73,7 @@ func (ml *MonitoringLogger) LogHistogram(ctx context.Context, histogramName stri
 	ml.logger.WithContext(ctx).Info("Histogram event", allFields...)
 }
 
-// LogGauge logs a gauge value (current state)
+// LogGauge logs a gauge value (current state).
 func (ml *MonitoringLogger) LogGauge(ctx context.Context, gaugeName string, value float64, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("gauge_name", gaugeName),
@@ -85,7 +85,7 @@ func (ml *MonitoringLogger) LogGauge(ctx context.Context, gaugeName string, valu
 	ml.logger.WithContext(ctx).Info("Gauge event", allFields...)
 }
 
-// LogHealthCheck logs a health check result
+// LogHealthCheck logs a health check result.
 func (ml *MonitoringLogger) LogHealthCheck(ctx context.Context, checkName string, healthy bool, duration time.Duration, err error, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("health_check_name", checkName),
@@ -103,7 +103,7 @@ func (ml *MonitoringLogger) LogHealthCheck(ctx context.Context, checkName string
 	}
 }
 
-// LogCriticalEvent logs a critical event that should trigger alerts
+// LogCriticalEvent logs a critical event that should trigger alerts.
 func (ml *MonitoringLogger) LogCriticalEvent(ctx context.Context, eventName, severity string, fields ...zap.Field) {
 	allFields := []zap.Field{
 		zap.String("critical_event_name", eventName),
@@ -118,42 +118,42 @@ func (ml *MonitoringLogger) LogCriticalEvent(ctx context.Context, eventName, sev
 
 // Monitoring field helpers
 
-// MetricName creates a metric_name field
+// MetricName creates a metric_name field.
 func MetricName(name string) zap.Field {
 	return zap.String("metric_name", name)
 }
 
-// MetricValue creates a metric_value field
+// MetricValue creates a metric_value field.
 func MetricValue(value float64) zap.Field {
 	return zap.Float64("metric_value", value)
 }
 
-// MetricUnit creates a metric_unit field
+// MetricUnit creates a metric_unit field.
 func MetricUnit(unit string) zap.Field {
 	return zap.String("metric_unit", unit)
 }
 
-// HealthCheckName creates a health_check_name field
+// HealthCheckName creates a health_check_name field.
 func HealthCheckName(name string) zap.Field {
 	return zap.String("health_check_name", name)
 }
 
-// HealthCheckHealthy creates a health_check_healthy field
+// HealthCheckHealthy creates a health_check_healthy field.
 func HealthCheckHealthy(healthy bool) zap.Field {
 	return zap.Bool("health_check_healthy", healthy)
 }
 
-// EventType creates an event_type field (for log classification)
+// EventType creates an event_type field (for log classification).
 func EventType(eventType string) zap.Field {
 	return zap.String("event_type", eventType)
 }
 
-// AlertFlag creates an alert field (marks logs that should trigger alerts)
+// AlertFlag creates an alert field (marks logs that should trigger alerts).
 func AlertFlag(shouldAlert bool) zap.Field {
 	return zap.Bool("alert", shouldAlert)
 }
 
-// Severity creates a severity field (for critical events)
+// Severity creates a severity field (for critical events).
 func Severity(severity string) zap.Field {
 	return zap.String("severity", severity)
 }

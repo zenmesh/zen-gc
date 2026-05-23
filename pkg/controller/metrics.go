@@ -5,6 +5,16 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+const (
+	labelPhase              = "phase"
+	labelPolicyNamespace    = "policy_namespace"
+	labelPolicyName         = "policy_name"
+	labelResourceAPIVersion = "resource_api_version"
+	labelResourceKind       = "resource_kind"
+	labelReason             = "reason"
+	labelErrorType          = "error_type"
+)
+
 var (
 	// GcPoliciesTotal is a gauge that tracks the total number of GC policies by phase.
 	gcPoliciesTotal = promauto.NewGaugeVec(
@@ -12,7 +22,7 @@ var (
 			Name: "gc_policies_total",
 			Help: "Total number of GC policies",
 		},
-		[]string{"phase"},
+		[]string{labelPhase},
 	)
 
 	// GcResourcesMatchedTotal is a counter that tracks the total number of resources matched by GC policies.
@@ -21,7 +31,7 @@ var (
 			Name: "gc_resources_matched_total",
 			Help: "Total number of resources matched by GC policies",
 		},
-		[]string{"policy_namespace", "policy_name", "resource_api_version", "resource_kind"},
+		[]string{labelPolicyNamespace, labelPolicyName, labelResourceAPIVersion, labelResourceKind},
 	)
 
 	// GcResourcesDeletedTotal is a counter that tracks the total number of resources deleted by GC.
@@ -30,7 +40,7 @@ var (
 			Name: "gc_resources_deleted_total",
 			Help: "Total number of resources deleted by GC",
 		},
-		[]string{"policy_namespace", "policy_name", "resource_api_version", "resource_kind", "reason"},
+		[]string{labelPolicyNamespace, labelPolicyName, labelResourceAPIVersion, labelResourceKind, labelReason},
 	)
 
 	// GcDeletionDurationSeconds is a histogram that tracks the time taken to delete resources.
@@ -40,7 +50,7 @@ var (
 			Help:    "Time taken to delete resources",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"policy_namespace", "policy_name", "resource_api_version", "resource_kind"},
+		[]string{labelPolicyNamespace, labelPolicyName, labelResourceAPIVersion, labelResourceKind},
 	)
 
 	// GcErrorsTotal is a counter that tracks the total number of GC errors.
@@ -49,7 +59,7 @@ var (
 			Name: "gc_errors_total",
 			Help: "Total number of GC errors",
 		},
-		[]string{"policy_namespace", "policy_name", "error_type"},
+		[]string{labelPolicyNamespace, labelPolicyName, labelErrorType},
 	)
 
 	// GcEvaluationDurationSeconds is a histogram that tracks the time taken to evaluate policies.
@@ -59,7 +69,7 @@ var (
 			Help:    "Time taken to evaluate GC policies",
 			Buckets: []float64{0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0},
 		},
-		[]string{"policy_namespace", "policy_name"},
+		[]string{labelPolicyNamespace, labelPolicyName},
 	)
 
 	// GcInformersTotal is a gauge that tracks the total number of active resource informers.
@@ -84,7 +94,7 @@ var (
 			Name: "gc_resources_pending_total",
 			Help: "Number of resources pending deletion (matched but TTL not expired)",
 		},
-		[]string{"policy_namespace", "policy_name", "resource_api_version", "resource_kind"},
+		[]string{labelPolicyNamespace, labelPolicyName, labelResourceAPIVersion, labelResourceKind},
 	)
 
 	// GcLeaderElectionStatus is a gauge that tracks leader election status (1 = leader, 0 = follower).

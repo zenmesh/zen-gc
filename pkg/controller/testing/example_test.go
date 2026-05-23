@@ -34,12 +34,12 @@ func TestMockUsage(t *testing.T) {
 	resources := []*unstructured.Unstructured{
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":      "test-cm",
-					"namespace": "default",
-					"uid":       "test-uid",
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:      k8sNameTestCM,
+					k8sKeyNamespace: k8sNSDefault,
+					k8sKeyUID:       k8sUIDTest,
 				},
 			},
 		},
@@ -57,7 +57,7 @@ func TestMockUsage(t *testing.T) {
 
 	// Create mock resource lister
 	mockLister := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+	gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 	mockLister.SetResources(gvr, "default", resources)
 
 	listed, err := mockLister.ListResources(context.Background(), gvr, "default")
@@ -74,8 +74,8 @@ func TestMockUsage(t *testing.T) {
 	mockMatcher.SetMatch(resource, true)
 
 	spec := &v1alpha1.TargetResourceSpec{
-		APIVersion: "v1",
-		Kind:       "ConfigMap",
+		APIVersion: k8sAPIV1,
+		Kind:       k8sKindConfigMap,
 	}
 	if !mockMatcher.MatchesSelectors(resource, spec) {
 		t.Error("Resource should match selectors")
@@ -85,8 +85,8 @@ func TestMockUsage(t *testing.T) {
 	mockRateLimiter := NewMockRateLimiterProvider()
 	policy := &v1alpha1.GarbageCollectionPolicy{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-policy",
-			Namespace: "default",
+			Name:      k8sPolicyNameTest,
+			Namespace: k8sNSDefault,
 			UID:       types.UID("policy-uid"),
 		},
 	}
@@ -114,11 +114,11 @@ func TestMockResourceInformer(t *testing.T) {
 	resources := []*unstructured.Unstructured{
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":      "test-cm",
-					"namespace": "default",
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:      k8sNameTestCM,
+					k8sKeyNamespace: k8sNSDefault,
 				},
 			},
 		},
@@ -148,7 +148,7 @@ func TestMockResourceInformer(t *testing.T) {
 // TestMockResourceLister tests the mock resource lister.
 func TestMockResourceLister(t *testing.T) {
 	mock := NewMockResourceLister()
-	gvr := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
+	gvr := schema.GroupVersionResource{Group: "", Version: k8sAPIV1, Resource: k8sResConfigMaps}
 
 	// Test empty list
 	resources, err := mock.ListResources(context.Background(), gvr, "default")
@@ -163,11 +163,11 @@ func TestMockResourceLister(t *testing.T) {
 	testResources := []*unstructured.Unstructured{
 		{
 			Object: map[string]interface{}{
-				"apiVersion": "v1",
-				"kind":       "ConfigMap",
-				"metadata": map[string]interface{}{
-					"name":      "test-cm",
-					"namespace": "default",
+				k8sKeyAPIVersion: k8sAPIV1,
+				k8sKeyKind:       k8sKindConfigMap,
+				k8sKeyMetadata: map[string]interface{}{
+					k8sKeyName:      k8sNameTestCM,
+					k8sKeyNamespace: k8sNSDefault,
 				},
 			},
 		},

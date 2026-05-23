@@ -9,7 +9,7 @@ import (
 )
 
 // IngesterRateLimitConfig represents rate limiting configuration for an ingester source
-// This is used by both zen-ingester (webhook adapter) and zen-back (API rate limiting)
+// This is used by both zen-ingester (webhook adapter) and zen-back (API rate limiting).
 type IngesterRateLimitConfig struct {
 	// RequestsPerMinute is the rate limit in requests per minute
 	RequestsPerMinute int
@@ -20,7 +20,7 @@ type IngesterRateLimitConfig struct {
 }
 
 // CRDRateLimitConfig represents rate limit configuration from a CRD
-// This interface allows different CRD types to provide rate limit configuration
+// This interface allows different CRD types to provide rate limit configuration.
 type CRDRateLimitConfig interface {
 	// GetRequestsPerMinute returns the rate limit in requests per minute (0 if not configured)
 	GetRequestsPerMinute() int
@@ -37,7 +37,7 @@ type CRDRateLimitConfig interface {
 // source: The ingester source name (e.g., "falco", "trivy", "kyverno")
 // crdConfig: Optional CRD-based rate limit configuration (nil if not available)
 //
-// Returns the rate limit configuration and the source of the configuration
+// Returns the rate limit configuration and the source of the configuration.
 func LoadIngesterRateLimitConfig(source string, crdConfig CRDRateLimitConfig) *IngesterRateLimitConfig {
 	var rpm, burst int
 	var configSource string
@@ -86,7 +86,7 @@ func LoadIngesterRateLimitConfig(source string, crdConfig CRDRateLimitConfig) *I
 // getIngesterRateLimitFromEnv gets rate limit value from environment variable
 // Format: RATE_LIMIT_INGESTER_{SOURCE}_{TYPE} (e.g., RATE_LIMIT_INGESTER_FALCO_RPM)
 // source: "falco", "trivy", "DEFAULT", etc.
-// rateType: "RPM" or "BURST"
+// rateType: "RPM" or "BURST".
 func getIngesterRateLimitFromEnv(source, rateType string) int {
 	envKey := fmt.Sprintf("RATE_LIMIT_INGESTER_%s_%s", strings.ToUpper(source), rateType)
 	envVal := os.Getenv(envKey)
@@ -105,23 +105,23 @@ func getIngesterRateLimitFromEnv(source, rateType string) int {
 // CRDRateLimitAdapter adapts different CRD rate limit config types to CRDRateLimitConfig interface
 // This allows zen-ingester's SourceConfig.RateLimit to work with the shared loader
 
-// SourceConfigRateLimitAdapter adapts zen-ingester's RateLimitConfig to CRDRateLimitConfig
+// SourceConfigRateLimitAdapter adapts zen-ingester's RateLimitConfig to CRDRateLimitConfig.
 type SourceConfigRateLimitAdapter struct {
 	ObservationsPerMinute int
 	Burst                 int
 }
 
-// GetRequestsPerMinute returns the rate limit in requests per minute
+// GetRequestsPerMinute returns the rate limit in requests per minute.
 func (a *SourceConfigRateLimitAdapter) GetRequestsPerMinute() int {
 	return a.ObservationsPerMinute
 }
 
-// GetBurst returns the burst size
+// GetBurst returns the burst size.
 func (a *SourceConfigRateLimitAdapter) GetBurst() int {
 	return a.Burst
 }
 
-// NewSourceConfigRateLimitAdapter creates an adapter from zen-ingester's RateLimitConfig
+// NewSourceConfigRateLimitAdapter creates an adapter from zen-ingester's RateLimitConfig.
 func NewSourceConfigRateLimitAdapter(observationsPerMinute, burst int) CRDRateLimitConfig {
 	return &SourceConfigRateLimitAdapter{
 		ObservationsPerMinute: observationsPerMinute,

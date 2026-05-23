@@ -29,7 +29,7 @@ How was this tested?
 - [ ] Documentation updated
 - [ ] No new warnings generated
 - [ ] Tests added/updated and passing
-- [ ] Coverage maintained (>80%)
+- [ ] Coverage maintained (≥65% overall; run `make coverage`)
 - [ ] CHANGELOG.md updated (if applicable)
 
 ## Related Issues

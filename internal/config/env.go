@@ -22,16 +22,16 @@ import (
 )
 
 // RequireEnv validates and returns a required environment variable
-// Returns error if not set or empty
+// Returns error if not set or empty.
 func RequireEnv(key string) (string, error) {
 	val := os.Getenv(key)
 	if val == "" {
-		return "", fmt.Errorf("%s is required but not set", key)
+		return "", fmt.Errorf("%s: %w", key, ErrEnvRequired)
 	}
 	return val, nil
 }
 
-// RequireEnvWithDefault returns env var or default if not set
+// RequireEnvWithDefault returns env var or default if not set.
 func RequireEnvWithDefault(key, defaultValue string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
@@ -39,7 +39,7 @@ func RequireEnvWithDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-// RequireEnvInt validates and returns a required integer environment variable
+// RequireEnvInt validates and returns a required integer environment variable.
 func RequireEnvInt(key string) (int, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -47,12 +47,12 @@ func RequireEnvInt(key string) (int, error) {
 	}
 	intVal, err := strconv.Atoi(val)
 	if err != nil {
-		return 0, fmt.Errorf("%s must be an integer, got: %s", key, val)
+		return 0, fmt.Errorf("%s: %w: %s", key, ErrEnvInvalidInt, val)
 	}
 	return intVal, nil
 }
 
-// RequireEnvIntWithDefault returns env var as int or default
+// RequireEnvIntWithDefault returns env var as int or default.
 func RequireEnvIntWithDefault(key string, defaultValue int) int {
 	if val := os.Getenv(key); val != "" {
 		if intVal, err := strconv.Atoi(val); err == nil {
@@ -62,7 +62,7 @@ func RequireEnvIntWithDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
-// RequireEnvBool validates and returns a required boolean environment variable
+// RequireEnvBool validates and returns a required boolean environment variable.
 func RequireEnvBool(key string) (bool, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -70,12 +70,12 @@ func RequireEnvBool(key string) (bool, error) {
 	}
 	boolVal, err := strconv.ParseBool(val)
 	if err != nil {
-		return false, fmt.Errorf("%s must be a boolean (true/false), got: %s", key, val)
+		return false, fmt.Errorf("%s: %w: %s", key, ErrEnvInvalidBool, val)
 	}
 	return boolVal, nil
 }
 
-// RequireEnvBoolWithDefault returns env var as bool or default
+// RequireEnvBoolWithDefault returns env var as bool or default.
 func RequireEnvBoolWithDefault(key string, defaultValue bool) bool {
 	if val := os.Getenv(key); val != "" {
 		if boolVal, err := strconv.ParseBool(val); err == nil {
@@ -85,7 +85,7 @@ func RequireEnvBoolWithDefault(key string, defaultValue bool) bool {
 	return defaultValue
 }
 
-// RequireEnvURL validates and returns a required URL environment variable
+// RequireEnvURL validates and returns a required URL environment variable.
 func RequireEnvURL(key string) (string, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -93,13 +93,13 @@ func RequireEnvURL(key string) (string, error) {
 	}
 	parsed, err := url.Parse(val)
 	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") {
-		return "", fmt.Errorf("%s must be a valid URL (http:// or https://), got: %s", key, val)
+		return "", fmt.Errorf("%s: %w: %s", key, ErrEnvInvalidURL, val)
 	}
 	return val, nil
 }
 
-// RequireEnvURLWithDefault returns env var as URL or default
-func RequireEnvURLWithDefault(key string, defaultValue string) string {
+// RequireEnvURLWithDefault returns env var as URL or default.
+func RequireEnvURLWithDefault(key, defaultValue string) string {
 	if val := os.Getenv(key); val != "" {
 		parsed, err := url.Parse(val)
 		if err == nil && (parsed.Scheme == "http" || parsed.Scheme == "https") {
@@ -109,7 +109,7 @@ func RequireEnvURLWithDefault(key string, defaultValue string) string {
 	return defaultValue
 }
 
-// RequireEnvOneOf validates that env var is one of allowed values
+// RequireEnvOneOf validates that env var is one of allowed values.
 func RequireEnvOneOf(key string, allowed []string) (string, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -120,35 +120,35 @@ func RequireEnvOneOf(key string, allowed []string) (string, error) {
 			return val, nil
 		}
 	}
-	return "", fmt.Errorf("%s must be one of %v, got: %s", key, allowed, val)
+	return "", fmt.Errorf("%s: %w: allowed %v, got %s", key, ErrEnvValueNotAllowed, allowed, val)
 }
 
-// RequireEnvSecret validates that a secret env var is set and meets minimum length
+// RequireEnvSecret validates that a secret env var is set and meets minimum length.
 func RequireEnvSecret(key string, minLength int) (string, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
 		return "", err
 	}
 	if len(val) < minLength {
-		return "", fmt.Errorf("%s must be at least %d characters (current: %d)", key, minLength, len(val))
+		return "", fmt.Errorf("%s: %w: need at least %d characters (current %d)", key, ErrEnvSecretTooShort, minLength, len(val))
 	}
 	if strings.Contains(strings.ToLower(val), "change-me") {
-		return "", fmt.Errorf("%s contains 'change-me', use a strong secret", key)
+		return "", fmt.Errorf("%s: %w", key, ErrEnvSecretWeak)
 	}
 	return val, nil
 }
 
-// RequireAtLeastOne validates that at least one of the provided env vars is set
+// RequireAtLeastOne validates that at least one of the provided env vars is set.
 func RequireAtLeastOne(keys []string) error {
 	for _, key := range keys {
 		if val := os.Getenv(key); val != "" {
 			return nil
 		}
 	}
-	return fmt.Errorf("at least one of %v must be set", keys)
+	return fmt.Errorf("%w: %v", ErrEnvAtLeastOne, keys)
 }
 
-// ValidateProduction checks production-specific security requirements
+// ValidateProduction checks production-specific security requirements.
 func ValidateProduction() error {
 	env := os.Getenv("ENVIRONMENT")
 	if env != "production" {
@@ -157,7 +157,7 @@ func ValidateProduction() error {
 
 	// Check DEBUG is disabled
 	if os.Getenv("DEBUG") == "true" {
-		return fmt.Errorf("DEBUG must be false in production")
+		return fmt.Errorf("%w", ErrProductionDebug)
 	}
 
 	// Check database SSL
@@ -166,20 +166,20 @@ func ValidateProduction() error {
 		dbURL = os.Getenv("CRDB_DSN")
 	}
 	if dbURL != "" && strings.Contains(dbURL, "sslmode=disable") {
-		return fmt.Errorf("DATABASE_URL must use SSL in production (remove sslmode=disable)")
+		return fmt.Errorf("%w", ErrProductionDBSSL)
 	}
 
 	return nil
 }
 
 // ServiceConfigValidator validates service-specific configuration
-// This is a helper that can be used by services to validate their config
+// This is a helper that can be used by services to validate their config.
 type ServiceConfigValidator struct {
 	serviceName string
 	errors      []string
 }
 
-// NewServiceConfigValidator creates a new service config validator
+// NewServiceConfigValidator creates a new service config validator.
 func NewServiceConfigValidator(serviceName string) *ServiceConfigValidator {
 	return &ServiceConfigValidator{
 		serviceName: serviceName,
@@ -187,7 +187,7 @@ func NewServiceConfigValidator(serviceName string) *ServiceConfigValidator {
 	}
 }
 
-// Require adds a required env var check
+// Require adds a required env var check.
 func (v *ServiceConfigValidator) Require(key string) string {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -197,12 +197,12 @@ func (v *ServiceConfigValidator) Require(key string) string {
 	return val
 }
 
-// RequireWithDefault adds an optional env var with default
+// RequireWithDefault adds an optional env var with default.
 func (v *ServiceConfigValidator) RequireWithDefault(key, defaultValue string) string {
 	return RequireEnvWithDefault(key, defaultValue)
 }
 
-// RequireInt adds a required int env var check
+// RequireInt adds a required int env var check.
 func (v *ServiceConfigValidator) RequireInt(key string) int {
 	val, err := RequireEnvInt(key)
 	if err != nil {
@@ -212,12 +212,12 @@ func (v *ServiceConfigValidator) RequireInt(key string) int {
 	return val
 }
 
-// RequireIntWithDefault adds an optional int env var with default
+// RequireIntWithDefault adds an optional int env var with default.
 func (v *ServiceConfigValidator) RequireIntWithDefault(key string, defaultValue int) int {
 	return RequireEnvIntWithDefault(key, defaultValue)
 }
 
-// RequireURL adds a required URL env var check
+// RequireURL adds a required URL env var check.
 func (v *ServiceConfigValidator) RequireURL(key string) string {
 	val, err := RequireEnvURL(key)
 	if err != nil {
@@ -227,7 +227,7 @@ func (v *ServiceConfigValidator) RequireURL(key string) string {
 	return val
 }
 
-// RequireSecret adds a required secret env var check with minimum length
+// RequireSecret adds a required secret env var check with minimum length.
 func (v *ServiceConfigValidator) RequireSecret(key string, minLength int) string {
 	val, err := RequireEnvSecret(key, minLength)
 	if err != nil {
@@ -237,32 +237,32 @@ func (v *ServiceConfigValidator) RequireSecret(key string, minLength int) string
 	return val
 }
 
-// RequireAtLeastOne adds a check that at least one of the keys is set
+// RequireAtLeastOne adds a check that at least one of the keys is set.
 func (v *ServiceConfigValidator) RequireAtLeastOne(keys []string) {
 	if err := RequireAtLeastOne(keys); err != nil {
 		v.errors = append(v.errors, err.Error())
 	}
 }
 
-// Validate returns all validation errors
+// Validate returns all validation errors.
 func (v *ServiceConfigValidator) Validate() error {
 	if len(v.errors) == 0 {
 		return nil
 	}
-	return fmt.Errorf("%s configuration validation failed:\n  - %s", v.serviceName, strings.Join(v.errors, "\n  - "))
+	return fmt.Errorf("%s: %w:\n  - %s", v.serviceName, ErrServiceConfigInvalid, strings.Join(v.errors, "\n  - "))
 }
 
-// HasErrors returns true if there are validation errors
+// HasErrors returns true if there are validation errors.
 func (v *ServiceConfigValidator) HasErrors() bool {
 	return len(v.errors) > 0
 }
 
-// Errors returns all validation errors
+// Errors returns all validation errors.
 func (v *ServiceConfigValidator) Errors() []string {
 	return v.errors
 }
 
-// RequireEnvDuration validates and returns a required duration environment variable
+// RequireEnvDuration validates and returns a required duration environment variable.
 func RequireEnvDuration(key string) (time.Duration, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -270,12 +270,12 @@ func RequireEnvDuration(key string) (time.Duration, error) {
 	}
 	duration, err := time.ParseDuration(val)
 	if err != nil {
-		return 0, fmt.Errorf("%s must be a valid duration (e.g., 30s, 5m, 1h), got: %s", key, val)
+		return 0, fmt.Errorf("%s: %w: %s", key, ErrEnvInvalidDuration, val)
 	}
 	return duration, nil
 }
 
-// RequireEnvDurationWithDefault returns env var as duration or default
+// RequireEnvDurationWithDefault returns env var as duration or default.
 func RequireEnvDurationWithDefault(key string, defaultValue time.Duration) time.Duration {
 	if val := os.Getenv(key); val != "" {
 		if duration, err := time.ParseDuration(val); err == nil {
@@ -285,7 +285,7 @@ func RequireEnvDurationWithDefault(key string, defaultValue time.Duration) time.
 	return defaultValue
 }
 
-// RequireEnvCSV validates and returns a required CSV environment variable
+// RequireEnvCSV validates and returns a required CSV environment variable.
 func RequireEnvCSV(key string) ([]string, error) {
 	val, err := RequireEnv(key)
 	if err != nil {
@@ -300,12 +300,12 @@ func RequireEnvCSV(key string) ([]string, error) {
 		}
 	}
 	if len(result) == 0 {
-		return nil, fmt.Errorf("%s CSV list cannot be empty", key)
+		return nil, fmt.Errorf("%s: %w", key, ErrEnvCSVEmpty)
 	}
 	return result, nil
 }
 
-// RequireEnvCSVWithDefault returns env var as CSV or default
+// RequireEnvCSVWithDefault returns env var as CSV or default.
 func RequireEnvCSVWithDefault(key string, defaultValue []string) []string {
 	if val := os.Getenv(key); val != "" {
 		parts := strings.Split(val, ",")

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// ValidationError represents a configuration validation error
+// ValidationError represents a configuration validation error.
 type ValidationError struct {
 	Field   string
 	Message string
@@ -18,17 +18,17 @@ func (e *ValidationError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Field, e.Message)
 }
 
-// Validator validates environment configuration
+// Validator validates environment configuration.
 type Validator struct {
 	errors []ValidationError
 }
 
-// NewValidator creates a new config validator
+// NewValidator creates a new config validator.
 func NewValidator() *Validator {
 	return &Validator{errors: []ValidationError{}}
 }
 
-// RequireString validates a required string env var
+// RequireString validates a required string env var.
 func (v *Validator) RequireString(key string) string {
 	val := os.Getenv(key)
 	if val == "" {
@@ -41,7 +41,7 @@ func (v *Validator) RequireString(key string) string {
 	return val
 }
 
-// OptionalString returns env var or default
+// OptionalString returns env var or default.
 func (v *Validator) OptionalString(key, defaultVal string) string {
 	val := os.Getenv(key)
 	if val == "" {
@@ -50,7 +50,7 @@ func (v *Validator) OptionalString(key, defaultVal string) string {
 	return val
 }
 
-// RequireURL validates a required URL
+// RequireURL validates a required URL.
 func (v *Validator) RequireURL(key string) string {
 	val := v.RequireString(key)
 	if val == "" {
@@ -68,7 +68,7 @@ func (v *Validator) RequireURL(key string) string {
 	return val
 }
 
-// OptionalURL returns env var as URL or default
+// OptionalURL returns env var as URL or default.
 func (v *Validator) OptionalURL(key, defaultVal string) string {
 	val := os.Getenv(key)
 	if val == "" {
@@ -86,7 +86,7 @@ func (v *Validator) OptionalURL(key, defaultVal string) string {
 	return val
 }
 
-// RequireInt validates a required integer env var
+// RequireInt validates a required integer env var.
 func (v *Validator) RequireInt(key string) int {
 	val := v.RequireString(key)
 	if val == "" {
@@ -104,7 +104,7 @@ func (v *Validator) RequireInt(key string) int {
 	return intVal
 }
 
-// OptionalInt returns env var as int or default
+// OptionalInt returns env var as int or default.
 func (v *Validator) OptionalInt(key string, defaultVal int) int {
 	val := os.Getenv(key)
 	if val == "" {
@@ -122,7 +122,7 @@ func (v *Validator) OptionalInt(key string, defaultVal int) int {
 	return intVal
 }
 
-// RequireBool validates a required boolean env var
+// RequireBool validates a required boolean env var.
 func (v *Validator) RequireBool(key string) bool {
 	val := v.RequireString(key)
 	if val == "" {
@@ -140,7 +140,7 @@ func (v *Validator) RequireBool(key string) bool {
 	return boolVal
 }
 
-// OptionalBool returns env var as bool or default
+// OptionalBool returns env var as bool or default.
 func (v *Validator) OptionalBool(key string, defaultVal bool) bool {
 	val := os.Getenv(key)
 	if val == "" {
@@ -158,7 +158,7 @@ func (v *Validator) OptionalBool(key string, defaultVal bool) bool {
 	return boolVal
 }
 
-// RequireDuration validates a required duration env var (e.g., "30s", "5m")
+// RequireDuration validates a required duration env var (e.g., "30s", "5m").
 func (v *Validator) RequireDuration(key string) string {
 	val := v.RequireString(key)
 	if val == "" {
@@ -177,8 +177,8 @@ func (v *Validator) RequireDuration(key string) string {
 	return val
 }
 
-// OptionalDuration returns env var as duration or default
-func (v *Validator) OptionalDuration(key string, defaultVal string) string {
+// OptionalDuration returns env var as duration or default.
+func (v *Validator) OptionalDuration(key, defaultVal string) string {
 	val := os.Getenv(key)
 	if val == "" {
 		return defaultVal
@@ -194,7 +194,7 @@ func (v *Validator) OptionalDuration(key string, defaultVal string) string {
 	return val
 }
 
-// RequireOneOf validates value is in allowed list
+// RequireOneOf validates value is in allowed list.
 func (v *Validator) RequireOneOf(key string, allowed []string) string {
 	val := v.RequireString(key)
 	if val == "" {
@@ -214,7 +214,7 @@ func (v *Validator) RequireOneOf(key string, allowed []string) string {
 	return ""
 }
 
-// RequireCSV validates comma-separated values
+// RequireCSV validates comma-separated values.
 func (v *Validator) RequireCSV(key string) []string {
 	val := v.RequireString(key)
 	if val == "" {
@@ -239,7 +239,7 @@ func (v *Validator) RequireCSV(key string) []string {
 	return result
 }
 
-// OptionalCSV returns CSV or default
+// OptionalCSV returns CSV or default.
 func (v *Validator) OptionalCSV(key string, defaultVal []string) []string {
 	val := os.Getenv(key)
 	if val == "" {
@@ -257,7 +257,7 @@ func (v *Validator) OptionalCSV(key string, defaultVal []string) []string {
 	return result
 }
 
-// ForbidInProduction ensures value is not set in production
+// ForbidInProduction ensures value is not set in production.
 func (v *Validator) ForbidInProduction(key string) {
 	env := os.Getenv("ENVIRONMENT")
 	if env == "production" && os.Getenv(key) != "" {
@@ -268,7 +268,7 @@ func (v *Validator) ForbidInProduction(key string) {
 	}
 }
 
-// Validate returns all validation errors
+// Validate returns all validation errors.
 func (v *Validator) Validate() error {
 	if len(v.errors) == 0 {
 		return nil
@@ -278,15 +278,15 @@ func (v *Validator) Validate() error {
 	for _, e := range v.errors {
 		msgs = append(msgs, e.Error())
 	}
-	return fmt.Errorf("configuration validation failed:\n  - %s", strings.Join(msgs, "\n  - "))
+	return fmt.Errorf("%w:\n  - %s", ErrConfigValidationFailed, strings.Join(msgs, "\n  - "))
 }
 
-// HasErrors returns true if validation errors exist
+// HasErrors returns true if validation errors exist.
 func (v *Validator) HasErrors() bool {
 	return len(v.errors) > 0
 }
 
-// Errors returns all validation errors
+// Errors returns all validation errors.
 func (v *Validator) Errors() []ValidationError {
 	return v.errors
 }

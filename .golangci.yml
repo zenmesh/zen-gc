@@ -1,12 +1,11 @@
-# golangci-lint v2 — zen-gc (OSS-friendly scope)
+# golangci-lint v2 — zen-gc
 #
-# Full stylistic linters (goconst, godot, dupl, revive package-comments, err113) are
-# intentionally off until backlog cleanup — see docs/LINTING.md.
+# See docs/LINTING.md.
 
 version: "2"
 
 run:
-  timeout: 5m
+  timeout: 10m
   tests: true
   go: "1.26"
 
@@ -21,28 +20,104 @@ linters:
   default: none
   enable:
     - copyloopvar
+    - dupl
+    - err113
     - errcheck
+    - errorlint
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
     - gosec
     - ineffassign
     - misspell
+    - mnd
     - nakedret
     - noctx
+    - revive
     - staticcheck
     - unconvert
     - unused
     - whitespace
-    - gocyclo
     - govet
 
   settings:
+    dupl:
+      threshold: 120
+    goconst:
+      min-len: 3
+      min-occurrences: 6
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
     gocyclo:
       min-complexity: 35
+    godot:
+      scope: declarations
+      exclude:
+        - '^TODO:'
+        - '^FIXME:'
+        - '^NOTE:'
+      capital: true
     gosec:
       excludes:
         - G104
         - G204
     misspell:
       locale: US
+    mnd:
+      checks:
+        - argument
+        - case
+        - condition
+        - operation
+        - return
+      ignored-numbers:
+        - "0"
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - "8"
+        - "10"
+        - "15"
+        - "20"
+        - "35"
+        - "52"
+        - "100"
+        - "200"
+        - "404"
+        - "500"
+        - "1000"
+        - "1024"
+        - "2048"
+        - "4096"
+        - "65534"
+        - "65535"
+      ignored-functions:
+        - time.Sleep
+        - time.Duration
+        - time.Second
+        - time.Minute
+        - time.Hour
+        - time.Millisecond
+        - time.Microsecond
+        - time.Nanosecond
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+        - name: error-return
+          severity: warning
+        - name: error-naming
+          severity: warning
+        - name: var-naming
+          severity: warning
+        - name: package-comments
+          disabled: true
     staticcheck:
       checks:
         - all
@@ -69,20 +144,18 @@ linters:
       - charts
       - .github
     rules:
-      # Tests often omit explicit error checks for brevity
+      - path: _test\.go
+        linters:
+          - godot
+          - err113
+          - dupl
+          - goconst
       - path: _test\.go
         linters:
           - errcheck
-      # Tests: httptest without context is acceptable
       - path: _test\.go
         linters:
           - noctx
-      # Webhook handlers run cleanup goroutines with detached lifecycle
-      - path: pkg/webhook/webhook\.go
-        linters:
-          - gosec
-        text: G118
-      # client-go fake deprecation in tests
       - path: _test\.go
         linters:
           - staticcheck
@@ -96,7 +169,7 @@ linters:
 
 issues:
   max-issues-per-linter: 0
-  max-same-issues: 50
+  max-same-issues: 0
 
 formatters:
   enable:
