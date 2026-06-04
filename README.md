@@ -7,6 +7,8 @@
 
 Kubernetes controller for **declarative garbage collection**: define **`GarbageCollectionPolicy`** objects (TTL, selectors, dry-run, rate limits) and let zen-gc delete matching resources safely.
 
+**Product site:** [zen-mesh.io](https://zen-mesh.io) — Zen Mesh webhook operations platform, docs, and evidence surfaces.
+
 **zen-gc** is open source (Apache-2.0) from **[Zen Mesh Inc.](https://zen-mesh.io)**. The commercial **[Zen Mesh](https://zen-mesh.io)** offering is separate; this repository is meant for community use, self-managed clusters, and contributions.
 
 **Security:** report vulnerabilities to **[security@zen-mesh.io](mailto:security@zen-mesh.io)** or via [GitHub Security Advisories](https://github.com/zen-mesh/zen-gc/security) — see [SECURITY.md](SECURITY.md).
