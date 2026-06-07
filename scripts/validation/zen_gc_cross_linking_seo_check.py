@@ -108,6 +108,9 @@ def check_no_placeholders():
         for f in files:
             if f.endswith(".md"):
                 path = os.path.join(root, f)
+                # Skip closeout evidence files that reference the placeholder as documentation
+                if "CLOSEOUT" in f.upper() or "EVIDENCE" in f.upper():
+                    continue
                 with open(path) as fh:
                     content = fh.read()
                     if "{{ .projectName }}" in content:
@@ -141,15 +144,25 @@ def check_zen_mesh_io():
         check("zen-mesh.io repo available for checking", False, "Clone zen-mesh.io repo")
         return
 
+    layout_path = os.path.join(ZEN_MESH_IO_DIR, "src/layouts/Layout.astro")
+    layout_content = read_file(layout_path)
+    if layout_content:
+        check("zen-mesh.io nav links to Free OSS page", "Free OSS" in layout_content or "/free-oss" in layout_content)
+    else:
+        check("zen-mesh.io nav links to Free OSS page", False)
+
+    oss_path = os.path.join(ZEN_MESH_IO_DIR, "src/pages/free-oss.astro")
+    oss_content = read_file(oss_path)
+    check("zen-mesh.io /free-oss page links to zen-gc", oss_content and "zen-gc" in oss_content)
+
     index_path = os.path.join(ZEN_MESH_IO_DIR, "src/pages/index.astro")
     content = read_file(index_path)
     if not content:
         check("zen-mesh.io index.astro exists", False)
         return
 
-    check("zen-mesh.io links to zen-gc", "zen-gc" in content or "zen_gc" in content)
-    check("zen-mesh.io primary CTA preserved (Edge Lite)", "Edge Lite" in content or "edge" in content.lower())
-    check("zen-mesh.io does NOT claim prod-live for Zen Mesh", "Early Access" in content or "early access" in content.lower() or "DEMO" in content)
+    check("zen-mesh.io primary CTA uses Zen Edge naming", "Zen Edge" in content or "Try Zen Edge" in content)
+    check("zen-mesh.io does NOT claim prod-live for Zen Mesh", "Early Access" in content or "early access" in content.lower())
 
 
 def check_docs():
