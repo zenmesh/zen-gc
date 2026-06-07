@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers development setup, workflows, and best practices for {{ .projectName }}.
+This guide covers development setup, workflows, and best practices for zen-gc.
 
 ## Prerequisites
 
@@ -12,8 +12,8 @@ This guide covers development setup, workflows, and best practices for {{ .proje
 ## Installation
 
 ```bash
-git clone https://github.com/zen-mesh/{{ .projectName }}.git
-cd {{ .projectName }}
+git clone https://github.com/zen-mesh/zen-gc.git
+cd zen-gc
 go mod download
 ```
 
@@ -27,7 +27,7 @@ make check
 go test ./...
 
 # Build
-go build ./cmd/{{ .projectName }}
+go build ./cmd/zen-gc
 ```
 
 ## Development Workflow

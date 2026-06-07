@@ -7,7 +7,13 @@
 
 Kubernetes controller for **declarative garbage collection**: define **`GarbageCollectionPolicy`** objects (TTL, selectors, dry-run, rate limits) and let zen-gc delete matching resources safely.
 
-**zen-gc** is open source (Apache-2.0) from **[Zen Mesh Inc.](https://zen-mesh.io)**. The commercial **[Zen Mesh](https://zen-mesh.io)** offering is separate; this repository is meant for community use, self-managed clusters, and contributions.
+**zen-gc** is a free and open source (Apache-2.0) **Kubernetes garbage collection controller** from the **[Zen Mesh](https://zen-mesh.io)** team. It is designed for community use, self-managed Kubernetes clusters, and contributions. zen-gc is **complementary to but independent of** Zen Mesh — you can use zen-gc without Zen Mesh, and Zen Mesh does not require zen-gc.
+
+- **Clean up** completed Jobs, temporary ConfigMaps, expired Secrets, evicted Pods, orphaned ReplicaSets, released PVCs, and any other Kubernetes resource.
+- **Declarative TTL policies** — fixed, field-based, mapped, and relative expiration modes.
+- **Safe, rate-limited, observable** — dry-run mode, Prometheus metrics, Kubernetes events, leader election for HA.
+
+**Related project — Zen Mesh:** [zen-mesh.io](https://zen-mesh.io) is a commercial webhook delivery and data-plane operations platform for private Kubernetes networks. zen-gc is the free OSS Kubernetes cleanup controller from the same team; the two projects are separate and independent.
 
 **Security:** report vulnerabilities to **[security@zen-mesh.io](mailto:security@zen-mesh.io)** or via [GitHub Security Advisories](https://github.com/zen-mesh/zen-gc/security) — see [SECURITY.md](SECURITY.md).
 
@@ -157,9 +163,20 @@ ttl:
 - Prometheus metrics, Kubernetes events, HA via leader election
 - Test suite with CI and optional kind e2e (`make e2e-kind`)
 
+## From the Zen Mesh community
+
+**zen-gc** is part of the broader **Zen Mesh** ecosystem — a set of open-source and commercial tools for Kubernetes and private-network operations.
+
+| Project | Description | License |
+|---------|-------------|---------|
+| [zen-gc](https://github.com/zen-mesh/zen-gc) | Free OSS Kubernetes garbage collection controller (this project) | Apache-2.0 |
+| [Zen Mesh](https://zen-mesh.io) | Commercial webhook delivery and data-plane operations platform | Commercial |
+
+zen-gc is useful independently — it does not require Zen Mesh, and Zen Mesh does not require zen-gc.
+
 ## Status
 
-zen-gc is actively maintained as OSS. Feedback and contributions are welcome.
+zen-gc is a public repository available for community use, feedback, and contributions. It is actively maintained as open source under the Apache-2.0 license. This is not an official product launch — zen-gc is a free community tool built by the Zen Mesh team.
 
 ## References
 
@@ -169,5 +186,8 @@ zen-gc is actively maintained as OSS. Feedback and contributions are welcome.
 ## Links
 
 - **Zen Mesh Inc.**: [zen-mesh.io](https://zen-mesh.io)
+- **zen-gc Documentation Index**: [docs/INDEX.md](docs/INDEX.md)
+- **Zen Mesh Documentation**: [docs.zen-mesh.io](https://docs.zen-mesh.io)
 - **Helm (Artifact Hub)**: [gc-controller chart](https://artifacthub.io/packages/helm/zengc/gc-controller)
 - **Explainer video**: [YouTube](https://www.youtube.com/watch?v=P8afhcgjWVQ&list=PL1AGc_sKXJBdInu0yffTJxN828oaCuqwx)
+- **GitHub Repository**: [github.com/zen-mesh/zen-gc](https://github.com/zen-mesh/zen-gc)

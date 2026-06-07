@@ -1,6 +1,6 @@
 # Release Process
 
-This document describes the release process for {{ .projectName }}.
+This document describes the release process for zen-gc.
 
 ## Versioning
 

@@ -2,12 +2,33 @@
 
 ## Overview
 
-`zen-gc` is a production-ready Kubernetes controller for automatic garbage collection of any Kubernetes resource.
+`zen-gc` is a Kubernetes controller for automatic garbage collection of any Kubernetes resource. It is available as free open-source software (Apache-2.0) from the [Zen Mesh](https://zen-mesh.io) team.
+
+## Ecosystem Boundary
+
+### zen-gc (this project)
+
+- **Free OSS Kubernetes garbage collection controller**
+- Declarative cleanup policies with TTL, selectors, conditions, and rate limiting
+- Works with any Kubernetes resource type
+- Fully independent — no Zen Mesh required
+- Apache-2.0 licensed for community use, self-managed clusters, and contributions
+
+### Zen Mesh
+
+- **Commercial webhook delivery and data-plane operations platform**
+- Private-network webhook delivery, edge/data-plane operations, logs, evidence, and operational truth
+- Designed for teams that need cryptographically verified webhook delivery behind NAT, VPN, or firewalls
+- Separate from zen-gc; Zen Mesh does not depend on zen-gc and zen-gc does not depend on Zen Mesh
+
+### Relationship
+
+Both projects are built by **Zen Mesh Inc.** and share engineering practices and infrastructure, but they serve different needs. zen-gc is useful independently on any Kubernetes cluster and does not require a Zen Mesh subscription.
 
 ## Project Goals
 
 1. **Provide Value**: Solve the real-world problem of resource cleanup in Kubernetes
-2. **Production Ready**: Build a reliable, observable, and maintainable solution
+2. **Reliable**: Build a well-tested, observable, and maintainable controller
 3. **Community Driven**: Open source project that welcomes contributions and feedback
 4. **Future**: If widely adopted, may be proposed as a Kubernetes Enhancement Proposal (KEP)
 
@@ -35,31 +56,31 @@ zen-gc/
 
 ## Development Status
 
-### Current Status: Production Ready ✅
+### Current Status
 
 - ✅ Full-featured GC controller implementation
 - ✅ Comprehensive CRD with flexible TTL and condition support
-- ✅ Production features (rate limiting, metrics, HA)
+- ✅ Production-oriented features (rate limiting, metrics, HA)
 - ✅ Extensive test coverage (~65% overall unit tests; `make coverage`)
 - ✅ Complete documentation
 - ✅ Open source and actively maintained
 
 ### Future Considerations
 
-If zen-gc gains significant community adoption and proves valuable to the Kubernetes ecosystem, it may be proposed as a Kubernetes Enhancement Proposal (KEP) to potentially become part of upstream Kubernetes. However, this is not the primary goal—the focus is on providing a useful, production-ready solution.
+If zen-gc gains significant community adoption and proves valuable to the Kubernetes ecosystem, it may be proposed as a Kubernetes Enhancement Proposal (KEP) to potentially become part of upstream Kubernetes. However, this is not the primary goal—the focus is on providing a useful, community-driven solution.
 
 ## Key Principles
 
 1. **Kubernetes-Native**: Uses standard Kubernetes patterns
 2. **Generic**: Works with any Kubernetes resource
 3. **Community-Driven**: Open source, community feedback welcome
-4. **Production-Ready**: Built-in rate limiting, metrics, and observability
+4. **Observable**: Built-in rate limiting, metrics, and observability
 
 ## Next Steps
 
 1. Review and refine KEP document
 2. Gather initial community feedback
 3. Implement PoC when ready
-4. Open source release
+4. Continue open source development
 5. Submit KEP after validation
 
