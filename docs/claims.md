@@ -45,9 +45,15 @@ zen-gc is a Kubernetes controller that provides **declarative garbage collection
 
 zen-gc is built with `client-go v0.35` targeting Kubernetes 1.31.x API. The CI test suite runs on `ubuntu-latest` GitHub runners with no cloud Kubernetes cluster. Compatibility with specific Kubernetes distributions or cloud providers is **not** actively evidenced.
 
-**Evidenced:** Go build + unit + integration tests pass.
+**Evidenced:**
+- Go build + unit + integration tests pass
+- Validated on **kind** with Kubernetes v1.36.1 (`docs/evidence/kubernetes/v1.36/kind.md`)
+- Validated on **k3d (K3s)** with Kubernetes v1.36.2+k3s1 (`docs/evidence/kubernetes/v1.36/k3d.md`)
 
-**Not evidenced:** Behavior on EKS, GKE, AKS, OpenShift, k3s (beyond local `kind`), or any specific K8s version beyond compilation compatibility.
+**Blocked:**
+- kubeadm validation blocked (GAPI VM runs K8s v1.32.13; see `docs/evidence/kubernetes/v1.36/kubeadm.md`)
+
+**Not evidenced:** Behavior on EKS, GKE, AKS, OpenShift, Rancher, or any Kubernetes version other than the specific validated environments above.
 
 ## Security claims
 

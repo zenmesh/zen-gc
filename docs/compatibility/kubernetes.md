@@ -21,13 +21,23 @@ Build requirement: **Go 1.26+** (see `go.mod`).
 | Integration tests | ✅ `test/integration/` | Runs against envtest-backed API |
 | kind cluster (local) | ⚠️ `make e2e-kind` | Available but not run in CI |
 
+## Validated environments
+
+| Environment | K8s Version | Result | Evidence |
+|-------------|-------------|--------|----------|
+| kind | v1.36.1 | PASS | `docs/evidence/kubernetes/v1.36/kind.md` |
+| k3d (K3s) | v1.36.2+k3s1 | PASS | `docs/evidence/kubernetes/v1.36/k3d.md` |
+| kubeadm | — | BLOCKED | `docs/evidence/kubernetes/v1.36/kubeadm.md` |
+
+This does **not** imply validation on EKS, GKE, AKS, OpenShift, Rancher, all CNIs, all storage providers, or all Kubernetes 1.36 environments. Operators should validate in their own environment.
+
 ## Not evidenced
 
 The following are **not** actively tested or evidenced:
 
 - Cloud Kubernetes (EKS, GKE, AKS)
 - Kubernetes distributions (OpenShift, Rancher, k0s, etc.)
-- Specific Kubernetes versions beyond compilation compatibility
+- Kubernetes versions older than 1.36
 - Network plugins (Calico, Cilium, Flannel)
 - Storage providers (CSI drivers)
 - ARM64 Kubernetes clusters
@@ -36,6 +46,8 @@ The following are **not** actively tested or evidenced:
 ## Version support policy
 
 zen-gc follows `client-go` compatibility: compiled against the latest stable Kubernetes API. Older API versions may work but are not actively tested. Breaking changes from upstream Kubernetes may affect behavior — report issues via GitHub.
+
+Validated environments are tracked per Kubernetes minor version in `docs/evidence/kubernetes/`.
 
 ## CRD API version
 

@@ -40,8 +40,9 @@ This index catalogs what is evidenced about zen-gc. Each category states whether
 | client-go version | ✅ Present | `v0.35` — compatible with K8s 1.31.x API |
 | CRD API version | ✅ Present | `apiextensions.k8s.io/v1` (via controller-runtime) |
 | Tested on cloud K8s | ❌ Missing | No EKS/GKE/AKS test results published |
-| Tested on kind | ⚠️ Partial | `make e2e-kind` available but not in CI |
-| Version matrix | ⚠️ Template-only | `docs/compatibility/kubernetes.md` has planned/future version support |
+| Tested on kind (K8s v1.36.1) | ✅ Present | `docs/evidence/kubernetes/v1.36/kind.md` |
+| Tested on k3d (K3s v1.36.2+k3s1) | ✅ Present | `docs/evidence/kubernetes/v1.36/k3d.md` |
+| Tested on kubeadm (v1.36.x) | ❌ Blocked | GAPI VM runs v1.32.13; see `docs/evidence/kubernetes/v1.36/kubeadm.md` |
 
 ## Release evidence
 

@@ -14,6 +14,9 @@
 - [Claims and maturity](docs/claims.md) — what zen-gc does and does not do
 - [Evidence index](docs/evidence/README.md) — tested claims and known gaps
 - [Kubernetes compatibility](docs/compatibility/kubernetes.md) — evidenced version support
+- [K8s v1.36 kind evidence](docs/evidence/kubernetes/v1.36/kind.md) — kind v1.36.1
+- [K8s v1.36 k3d evidence](docs/evidence/kubernetes/v1.36/k3d.md) — K3s v1.36.2+k3s1
+- [K8s v1.36 kubeadm evidence (blocked)](docs/evidence/kubernetes/v1.36/kubeadm.md) — blocked
 - [Security policy](SECURITY.md) — vulnerability reporting
 - [Security (operations)](docs/security/threat-model.md) — threat model and RBAC assumptions
 - [Supply chain](docs/security/supply-chain.md) — build, scan, provenance status

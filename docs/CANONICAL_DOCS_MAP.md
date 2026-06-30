@@ -40,6 +40,9 @@
 - [llms.txt](../llms.txt) — AI discovery index
 - [Claims and Maturity](claims.md) — what zen-gc does and does not do
 - [Evidence Index](evidence/README.md) — catalog of tested claims and gaps
+- [K8s v1.36 Evidence (kind)](evidence/kubernetes/v1.36/kind.md) — kind + K8s v1.36.1
+- [K8s v1.36 Evidence (k3d)](evidence/kubernetes/v1.36/k3d.md) — k3d + K3s v1.36.2+k3s1
+- [K8s v1.36 Evidence (kubeadm, blocked)](evidence/kubernetes/v1.36/kubeadm.md) — kubeadm + K8s v1.36.x (blocked)
 - [Release Evidence](evidence/releases/README.md) — per-release test results
 - [Kubernetes Compatibility](compatibility/kubernetes.md) — evidenced K8s version support
 

@@ -1,53 +1,37 @@
-# Version Compatibility Matrix
+# Version Compatibility
 
-This document provides version compatibility information for zen-gc, including supported Kubernetes versions, CRD version migration guides, and migration from other TTL solutions.
+This document summarizes zen-gc's Kubernetes version compatibility based on
+validated evidence. See `docs/evidence/kubernetes/` for full validation details.
 
-## Table of Contents
+## Validated Environments
 
-- [Supported Kubernetes Versions](#supported-kubernetes-versions)
-- [CRD Version Migration Guide](#crd-version-migration-guide)
-- [Migration from Other Solutions](#migration-from-other-solutions)
+| Environment | K8s Version | Result | Evidence |
+|-------------|-------------|--------|----------|
+| kind | v1.36.1 | PASS | `docs/evidence/kubernetes/v1.36/kind.md` |
+| k3d (K3s) | v1.36.2+k3s1 | PASS | `docs/evidence/kubernetes/v1.36/k3d.md` |
+| kubeadm | — | BLOCKED | `docs/evidence/kubernetes/v1.36/kubeadm.md` |
 
----
+This does **not** imply validation on EKS, GKE, AKS, OpenShift, Rancher, all CNIs,
+all storage providers, or all Kubernetes 1.36 environments. Operators should validate
+in their own environment.
 
-## Supported Kubernetes Versions
+## Compilation Compatibility
 
-### Compatibility Matrix
+zen-gc is built with `client-go v0.35` targeting Kubernetes 1.31.x API surface.
+Compilation compatibility does not guarantee runtime correctness on any specific
+Kubernetes version.
 
-| zen-gc Version | Kubernetes 1.23 | Kubernetes 1.24 | Kubernetes 1.25 | Kubernetes 1.26 | Kubernetes 1.27 | Kubernetes 1.28 | Kubernetes 1.29+ |
-|----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|------------------|
-| 0.1.x          | ✅              | ✅              | ✅              | ✅              | ✅              | ✅              | ✅               |
-| 0.2.x          | ❌              | ✅              | ✅              | ✅              | ✅              | ✅              | ✅               |
-| 1.0.x          | ❌              | ❌              | ✅              | ✅              | ✅              | ✅              | ✅               |
+## Minimum Requirements
 
-**Legend:**
-- ✅ Fully supported
-- ⚠️ Supported with limitations
-- ❌ Not supported
+- **CRD API**: v1 (`apiextensions.k8s.io/v1`)
+- **RBAC**: v1 (`rbac.authorization.k8s.io/v1`)
+- **Go**: 1.26+ (see `go.mod`)
 
-### Minimum Requirements
+## Version Support Policy
 
-- **Kubernetes**: 1.23+ (required for TTL-after-finished feature)
-- **CRD API**: v1 (apiextensions.k8s.io/v1)
-- **RBAC**: v1 (rbac.authorization.k8s.io/v1)
-
-### Tested Versions
-
-The following Kubernetes versions are regularly tested:
-
-- 1.23.x (EKS, GKE, AKS)
-- 1.24.x (EKS, GKE, AKS)
-- 1.25.x (EKS, GKE, AKS)
-- 1.26.x (EKS, GKE, AKS)
-- 1.27.x (EKS, GKE, AKS)
-- 1.28.x (EKS, GKE, AKS)
-- 1.29.x (EKS, GKE, AKS)
-
-### Version Support Policy
-
-- **Current Version**: Fully supported
-- **Previous Minor Version**: Supported with bug fixes
-- **Older Versions**: Best effort support
+zen-gc follows `client-go` compatibility: compiled against the latest stable
+Kubernetes API. Older API versions may work but are not actively tested. Breaking
+changes from upstream Kubernetes may affect behavior — report issues via GitHub.
 
 ### Deprecated Features
 
@@ -105,7 +89,7 @@ The following Kubernetes versions are regularly tested:
 
 ### Migration Path: v1beta1 → v1
 
-**When**: After production validation and API stability guarantee
+**When**: Future API stability pass (not currently scheduled)
 
 **Breaking Changes**: None planned (subject to API stability policy)
 
@@ -366,52 +350,13 @@ spec:
 
 ---
 
-## Compatibility Testing
+## Reporting Compatibility Issues
 
-### Testing Matrix
-
-We test compatibility with:
-
-- **Cloud Providers**: AWS EKS, GKE, Azure AKS
-- **Distributions**: k3s, k0s, Rancher
-- **CNI Plugins**: Calico, Cilium, Flannel
-- **Storage**: Local, NFS, CSI drivers
-
-### Reporting Compatibility Issues
-
-If you encounter compatibility issues:
-
-1. Open a GitHub issue
-2. Include:
-   - Kubernetes version
-   - Cloud provider/distribution
-   - Error messages
-   - Steps to reproduce
-
----
-
-## Version Support Timeline
-
-### Current Support
-
-- **v1alpha1**: Supported until v1beta1 release + 6 months
-- **v1beta1**: Will be supported until v1 release + 12 months
-- **v1**: Long-term support (LTS)
-
-### End of Life Policy
-
-- **Deprecation Notice**: 6 months before removal
-- **Security Fixes**: Provided for 12 months after deprecation
-- **Bug Fixes**: Provided for 6 months after deprecation
-
----
-
-## Summary
-
-- **Kubernetes**: 1.23+ required, 1.25+ recommended
-- **CRD Migration**: Straightforward, no data loss
-- **Solution Migration**: Well-documented paths from common alternatives
-- **Testing**: Regular compatibility testing across platforms
+If you encounter compatibility issues, open a GitHub issue and include:
+- Kubernetes version
+- Cluster environment (kind, k3d, kubeadm, cloud provider, etc.)
+- Error messages and logs
+- Steps to reproduce
 
 For specific migration help, open a GitHub issue or contact maintainers.
 

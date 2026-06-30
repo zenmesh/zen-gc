@@ -1,0 +1,30 @@
+{
+  "repo": "zenmesh/zen-gc",
+  "commit": "4be11fe77321eaf0475b226c85d7bcd24d50092f",
+  "date": "2026-06-29",
+  "cluster_type": "kubeadm",
+  "kubernetes_version": "v1.32.13 (installed; v1.36.x required)",
+  "vm_hostname": "h462-gateway-kubeadm-1780668538",
+  "vm_ip": "192.168.122.179",
+  "vm_disposable_confirmed": true,
+  "vm_os": "Debian 13 (trixie)",
+  "status": "BLOCKED",
+  "blocker_reason": "GAPI VM runs kubeadm v1.32.13; upgrading to v1.36.x is a multi-step process outside this validation scope.",
+  "commands_run": [
+    "virsh qemu-agent-command h462-gateway-kubeadm-1780668538 guest-exec (hostname, kubelet --version, kubeadm version)",
+    "kubeadm version: v1.32.13",
+    "kubelet --version: v1.32.13"
+  ],
+  "result": "BLOCKED",
+  "limitations": [
+    "kubeadm cluster version v1.32.13 does not match target v1.36.x",
+    "No SSH access (PasswordAuthentication disabled)",
+    "QEMU guest agent available for command execution only"
+  ],
+  "cleanup_succeeded": true,
+  "prerequisites_for_retest": [
+    "Install kubeadm/kubelet/kubectl v1.36.x packages from Kubernetes apt repo",
+    "Upgrade or reinitialize cluster at v1.36.x",
+    "Run common validation scenario"
+  ]
+}

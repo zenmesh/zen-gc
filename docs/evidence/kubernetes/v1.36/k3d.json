@@ -1,0 +1,35 @@
+{
+  "repo": "zenmesh/zen-gc",
+  "commit": "4be11fe77321eaf0475b226c85d7bcd24d50092f",
+  "date": "2026-06-29",
+  "cluster_type": "k3d",
+  "kubernetes_version": "v1.36.2+k3s1",
+  "k3d_version": "v5.8.3",
+  "k3s_image": "rancher/k3s:v1.36.2-k3s1",
+  "container_runtime": "containerd://2.3.2-k3s2",
+  "go_version": "go1.26.4",
+  "commands_run": [
+    "k3d cluster create zen-gc-k8s136 --image rancher/k3s:v1.36.2-k3s1",
+    "k3d image import zenmesh/zen-gc-controller:v0.0.1-alpha-425e777f5 --cluster zen-gc-k8s136",
+    "kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml",
+    "kubectl apply -f deploy/manifests/namespace.yaml",
+    "kubectl apply -f deploy/manifests/rbac.yaml",
+    "kubectl apply -f deploy/manifests/deployment.yaml (image patched)",
+    "kubectl apply -f deploy/manifests/service.yaml",
+    "kubectl wait --for=condition=Ready pod -l app=gc-controller",
+    "kubectl create namespace gc-validation",
+    "kubectl create configmap test-gc-cm --namespace gc-validation",
+    "kubectl apply -f GarbageCollectionPolicy (dry-run, ConfigMap, 30s TTL)",
+    "kubectl delete garbagecollectionpolicy cm-dryrun-test",
+    "kubectl delete namespace gc-validation"
+  ],
+  "result": "PASS",
+  "limitations": [
+    "Single-server k3d cluster only (no agent nodes)",
+    "Self-signed webhook certs (not validated via TLS)",
+    "Dry-run only; actual deletion not tested",
+    "K3s bundles flannel, CoreDNS, metrics-server; may differ from non-K3s K8s distributions"
+  ],
+  "logs_evidence": "k3d.md#controller-logs-leader",
+  "cleanup_succeeded": true
+}
