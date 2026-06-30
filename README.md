@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go)](https://go.dev/)
-[![CI](https://github.com/zen-mesh/zen-gc/workflows/CI/badge.svg)](https://github.com/zen-mesh/zen-gc/actions)
+[![CI](https://github.com/zenmesh/zen-gc/workflows/CI/badge.svg)](https://github.com/zenmesh/zen-gc/actions)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.26+-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 
 Kubernetes controller for **declarative garbage collection**: define **`GarbageCollectionPolicy`** objects (TTL, selectors, dry-run, rate limits) and let zen-gc delete matching resources safely.
@@ -15,7 +15,7 @@ Kubernetes controller for **declarative garbage collection**: define **`GarbageC
 
 **Related project — Zen Mesh:** [zen-mesh.io](https://zen-mesh.io) is a commercial webhook delivery and data-plane operations platform for private Kubernetes networks. zen-gc is the free OSS Kubernetes cleanup controller from the same team; the two projects are separate and independent.
 
-**Security:** report vulnerabilities to **[security@zen-mesh.io](mailto:security@zen-mesh.io)** or via [GitHub Security Advisories](https://github.com/zen-mesh/zen-gc/security) — see [SECURITY.md](SECURITY.md).
+**Security:** report vulnerabilities to **[security@zen-mesh.io](mailto:security@zen-mesh.io)** or via [GitHub Security Advisories](https://github.com/zenmesh/zen-gc/security) — see [SECURITY.md](SECURITY.md).
 
 Builds require **Go 1.26+** (see `go.mod`). Published container images are built with Go **1.26**.
 
@@ -44,20 +44,20 @@ kubectl apply -f examples/temp-configmap-cleanup.yaml
 **Remote raw manifests** (replace branch/tag as needed):
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/namespace.yaml
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/rbac.yaml
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/deploy/manifests/deployment.yaml
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/manifests/rbac.yaml
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/manifests/deployment.yaml
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
 ```
 
 ### With Helm
 
+The gc-controller Helm chart (v0.0.1-alpha) is available on **[Artifact Hub](https://artifacthub.io/packages/helm/zengc/gc-controller)**. From a repo clone you can also install directly:
+
 ```bash
-helm repo add zen-gc https://zen-mesh.github.io/zen-gc
-helm repo update
-helm install gc-controller zen-gc/gc-controller --version 0.0.1-alpha --namespace gc-system --create-namespace
-kubectl apply -f https://raw.githubusercontent.com/zen-mesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
+helm install gc-controller ./docs/gc-controller-0.0.1-alpha.tgz --namespace gc-system --create-namespace
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/examples/temp-configmap-cleanup.yaml
 ```
 
 ### Minimal policy example
@@ -181,7 +181,7 @@ zen-gc is a public repository available for community use, feedback, and contrib
 
 | Project | Description | License |
 |---------|-------------|---------|
-| [zen-gc](https://github.com/zen-mesh/zen-gc) | Free OSS Kubernetes garbage collection controller (this project) | Apache-2.0 |
+| [zen-gc](https://github.com/zenmesh/zen-gc) | Free OSS Kubernetes garbage collection controller (this project) | Apache-2.0 |
 | [Zen Mesh](https://zen-mesh.io) | Commercial webhook delivery and data-plane operations platform | Commercial |
 
 ## References
@@ -191,7 +191,7 @@ zen-gc is a public repository available for community use, feedback, and contrib
 
 ## Links
 
-- **GitHub Repository**: [github.com/zen-mesh/zen-gc](https://github.com/zen-mesh/zen-gc)
+- **GitHub Repository**: [github.com/zenmesh/zen-gc](https://github.com/zenmesh/zen-gc)
 - **Documentation Index**: [docs/INDEX.md](docs/INDEX.md)
 - **Helm (Artifact Hub)**: [gc-controller chart](https://artifacthub.io/packages/helm/zengc/gc-controller)
 - **Explainer video**: [YouTube](https://www.youtube.com/watch?v=P8afhcgjWVQ&list=PL1AGc_sKXJBdInu0yffTJxN828oaCuqwx)

@@ -12,7 +12,7 @@ This guide covers development setup, workflows, and best practices for zen-gc.
 ## Installation
 
 ```bash
-git clone https://github.com/zen-mesh/zen-gc.git
+git clone https://github.com/zenmesh/zen-gc.git
 cd zen-gc
 go mod download
 ```

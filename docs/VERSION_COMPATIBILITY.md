@@ -107,7 +107,7 @@ The following Kubernetes versions are regularly tested:
 
 **When**: After production validation and API stability guarantee
 
-**Breaking Changes**: None (guaranteed)
+**Breaking Changes**: None planned (subject to API stability policy)
 
 **Migration Steps**:
 

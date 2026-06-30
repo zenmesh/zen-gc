@@ -94,7 +94,7 @@ def check_docs_index():
         return
 
     check("INDEX links to zen-mesh.io", "zen-mesh.io" in content)
-    check("INDEX links to GitHub", "github.com/zen-mesh/zen-gc" in content)
+    check("INDEX links to GitHub", "github.com/zenmesh/zen-gc" in content)
     check("INDEX has 'Where this fits with Zen Mesh' section", "Where this fits with Zen Mesh" in content)
     check("INDEX describes as Kubernetes garbage collection controller", "garbage collection controller" in content.lower())
     check("INDEX mentions Apache-2.0", "apache-2.0" in content.lower() or "Apache-2.0" in content)

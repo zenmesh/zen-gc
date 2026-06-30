@@ -50,7 +50,7 @@ zen-gc is a free Apache-2.0 **Kubernetes garbage collection controller** that pr
 
 ## Resources
 
-- [GitHub Repository](https://github.com/zen-mesh/zen-gc)
+- [GitHub Repository](https://github.com/zenmesh/zen-gc)
 - [README](../README.md) — project overview and quick start
 - [Canonical Docs Map](CANONICAL_DOCS_MAP.md) — full document index
 - [Zen Mesh](https://zen-mesh.io) — commercial platform from the same team
