@@ -31,13 +31,30 @@ zen-gc is a free Apache-2.0 **Kubernetes garbage collection controller** that pr
 - [Contributing Guidelines](../CONTRIBUTING.md)
 - [Release Process](RELEASE.md)
 
+## Public Trust & Evidence
+
+- [Claims and Maturity](claims.md) — what zen-gc does and does not do
+- [Evidence Index](evidence/README.md) — catalog of tested claims and gaps
+- [Kubernetes Compatibility](compatibility/kubernetes.md) — evidenced K8s version support
+
+## Security
+
+- [Security Policy](../SECURITY.md) — vulnerability disclosure
+- [Threat Model](security/threat-model.md) — controller threat model
+- [Supply Chain Security](security/supply-chain.md) — build, scan, provenance
+
+## AI Interfaces
+
+- [AI Status](ai/status.json) — maturity JSON
+- [AI Evidence Index](ai/evidence-index.json) — evidence index JSON
+
 ## Resources
 
 - [GitHub Repository](https://github.com/zen-mesh/zen-gc)
 - [README](../README.md) — project overview and quick start
+- [Canonical Docs Map](CANONICAL_DOCS_MAP.md) — full document index
 - [Zen Mesh](https://zen-mesh.io) — commercial platform from the same team
 - [Zen Mesh Documentation](https://docs.zen-mesh.io)
-- [Security Policy](../SECURITY.md)
 - [Code of Conduct](../CODE_OF_CONDUCT.md)
 - [Changelog](../CHANGELOG.md)
 

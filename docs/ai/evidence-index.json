@@ -1,0 +1,133 @@
+{
+  "project": "zen-gc",
+  "version": "1.0",
+  "description": "Machine-readable evidence index for zen-gc. Each entry describes whether evidence exists for a given category.",
+  "categories": [
+    {
+      "id": "ci-unit-tests",
+      "name": "Unit tests",
+      "status": "present",
+      "detail": "go test ./... runs in CI. 65% coverage gate enforced.",
+      "location": ".github/workflows/ci.yml"
+    },
+    {
+      "id": "ci-integration-tests",
+      "name": "Integration tests",
+      "status": "present",
+      "detail": "test/integration/ run in CI with controller-runtime envtest.",
+      "location": ".github/workflows/ci.yml"
+    },
+    {
+      "id": "ci-race-detection",
+      "name": "Race detection",
+      "status": "present",
+      "detail": "go test -v -race run in CI.",
+      "location": ".github/workflows/ci.yml"
+    },
+    {
+      "id": "vulnerability-scan",
+      "name": "Vulnerability scanning",
+      "status": "present",
+      "detail": "govulncheck + gosec in CI security job. All 14 reachable vulnerabilities remediated: golang.org/x/net v0.47.0→v0.55.0, Go 1.26.0→1.26.4. govulncheck PASS.",
+      "location": ".github/workflows/security.yml"
+    },
+    {
+      "id": "kubernetes-compatibility-client-go",
+      "name": "Kubernetes API compatibility (client-go version)",
+      "status": "present",
+      "detail": "client-go v0.35 targets K8s 1.31.x.",
+      "location": "go.mod"
+    },
+    {
+      "id": "kubernetes-compatibility-cloud-e2e",
+      "name": "Cloud Kubernetes E2E",
+      "status": "missing",
+      "detail": "No EKS/GKE/AKS E2E tests or results published.",
+      "location": null
+    },
+    {
+      "id": "container-image",
+      "name": "Container image build",
+      "status": "present",
+      "detail": "Multi-arch (amd64, arm64) image built in CI.",
+      "location": ".github/workflows/build-multiarch.yml"
+    },
+    {
+      "id": "helm-chart",
+      "name": "Helm chart",
+      "status": "present",
+      "detail": "Chart published to Artifact Hub. Version 0.0.1-alpha.",
+      "location": "docs/gc-controller-0.0.1-alpha.tgz"
+    },
+    {
+      "id": "release-evidence",
+      "name": "Release evidence documentation",
+      "status": "template-only",
+      "detail": "Template exists; no release-specific evidence files populated.",
+      "location": "docs/evidence/releases/template.md"
+    },
+    {
+      "id": "sbom",
+      "name": "SBOM",
+      "status": "missing",
+      "detail": "No CycloneDX/SPDX SBOM generated during build.",
+      "location": null
+    },
+    {
+      "id": "slsa-provenance",
+      "name": "SLSA provenance",
+      "status": "missing",
+      "detail": "No build attestation published.",
+      "location": null
+    },
+    {
+      "id": "security-policy",
+      "name": "Security policy",
+      "status": "present",
+      "detail": "Vulnerability disclosure policy documented.",
+      "location": "SECURITY.md"
+    },
+    {
+      "id": "threat-model",
+      "name": "Threat model",
+      "status": "present",
+      "detail": "Threat model document created for this release.",
+      "location": "docs/security/threat-model.md"
+    },
+    {
+      "id": "supply-chain",
+      "name": "Supply chain documentation",
+      "status": "present",
+      "detail": "Supply chain posture documented.",
+      "location": "docs/security/supply-chain.md"
+    },
+    {
+      "id": "rbac-documentation",
+      "name": "RBAC documentation",
+      "status": "present",
+      "detail": "Detailed RBAC permissions and security considerations documented.",
+      "location": "docs/RBAC.md"
+    },
+    {
+      "id": "code-ownership",
+      "name": "Code ownership",
+      "status": "present",
+      "detail": "CODEOWNERS file defines review requirements.",
+      "location": ".github/CODEOWNERS"
+    },
+    {
+      "id": "dependabot",
+      "name": "Dependabot dependency updates",
+      "status": "present",
+      "detail": "Automated updates for Go modules, Docker, and GitHub Actions.",
+      "location": ".github/dependabot.yml"
+    },
+    {
+      "id": "vulnerability-remediation",
+      "name": "Vulnerability remediation (govulncheck)",
+      "status": "present",
+      "detail": "14 reachable vulnerabilities remediated. golang.org/x/net v0.47.0→v0.55.0. Go toolchain 1.26.0→1.26.4. govulncheck PASS.",
+      "location": "go.mod, .github/workflows/*.yml"
+    }
+  ]
+}

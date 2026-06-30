@@ -1,0 +1,55 @@
+{
+  "project": "zen-gc",
+  "description": "Declarative garbage collection controller for Kubernetes",
+  "version": "0.0.1-alpha",
+  "license": "Apache-2.0",
+  "language": "Go",
+  "go_version": "1.26.4",
+  "maturity": "alpha",
+  "api_stability": "v1alpha1 (may change)",
+  "ci_status": {
+    "unit_tests": "passing",
+    "coverage_gate_65": true,
+    "integration_tests": "passing",
+    "race_detection": true,
+    "e2e_kind": "available_not_in_ci",
+    "vulnerability_scan_govulncheck": "configured",
+    "vulnerability_scan_gosec": "configured",
+    "vulnerability_scan_trivy": "configured_non_blocking"
+  },
+  "dependencies": {
+    "controller_runtime": "v0.19",
+    "client_go": "v0.35",
+    "kubernetes_api_target": "1.31.x"
+  },
+  "security": {
+    "vulnerability_reporting": "security@zen-mesh.io",
+    "supported_versions": "0.1.x",
+    "sbom_published": false,
+    "slsa_provenance_published": false,
+    "image_signing": false,
+    "container_non_root": true,
+    "read_only_root_fs": true,
+    "restricted_pod_security": true
+  },
+  "evidence": {
+    "evidence_index": "docs/evidence/README.md",
+    "claims_doc": "docs/claims.md",
+    "ai_evidence_index": "docs/ai/evidence-index.json",
+    "release_evidence": "docs/evidence/releases/README.md"
+  },
+  "known_gaps": [
+    "No cloud Kubernetes E2E evidence",
+    "No SBOM generation",
+    "No SLSA provenance",
+    "No image signing",
+    "No fuzz testing",
+    "No penetration testing"
+  ],
+  "non_goals": [
+    "Not a SaaS control plane or hosted service",
+    "Not a credential vault or secret store",
+    "Not a replacement for Kubernetes RBAC or admission policy",
+    "Not production-live or commercially launched"
+  ]
+}
