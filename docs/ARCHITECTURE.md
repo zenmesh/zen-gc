@@ -599,22 +599,18 @@ Each policy can customize deletion behavior:
 - Grace period (`gracePeriodSeconds`)
 - Propagation policy (`propagationPolicy`)
 
-## Production Readiness
+## Operational Maturity
 
-### Overall Assessment: **8.5/10** ✅
+zen-gc is a community OSS project at **v0.0.1-alpha** maturity (API version `v1alpha1`). It includes metrics, alerting, and health checks for self-managed deployments. Review [docs/claims.md](docs/claims.md) and [docs/evidence/README.md](docs/evidence/README.md) for evidenced coverage before using in production-critical paths.
 
-zen-gc is **production-ready** with excellent metrics, comprehensive documentation, good alerting, and solid test coverage.
-
-| Category | Score | Status |
-|----------|-------|--------|
-| **Metrics** | 9/10 | ✅ Excellent |
-| **Tests** | 8/10 | ✅ Good (65% overall coverage, 80%+ stretch goal) |
-| **Documentation** | 10/10 | ✅ Excellent |
-| **Alert Rules** | 8/10 | ✅ Good |
-| **Dashboards** | 8/10 | ✅ Good |
-| **Health Checks** | 7/10 | ⚠️ Good |
-| **Security** | 9/10 | ✅ Excellent |
-| **Observability** | 9/10 | ✅ Excellent |
+| Category | Status | Notes |
+|----------|--------|-------|
+| **Metrics** | ✅ Implemented | 11 Prometheus gauges/counters/histograms |
+| **Tests** | ⚠️ Partial | 65% overall coverage gate enforced; integration tests in CI |
+| **Documentation** | ✅ Present | Full docs tree including operations, security, trust layer |
+| **Alert Rules** | ⚠️ Good | Prometheus alerting rules included |
+| **Health Checks** | ⚠️ Basic | Leader election + reconciler health |
+| **Security** | ⚠️ Present | Non-root, read-only root FS, restricted PSP, govulncheck + gosec in CI |
 
 ### Metrics
 
@@ -670,7 +666,7 @@ See [SECURITY.md](../SECURITY.md) and [SECRET_MANAGEMENT.md](SECRET_MANAGEMENT.m
 
 ### Recommendations
 
-✅ **No immediate action required** - Component is production-ready.
+⚠️ **Review claims and evidence** — see [docs/claims.md](docs/claims.md) and [docs/evidence/README.md](docs/evidence/README.md) before using in production-critical paths. This is a v0.0.1-alpha community OSS project.
 
 **Future Enhancements** (optional):
 - Raise `pkg/controller` coverage toward 65%+ per package and 80%+ overall

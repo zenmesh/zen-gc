@@ -163,20 +163,26 @@ ttl:
 - Prometheus metrics, Kubernetes events, HA via leader election
 - Test suite with CI and optional kind e2e (`make e2e-kind`)
 
-## From the Zen Mesh community
+## Status
 
-**zen-gc** is part of the broader **Zen Mesh** ecosystem — a set of open-source and commercial tools for Kubernetes and private-network operations.
+zen-gc is a public repository available for community use, feedback, and contributions. It is actively maintained as open source under the Apache-2.0 license. This is not an official product launch — zen-gc is a free community tool built by the Zen Mesh team.
+
+## Public surface
+
+- **Source of truth:** this GitHub repository — all documentation, evidence, and issue tracking live here
+- **Public trust & evidence:** [docs/evidence/README.md](docs/evidence/README.md)
+- **Claims and maturity:** [docs/claims.md](docs/claims.md)
+- **AI context:** [llms.txt](llms.txt)
+- **No hosted website:** zen-gc does not have a dedicated website; `kube-zen.io` is a parked/legacy domain that is not used for zen-gc
+
+## From the Zen Mesh team
+
+**zen-gc** is a free, independent Apache-2.0 OSS project from the same team that builds **Zen Mesh** (a commercial webhook delivery platform). The two projects are **separate and independent** — zen-gc does not require Zen Mesh, and Zen Mesh does not require zen-gc.
 
 | Project | Description | License |
 |---------|-------------|---------|
 | [zen-gc](https://github.com/zen-mesh/zen-gc) | Free OSS Kubernetes garbage collection controller (this project) | Apache-2.0 |
 | [Zen Mesh](https://zen-mesh.io) | Commercial webhook delivery and data-plane operations platform | Commercial |
-
-zen-gc is useful independently — it does not require Zen Mesh, and Zen Mesh does not require zen-gc.
-
-## Status
-
-zen-gc is a public repository available for community use, feedback, and contributions. It is actively maintained as open source under the Apache-2.0 license. This is not an official product launch — zen-gc is a free community tool built by the Zen Mesh team.
 
 ## References
 
@@ -185,9 +191,8 @@ zen-gc is a public repository available for community use, feedback, and contrib
 
 ## Links
 
-- **Zen Mesh Inc.**: [zen-mesh.io](https://zen-mesh.io)
-- **zen-gc Documentation Index**: [docs/INDEX.md](docs/INDEX.md)
-- **Zen Mesh Documentation**: [docs.zen-mesh.io](https://docs.zen-mesh.io)
+- **GitHub Repository**: [github.com/zen-mesh/zen-gc](https://github.com/zen-mesh/zen-gc)
+- **Documentation Index**: [docs/INDEX.md](docs/INDEX.md)
 - **Helm (Artifact Hub)**: [gc-controller chart](https://artifacthub.io/packages/helm/zengc/gc-controller)
 - **Explainer video**: [YouTube](https://www.youtube.com/watch?v=P8afhcgjWVQ&list=PL1AGc_sKXJBdInu0yffTJxN828oaCuqwx)
-- **GitHub Repository**: [github.com/zen-mesh/zen-gc](https://github.com/zen-mesh/zen-gc)
+- **Zen Mesh Inc.**: [zen-mesh.io](https://zen-mesh.io)

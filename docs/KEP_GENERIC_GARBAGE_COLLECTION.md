@@ -6,7 +6,7 @@
 **SIG**: sig-apps (primary), sig-architecture (secondary)  
 **KEP Number**: TBD
 
-> **Note**: This KEP document describes a potential future enhancement to Kubernetes. zen-gc is currently a standalone, production-ready project. If zen-gc gains significant community adoption and proves valuable, this KEP may be submitted to propose integrating similar functionality into upstream Kubernetes.
+> **Note**: This KEP document describes a potential future enhancement to Kubernetes. zen-gc is a standalone community OSS project (v0.0.1-alpha). If zen-gc gains significant community adoption and proves valuable, this KEP may be submitted to propose integrating similar functionality into upstream Kubernetes.
 
 ---
 
@@ -21,7 +21,7 @@ This proposal (for future consideration) introduces a generic, declarative garba
 - **Generic**: Works with any Kubernetes resource type (CRDs, core resources, etc.)
 - **Kubernetes-Native**: Uses standard Kubernetes patterns (spec fields, not annotations)
 - **Zero Dependencies**: No external controllers or policy engines required
-- **Production-Ready**: Built-in rate limiting, metrics, and observability
+- **Operational maturity**: Built-in rate limiting, metrics, and observability (see [docs/claims.md](claims.md) for evidenced maturity)
 
 ---
 
