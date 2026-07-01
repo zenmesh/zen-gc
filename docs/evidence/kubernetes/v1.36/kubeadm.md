@@ -19,7 +19,7 @@ reconciliation is **not proven** on this VM due to control-plane instability
 | **Libvirt domain** | `h462-gateway-kubeadm-1780668538` |
 | **OS** | Debian 13 (trixie) |
 | **Kernel** | 6.12.74+deb13+1-amd64 |
-| **RAM** | 6 GB (increased from 4 GB; set live via `virsh setmem` before retry) |
+| **RAM** | 10 GB (increased from 4→6→10 GB; cold boot to set max memory) |
 | **vCPUs** | 2 |
 | **Containerd** | 1.7.24 (Debian repos) |
 | **CNI** | Flannel v0.28.5 |
@@ -115,6 +115,15 @@ lose leader election leases → exit with error → kubelet restarts → CrashLo
 accumulates. The root trigger (why the API server becomes unreachable) remains
 unresolved and appears to be specific to this kernel/containerd/kubeadm combination
 on Debian 13 (kernel `6.12.74+deb13+1-amd64` + containerd `1.7.24`).
+
+A third attempt with **10 GB RAM** (cold boot, `virsh setmaxmem` to 10 GiB,
+confirmed 9.7 GiB total / 7.7 GiB available inside VM) showed the identical
+failure pattern: API server logs confirm etcd connection timeout
+(`dial tcp 127.0.0.1:2379: operation was canceled`), followed by CM and scheduler
+lease loss. The host also runs a `k3s server` process (6% MEM), which may
+contribute to resource contention or port conflict. Root cause is not memory
+pressure — appears to be related to etcd/API server interaction under 2 vCPUs
+or kernel 6.12.74.
 
 The RAM increase alone did not resolve the instability. The control-plane
 components run as containers in the same pause sandbox and are subject to

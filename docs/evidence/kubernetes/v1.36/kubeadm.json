@@ -14,6 +14,8 @@
   "ram_before_retry_gb": 4,
   "ram_after_retry_gb": 6,
   "ram_after_retry_available_gb": 3.9,
+  "ram_after_retry_10gb_gb": 10,
+  "ram_after_retry_10gb_available_gb": 7.7,
   "reboot_performed": true,
   "status": "PARTIAL",
   "crd_registered": true,
@@ -48,7 +50,7 @@
   },
   "runtime_reconciliation": {
     "proven": false,
-    "blocker": "Control-plane instability persists after 4 GB → 6 GB RAM increase and VM reboot. Controller-manager and scheduler enter CrashLoopBackOff every 1–5 min due to leader election lease loss (API server unreachable). No OOM. Root cause unresolved on this kernel/containerd/kubeadm combination."
+    "blocker": "Control-plane instability persists across three RAM tiers (4 GB, 6 GB, 10 GB). Third attempt at 10 GB (cold boot, 7.7 GB available, no OOM) showed identical failure: API server etcd connection timeout followed by CM/scheduler lease loss. Also detected running k3s server process (6% MEM) that may contribute to contention. Root cause not memory pressure — likely 2 vCPU ceiling, etcd/API server interaction on kernel 6.12.74, or potential k3s conflict."
   },
   "vm_retry_history": [
     {
@@ -63,12 +65,21 @@
       "ram_gb": 6,
       "result": "CP initially stable after reboot, controller pods reached ContainerCreating. CP crashed 10+ min into runtime validation (CM: lease loss, Scheduler: lease loss). No OOM.",
       "runtime_status": "blocked"
+    },
+    {
+      "action": "RAM increased to 10 GB (cold boot, setmaxmem)",
+      "reboot": true,
+      "ram_gb": 10,
+      "result": "CP unstable with same failure pattern: API server etcd timeout, CM/scheduler lease loss. 7.7 GB available, no OOM. k3s server process detected (6% MEM). 2 vCPUs. Root cause not memory-related.",
+      "runtime_status": "blocked"
     }
   ],
   "known_issues": [
-    "Control-plane instability persists after 4GB→6GB RAM increase and VM reboot. CM/scheduler exit with code 1 (Error) due to leader election lease loss when API server becomes unreachable.",
+    "Control-plane instability persists across 3 RAM tiers (4, 6, 10 GB). CM/scheduler exit with code 1 (Error) due to leader election lease loss when API server becomes unreachable.",
     "GC controller pods cannot run on this VM due to CM/scheduler CrashLoopBackOff.",
-    "Root cause unresolved: kubelet cycles static pods; CM/scheduler lose lease and exit; backoff accumulates. Suspected kubelet/pause-container reconcile issue on kernel 6.12.74 + containerd 1.7.24.",
+    "Root cause unresolved: kubelet cycles static pods. 10 GB retry showed API server etcd timeout (dial tcp 127.0.0.1:2379: operation was canceled) — suggests etcd connectivity issue, not memory.",
+    "Host has a running k3s server process (6% MEM, 12% CPU) that may contend for resources or ports.",
+    "2 vCPUs may be insufficient for stable CP under load.",
     "kube-proxy in CrashLoopBackOff (known flannel/kube-proxy interaction).",
     "v1.36 kind and k3d PASS results demonstrate runtime behavior on stable clusters (see kind.md, k3d.md)."
   ],
