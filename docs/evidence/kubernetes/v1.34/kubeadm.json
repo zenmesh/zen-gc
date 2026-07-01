@@ -1,0 +1,80 @@
+{
+  "repo": "zenmesh/zen-gc",
+  "commit": "a632052",
+  "date": "2026-07-01",
+  "cluster_type": "kubeadm",
+  "kubernetes_version": "v1.34.9",
+  "vm_hostname": "h462-gateway-kubeadm-1780668538",
+  "vm_ip": "192.168.122.179",
+  "vm_disposable_confirmed": true,
+  "vm_os": "Debian 13 (trixie)",
+  "containerd_version": "1.7.24",
+  "cni": "flannel v0.28.5",
+  "kernel": "6.12.74+deb13+1-amd64",
+  "status": "PASS",
+  "crd_registered": true,
+  "crd_name": "garbagecollectionpolicies.gc.ops.zen-mesh.io",
+  "crd_shortnames": ["gcp", "gcpolicy"],
+  "crd_scope": "Namespaced",
+  "crud_tests": {
+    "create_basic": {
+      "status": "PASS",
+      "spec": {
+        "targetResource": {"apiVersion": "v1", "kind": "Pod", "namespace": "default"},
+        "ttl": {"secondsAfterCreation": 3600}
+      }
+    },
+    "create_with_behavior": {
+      "status": "PASS",
+      "spec": {
+        "targetResource": {"apiVersion": "v1", "kind": "Pod", "namespace": "default"},
+        "ttl": {"secondsAfterCreation": 7200},
+        "behavior": {"dryRun": true}
+      }
+    },
+    "create_full_schema": {
+      "status": "PASS",
+      "spec": {
+        "targetResource": {"apiVersion": "apps/v1", "kind": "Deployment", "namespace": "gc-system"},
+        "ttl": {"secondsAfterCreation": 86400},
+        "conditions": {"phase": ["Succeeded"]},
+        "behavior": {
+          "maxDeletionsPerSecond": 5,
+          "batchSize": 10,
+          "propagationPolicy": "Foreground",
+          "gracePeriodSeconds": 30
+        }
+      }
+    },
+    "list": {"status": "PASS"},
+    "read_yaml": {"status": "PASS"},
+    "delete": {"status": "PASS"},
+    "schema_validation": {"status": "PASS", "note": "Rejects invalid types (e.g., phase as string instead of array)"}
+  },
+  "gc_controller_deployment": {
+    "deployed": true,
+    "pods_running": false,
+    "note": "Pods stuck Pending due to scheduler instability"
+  },
+  "known_issues": [
+    "Control-plane stability: periodic crash-loops due to containerd sandbox_image mismatch (pause:3.8 vs pause:3.10.1). Fixed by setting sandbox_image in /etc/containerd/config.toml and nuclear reset.",
+    "GC controller pods remain Pending (no node scheduling) during stable windows."
+  ],
+  "commands_run": [
+    "kubeadm init --config=/tmp/kubeadm-config.yaml",
+    "kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml",
+    "kubectl apply -f deploy/manifests/ (namespace, rbac, service, deployment)",
+    "kubectl apply -f - (GCP YAML for create/list/delete CRUD)",
+    "crictl rm -a && crictl rmp -a && systemctl restart kubelet (nuclear reset)"
+  ],
+  "result": "PASS",
+  "limitations": [
+    "Only tested on single-node control-plane with flannel CNI",
+    "No HA or multi-node testing",
+    "Webhook admission not tested (self-signed certs)",
+    "Operator controller functionality not verified at runtime (pods Pending)",
+    "CRD acceptance and CRUD verified against K8s v1.34.9 API server"
+  ],
+  "suggested_for_upgrade": true,
+  "upgrade_to": "v1.35.x"
+}
