@@ -41,12 +41,13 @@
   "validated_environments": [
     "kind with Kubernetes v1.36.1 (PASS)",
     "k3d (K3s) with Kubernetes v1.36.2+k3s1 (PASS)",
-    "kubeadm — partial (CRD/API/RBAC pass, runtime blocked by CP instability)"
+    "kubeadm with Kubernetes v1.36.2 (PASS — CRD/API + runtime + GC)",
+    "kubeadm with Kubernetes v1.34.9 (PASS — CRD/API + runtime + GC)"
   ],
-  "validation_evidence_dir": "docs/evidence/kubernetes/v1.36/",
+  "validation_evidence_dir": "docs/evidence/kubernetes/v1.36/ and docs/evidence/kubernetes/v1.34/",
   "known_gaps": [
     "No cloud Kubernetes E2E evidence",
-    "kubeadm v1.36.x runtime evidence is PASS (containerd 2.2.5 upgraded from Debian 1.7.24)",
+    "kubeadm v1.36.x and v1.34.x runtime evidence is PASS (containerd 2.2.5)",
     "No SBOM generation",
     "No SLSA provenance",
     "No image signing",

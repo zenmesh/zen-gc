@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "ee5fea2",
+  "commit": "ea627eb",
   "date": "2026-07-01",
   "cluster_type": "kubeadm",
   "kubernetes_version": "v1.34.9",
@@ -8,41 +8,82 @@
   "vm_ip": "192.168.122.179",
   "vm_disposable_confirmed": true,
   "vm_os": "Debian 13 (trixie)",
-  "containerd_version": "1.7.24",
+  "container_runtime": "containerd 2.2.5",
   "cni": "flannel v0.28.5",
+  "coredns": "v1.12.1 (deployed via kubeadm addon)",
   "kernel": "6.12.74+deb13+1-amd64",
+  "ram_gb": 12,
+  "ram_available_gib": 10,
+  "vcpus": 4,
   "status": "PASS",
-  "validation_scope": "CRD/API compatibility only",
+  "validation_scope": "Full CRD/API + controller runtime + GC behavior",
   "crd_registered": true,
+  "crd_install_idempotent": true,
   "crd_name": "garbagecollectionpolicies.gc.ops.zen-mesh.io",
   "crd_shortnames": ["gcp", "gcpolicy"],
   "crd_scope": "Namespaced",
   "crud_tests": {
     "create_basic": {"status": "PASS"},
     "create_full_schema": {"status": "PASS"},
-    "create_dryrun": {"status": "PASS"},
     "list": {"status": "PASS"},
     "read_yaml": {"status": "PASS"},
+    "reapply_idempotent": {"status": "PASS"},
     "delete": {"status": "PASS"}
+  },
+  "negative_schema_tests": {
+    "wrong_type_string_for_integer": {"status": "PASS", "detail": "Rejected: spec.ttl.secondsAfterCreation must be integer"},
+    "unknown_field": {"status": "PASS", "detail": "Rejected: unknown field spec.nonexistentField (strict decoding)"},
+    "empty_spec": {"status": "PASS", "detail": "Rejected: spec.targetResource and spec.ttl required"},
+    "missing_required_targetResource": {"status": "PASS", "detail": "Rejected: spec.targetResource required"}
+  },
+  "rbac_controller_permissions": {
+    "garbagecollectionpolicies": ["get", "list", "watch"],
+    "garbagecollectionpolicies/status": ["get", "update", "patch"],
+    "leases": ["create", "get", "list", "watch", "update", "patch", "delete"],
+    "all_resources": ["get", "list", "watch", "delete"],
+    "note": "Events RBAC missing (cosmetic only — GC operations succeed)"
   },
   "gc_controller_deployment": {
     "deployed": true,
-    "pods_running": false,
-    "note": "Pods stuck Pending due to scheduler instability. Not part of v1.34 validation scope."
+    "replicas": 2,
+    "ready_replicas": 2,
+    "pods_scheduled": true,
+    "leader_election": true,
+    "worker_count": 1,
+    "webhook_insecure": true,
+    "note": "Controller acquired leader lease, workers started, webhook listening on :9443 (insecure mode)"
   },
-  "kind_tested": false,
-  "k3d_tested": false,
+  "runtime_reconciliation": {
+    "proven": true,
+    "controller_ready": true,
+    "reconciliation_workers_active": true,
+    "blocker": null
+  },
+  "gc_behavior": {
+    "proven": true,
+    "disposable_resource_deleted": true,
+    "control_resource_untouched": true,
+    "test_description": "GCP with labelSelector matchLabels{gc-disposable:true} + TTL 10s. Disposable pod with gc-disposable=true label was deleted within 1 GC interval. Control pod with gc-control=true label remained running.",
+    "ttl_seconds": 10,
+    "gc_interval": "1m",
+    "controller_log_proof": "Deleted resource default/disposable-pod (reason: ttl_expired)",
+    "second_cycle": "matched=0, deleted=0, pending=0"
+  },
+  "post_validation_stability": {
+    "cp_restarts": 0,
+    "node_ready": true,
+    "coredns_resolving": true
+  },
+  "compatibility_note": "Full runtime + GC behavior now proven on v1.34 with containerd 2.2.5. Previous v1.34 evidence (CRD/API only) was limited by containerd 1.7.24 CP instability which is resolved by upgrading to containerd 2.2.5.",
   "known_issues": [
-    "Control-plane stability: periodic crash-loops due to containerd sandbox_image mismatch (pause:3.8 vs pause:3.10.1). Fixed in config, but backoff accumulation causes re-cycling.",
-    "Runtime controller reconciliation not validated on v1.34."
+    "Events RBAC missing — controller cannot create/patch events. GC operations complete successfully regardless."
   ],
   "result": "PASS",
   "limitations": [
-    "CRD/API compatibility only — no runtime controller proof claimed for v1.34",
-    "Only tested on single-node control-plane with flannel CNI",
-    "No HA or multi-node testing",
-    "kind and k3d/K3s not tested on v1.34",
-    "Webhook admission not tested",
-    "For runtime-controller evidence see v1.36 kind and k3d reports"
+    "Single-node control-plane only (no HA).",
+    "Debian 13 with containerd 2.2.5 only (not containerd 1.7.24).",
+    "flannel CNI only.",
+    "Webhook running in insecure mode (no TLS certs).",
+    "No cloud Kubernetes testing."
   ]
 }

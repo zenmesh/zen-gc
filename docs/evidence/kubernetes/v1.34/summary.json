@@ -1,28 +1,33 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "ee5fea2",
+  "commit": "ea627eb",
   "date": "2026-07-01",
-  "validation_scope": "CRD/API compatibility only",
+  "validation_scope": "CRD/API + controller runtime + GC behavior",
   "validation_matrix": {
     "kubeadm": {
       "status": "PASS",
       "kubernetes_version": "v1.34.9",
-      "scope": "CRD/API compatibility only",
+      "scope": "CRD/API + runtime + GC",
       "vm_hostname": "h462-gateway-kubeadm-1780668538",
       "vm_ip": "192.168.122.179",
       "vm_disposable_confirmed": true,
       "vm_os": "Debian 13 (trixie)",
-      "containerd_version": "1.7.24",
+      "container_runtime": "containerd 2.2.5",
       "cni": "flannel v0.28.5",
       "kernel": "6.12.74+deb13+1-amd64",
       "crd_registered": true,
       "crd_shortnames": ["gcp", "gcpolicy"],
-      "crud_tests_passed": ["create_basic", "create_dryrun", "create_full_schema", "list", "read", "delete"],
+      "crud_tests_passed": ["create_basic", "create_full_schema", "list", "read", "reapply", "delete"],
+      "negative_schema_tests_passed": ["wrong_type", "unknown_field", "empty_spec", "missing_target"],
+      "controller_deployed": true,
+      "controller_ready": true,
+      "leader_election": true,
+      "gc_behavior_proven": true,
       "kind_tested": false,
       "k3d_tested": false,
       "notes": [
-        "CRD/API compatibility only. Runtime controller reconciliation not claimed for v1.34.",
-        "Control-plane instability: containerd sandbox_image mismatch (pause:3.8 vs pause:3.10.1).",
+        "Full runtime + GC behavior proven with containerd 2.2.5.",
+        "Previous containerd 1.7.24 caused CP instability (documented in v1.34 kubeadm.md history).",
         "kind and k3d/K3s not validated on v1.34."
       ],
       "evidence_md": "docs/evidence/kubernetes/v1.34/kubeadm.md",
@@ -30,7 +35,7 @@
     }
   },
   "notes": [
-    "v1.34 validation is limited to kubeadm CRD/API compatibility. For runtime-controller evidence see v1.36.",
-    "This does not imply validation on EKS, GKE, AKS, OpenShift, Rancher, all CNIs, all storage providers, or all Kubernetes 1.34 environments."
+    "v1.34 validation now includes full controller runtime + GC behavior with containerd 2.2.5.",
+    "This does not imply validation on EKS, GKE, AKS, OpenShift, Rancher, all CNIs, or all Kubernetes 1.34 environments."
   ]
 }
