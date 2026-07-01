@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "ee5fea2",
+  "commit": "490cef0",
   "date": "2026-07-01",
   "cluster_type": "kubeadm",
   "kubernetes_version": "v1.36.2",
@@ -11,7 +11,11 @@
   "containerd_version": "1.7.24",
   "cni": "flannel v0.28.5",
   "kernel": "6.12.74+deb13+1-amd64",
-  "status": "PASS",
+  "ram_before_retry_gb": 4,
+  "ram_after_retry_gb": 6,
+  "ram_after_retry_available_gb": 3.9,
+  "reboot_performed": true,
+  "status": "PARTIAL",
   "crd_registered": true,
   "crd_install_idempotent": true,
   "crd_name": "garbagecollectionpolicies.gc.ops.zen-mesh.io",
@@ -34,26 +38,47 @@
   "rbac_controller_permissions": {
     "garbagecollectionpolicies": ["get", "list", "watch"],
     "garbagecollectionpolicies/status": ["get", "update", "patch"],
-    "list_pods_gc_system": "yes",
-    "delete_pods_all_ns": "yes"
+    "list_pods_all_namespaces": "yes",
+    "delete_pods_all_namespaces": "yes"
   },
   "gc_controller_deployment": {
     "deployed": true,
     "pods_scheduled": false,
-    "note": "Deployment accepted, ReplicaSet created, toleration patch applied, taint removed, but controller-manager CrashLoopBackOff prevents pod scheduling and runtime verification on this VM"
+    "note": "Deployment accepted, ReplicaSet created, toleration patch applied, taint removed. After RAM increase and reboot, pods reached ContainerCreating state but control-plane crashed before they completed startup."
   },
-  "known_issues": [
-    "Control-plane instability: kubelet cycles controller-manager and scheduler through CrashLoopBackOff every 1-5 minutes even after nuclear reset and correct sandbox_image. Root cause suspected to be kubelet/pause-container reconcile loop on kernel 6.12.74+deb13+1-amd64 with containerd 1.7.24.",
-    "GC controller pods cannot run on this VM due to controller-manager/scheduler instability. Runtime reconciliation not verified on v1.36 kubeadm.",
-    "kube-proxy in CrashLoopBackOff (known flannel/kube-proxy interaction on v1.36 kubeadm).",
-    "v1.36 kind and k3d PASS results (see kind.md, k3d.md) demonstrate runtime behavior on stable clusters."
+  "runtime_reconciliation": {
+    "proven": false,
+    "blocker": "Control-plane instability persists after 4 GB → 6 GB RAM increase and VM reboot. Controller-manager and scheduler enter CrashLoopBackOff every 1–5 min due to leader election lease loss (API server unreachable). No OOM. Root cause unresolved on this kernel/containerd/kubeadm combination."
+  },
+  "vm_retry_history": [
+    {
+      "action": "initial validation (prior session)",
+      "ram_gb": 4,
+      "result": "CP unstable, CRD/CRUD/negative/RBAC pass during API up windows",
+      "runtime_status": "blocked"
+    },
+    {
+      "action": "RAM increased to 6 GB live",
+      "reboot": true,
+      "ram_gb": 6,
+      "result": "CP initially stable after reboot, controller pods reached ContainerCreating. CP crashed 10+ min into runtime validation (CM: lease loss, Scheduler: lease loss). No OOM.",
+      "runtime_status": "blocked"
+    }
   ],
-  "result": "PASS",
+  "known_issues": [
+    "Control-plane instability persists after 4GB→6GB RAM increase and VM reboot. CM/scheduler exit with code 1 (Error) due to leader election lease loss when API server becomes unreachable.",
+    "GC controller pods cannot run on this VM due to CM/scheduler CrashLoopBackOff.",
+    "Root cause unresolved: kubelet cycles static pods; CM/scheduler lose lease and exit; backoff accumulates. Suspected kubelet/pause-container reconcile issue on kernel 6.12.74 + containerd 1.7.24.",
+    "kube-proxy in CrashLoopBackOff (known flannel/kube-proxy interaction).",
+    "v1.36 kind and k3d PASS results demonstrate runtime behavior on stable clusters (see kind.md, k3d.md)."
+  ],
+  "result": "PARTIAL",
   "limitations": [
-    "Only tested on single-node control-plane with flannel CNI",
-    "No HA or multi-node testing",
-    "Webhook admission not tested (self-signed certs)",
-    "Runtime controller reconciliation not verified on this VM (CBCBO preventing scheduling)",
-    "CRD acceptance, CRUD, negative schema, RBAC, and idempotent install verified against K8s v1.36.2 API server"
+    "CRD/API compatibility, CRUD lifecycle, negative schema, and RBAC boundaries validated (PASS during API up windows).",
+    "Runtime controller reconciliation BLOCKED — control-plane instability persists after RAM increase and reboot.",
+    "Only tested on single-node control-plane with flannel CNI.",
+    "No HA or multi-node testing.",
+    "Webhook admission not tested (self-signed certs).",
+    "v1.36 kind and k3d evidence exists for runtime behavior (see kind.md, k3d.md)."
   ]
 }

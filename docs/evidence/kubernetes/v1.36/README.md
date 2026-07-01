@@ -9,7 +9,7 @@ Each subdirectory or file represents a specific cluster provisioning method.
 |--------|-------------|--------|-------|
 | [kind](kind.md) | v1.36.1 | PASS | CRD + runtime |
 | [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS | CRD + runtime |
-| [kubeadm](kubeadm.md) | v1.36.2 | PASS | CRD + negative + RBAC (runtime blocked by VM instability) |
+| [kubeadm](kubeadm.md) | v1.36.2 | PARTIAL | CRD/API + negative + RBAC (runtime blocked by CP instability; retried with 6 GB RAM and reboot) |
 
 ## Scope
 

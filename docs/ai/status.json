@@ -41,12 +41,12 @@
   "validated_environments": [
     "kind with Kubernetes v1.36.1 (PASS)",
     "k3d (K3s) with Kubernetes v1.36.2+k3s1 (PASS)",
-    "kubeadm — blocked (VM runs v1.32.13)"
+    "kubeadm — partial (CRD/API/RBAC pass, runtime blocked by CP instability)"
   ],
   "validation_evidence_dir": "docs/evidence/kubernetes/v1.36/",
   "known_gaps": [
     "No cloud Kubernetes E2E evidence",
-    "No kubeadm v1.36.x evidence",
+    "kubeadm v1.36.x runtime evidence is PARTIAL (CP instability)",
     "No SBOM generation",
     "No SLSA provenance",
     "No image signing",

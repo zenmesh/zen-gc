@@ -18,7 +18,7 @@ boundaries, and install idempotency. Runtime controller reconciliation is
 | **Libvirt domain** | `h462-gateway-kubeadm-1780668538` |
 | **OS** | Debian 13 (trixie) |
 | **Kernel** | 6.12.74+deb13+1-amd64 |
-| **RAM** | 4 GB |
+| **RAM** | 6 GB (increased from 4 GB; set live via `virsh setmem` before retry) |
 | **vCPUs** | 2 |
 | **Containerd** | 1.7.24 (Debian repos) |
 | **CNI** | Flannel v0.28.5 |
@@ -92,15 +92,32 @@ garbage collection).
 
 ## Known Issues
 
-### Control-Plane Instability
+### Control-Plane Instability (Retried)
 The kubelet continuously cycles `kube-controller-manager` and
-`kube-scheduler` through CrashLoopBackOff every 1–5 minutes, even after
-nuclear reset (`crictl rm -a && crictl rmp -a && systemctl restart kubelet`)
-and with correct `sandbox_image = pause:3.10.1` from the start.
+`kube-scheduler` through CrashLoopBackOff every 1–5 minutes, despite:
 
-Root cause is unresolved — likely a kubelet/pause-container reconciliation
-loop specific to kernel `6.12.74+deb13+1-amd64` + containerd `1.7.24` on
-Debian 13. Memory is adequate (1.7 GiB available during cycling).
+- **VM RAM increased** from 4 GB → 6 GB (live via `virsh setmem`, confirmed
+  inside VM as 5.8 GiB total / 3.9 GiB available)
+- **VM rebooted** (uptime 23 min at post-reboot check)
+- **Nuclear reset** (`crictl rm -a && crictl rmp -a && systemctl restart kubelet`)
+- **Correct sandbox_image** (`pause:3.10.1`) set from the start
+
+**Root cause** (from container logs):
+- controller-manager: `Error retrieving lease lock` — connection refused to API server
+- scheduler: `Failed to renew lease` — context deadline exceeded when dialing
+  `https://192.168.122.179:6443`
+- Both exit with code 1 (Error), not 0 (SIGTERM)
+- No OOM events; 3.9 GiB available memory
+
+The failure cascade is: API server becomes briefly unreachable → CM and scheduler
+lose leader election leases → exit with error → kubelet restarts → CrashLoopBackOff
+accumulates. The root trigger (why the API server becomes unreachable) remains
+unresolved and appears to be specific to this kernel/containerd/kubeadm combination
+on Debian 13 (kernel `6.12.74+deb13+1-amd64` + containerd `1.7.24`).
+
+The RAM increase alone did not resolve the instability. The control-plane
+components run as containers in the same pause sandbox and are subject to
+kubelet reconciliation that continues to cycle them.
 
 This prevents:
 - GC controller pod scheduling (requires functional scheduler + CMS)

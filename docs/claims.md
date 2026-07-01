@@ -51,7 +51,7 @@ zen-gc is built with `client-go v0.35` targeting Kubernetes 1.31.x API. The CI t
 - Validated on **k3d (K3s)** with Kubernetes v1.36.2+k3s1 (`docs/evidence/kubernetes/v1.36/k3d.md`)
 
 **Blocked:**
-- kubeadm validation blocked (GAPI VM runs K8s v1.32.13; see `docs/evidence/kubernetes/v1.36/kubeadm.md`)
+- kubeadm validation — partial (control-plane instability on 6 GB VM; CRD/API/RBAC pass, runtime blocked by CrashLoopBackOff; see `docs/evidence/kubernetes/v1.36/kubeadm.md`)
 
 **Not evidenced:** Behavior on EKS, GKE, AKS, OpenShift, Rancher, or any Kubernetes version other than the specific validated environments above.
 
