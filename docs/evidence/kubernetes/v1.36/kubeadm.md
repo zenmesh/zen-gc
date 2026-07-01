@@ -125,7 +125,24 @@ contribute to resource contention or port conflict. Root cause is not memory
 pressure — appears to be related to etcd/API server interaction under 2 vCPUs
 or kernel 6.12.74.
 
-The RAM increase alone did not resolve the instability. The control-plane
+A fourth attempt added **2 more vCPUs** (4 total) + **fresh kubeadm reinstall**
+(`kubeadm reset`, state cleanup, `kubeadm init` with v1.36.2). The fresh cluster
+was stable for ~8 minutes (GCP CRD installed, test pods scheduled, controller
+binary uploaded). It then degraded into the identical failure pattern: API server
+etcd connection timeout, CM/scheduler lease loss, CrashLoopBackOff. No OOM at
+any point (7.7 GB available, 4 vCPUs idle).
+
+**Root cause is definitively NOT memory or CPU starvation** — the failure occurs
+regardless of resource allocation (4 GB/2 vCPU → 6 GB/2 vCPU → 10 GB/4 vCPU).
+Likely causes (in order of suspicion):
+1. **k3s server interference** — a `k3s server` process runs alongside kubeadm,
+   may contend for etcd ports or API server resources
+2. **containerd 1.7.24 + kernel 6.12.74 incompatibility** — this specific
+   combination on Debian 13 may have issues with pause container lifecycle
+3. **kubeadm v1.36.2 static pod behavior** — static pod manifests for
+   control-plane may interact poorly with kubelet reconciliation on this kernel
+
+The RAM and vCPU increases alone did not resolve the instability. The control-plane
 components run as containers in the same pause sandbox and are subject to
 kubelet reconciliation that continues to cycle them.
 
