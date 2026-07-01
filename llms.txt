@@ -16,7 +16,7 @@
 - [Kubernetes compatibility](docs/compatibility/kubernetes.md) — evidenced version support
 - [K8s v1.36 kind evidence](docs/evidence/kubernetes/v1.36/kind.md) — kind v1.36.1
 - [K8s v1.36 k3d evidence](docs/evidence/kubernetes/v1.36/k3d.md) — K3s v1.36.2+k3s1
-- [K8s v1.36 kubeadm evidence (blocked)](docs/evidence/kubernetes/v1.36/kubeadm.md) — blocked
+- [K8s v1.36 kubeadm evidence](docs/evidence/kubernetes/v1.36/kubeadm.md) — kubeadm v1.36.2 PASS
 - [Security policy](SECURITY.md) — vulnerability reporting
 - [Security (operations)](docs/security/threat-model.md) — threat model and RBAC assumptions
 - [Supply chain](docs/security/supply-chain.md) — build, scan, provenance status

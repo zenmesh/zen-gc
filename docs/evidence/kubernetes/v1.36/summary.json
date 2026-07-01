@@ -30,17 +30,19 @@
       "vm_ip": "192.168.122.179",
       "vm_disposable_confirmed": true,
       "vm_os": "Debian 13 (trixie)",
-      "containerd_version": "1.7.24",
+      "container_runtime": "containerd 2.2.5",
       "cni": "flannel v0.28.5",
       "kernel": "6.12.74+deb13+1-amd64",
       "crd_registered": true,
       "crd_shortnames": ["gcp", "gcpolicy"],
       "crud_tests_passed": ["create_basic", "create_full_schema", "list", "read", "delete", "schema_validation"],
+      "controller_deployed": true,
+      "controller_ready": true,
+      "leader_election": true,
+      "gc_behavior_proven": true,
       "notes": [
-        "Control-plane components have restarts (apiserver 4, etcd 2, scheduler 3) but stabilize as 1/1 Ready.",
-        "kube-proxy exhibits CrashLoopBackOff (known v1.36 kubeadm issue).",
-        "GC controller pods stuck Pending — scheduling artifact.",
-        "Previously BLOCKED (VM had v1.32.13); resolved by nuke-and-reinstall v1.36.2."
+        "Full CRD/API + controller runtime + GC deletion behavior validated.",
+        "Validated with containerd 2.2.5 (Debian default containerd 1.7.24 not claimed for this workload)."
       ],
       "evidence_md": "docs/evidence/kubernetes/v1.36/kubeadm.md",
       "evidence_json": "docs/evidence/kubernetes/v1.36/kubeadm.json"

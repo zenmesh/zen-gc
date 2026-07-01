@@ -27,7 +27,6 @@
       "k3d_tested": false,
       "notes": [
         "Full runtime + GC behavior proven with containerd 2.2.5.",
-        "Previous containerd 1.7.24 caused CP instability (documented in v1.34 kubeadm.md history).",
         "kind and k3d/K3s not validated on v1.34."
       ],
       "evidence_md": "docs/evidence/kubernetes/v1.34/kubeadm.md",

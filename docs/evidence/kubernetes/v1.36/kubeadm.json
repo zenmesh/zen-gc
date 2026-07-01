@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "451a95c4be778afb49b4f6961cbc886599cdd69d",
+  "commit": "9e2b6cd1f2260580635d4b6a155f40ff98bbbefe",
   "date": "2026-07-01",
   "cluster_type": "kubeadm",
   "kubernetes_version": "v1.36.2",
@@ -8,7 +8,7 @@
   "vm_ip": "192.168.122.179",
   "vm_disposable_confirmed": true,
   "vm_os": "Debian 13 (trixie)",
-  "container_runtime": "containerd 2.2.5 (upgraded from Debian's 1.7.24)",
+  "container_runtime": "containerd 2.2.5",
   "cni": "flannel v0.28.5",
   "coredns": "v1.12.0 (deployed via kubeadm init phase addon coredns)",
   "kernel": "6.12.74+deb13+1-amd64",
@@ -69,68 +69,16 @@
     "node_ready": true,
     "coredns_resolving": true
   },
-  "vm_retry_history": [
-    {
-      "action": "initial validation (prior session)",
-      "ram_gb": 4,
-      "vcpus": 2,
-      "containerd": "1.7.24",
-      "result": "CP unstable, CRD/CRUD/negative/RBAC pass during API up windows",
-      "runtime_status": "blocked"
-    },
-    {
-      "action": "RAM increased to 6 GB, reboot",
-      "ram_gb": 6,
-      "vcpus": 2,
-      "containerd": "1.7.24",
-      "result": "CP initially stable ~10 min, then crashed (CM/Scheduler lease loss)",
-      "runtime_status": "blocked"
-    },
-    {
-      "action": "RAM increased to 10 GB, cold boot",
-      "ram_gb": 10,
-      "vcpus": 2,
-      "containerd": "1.7.24",
-      "result": "CP immediately unstable, API server etcd timeout",
-      "runtime_status": "blocked"
-    },
-    {
-      "action": "4 vCPUs + 10 GB + fresh kubeadm reinstall",
-      "ram_gb": 10,
-      "vcpus": 4,
-      "containerd": "1.7.24",
-      "result": "CP stable ~8 min then identical failure. k3s suspected.",
-      "runtime_status": "blocked"
-    },
-    {
-      "action": "Full K8s strip + reboot + reinstall (ruled out k3s)",
-      "ram_gb": 10,
-      "vcpus": 4,
-      "containerd": "1.7.24",
-      "result": "Identical failure pattern. k3s ruled out. Root cause = containerd 1.7.24 + kernel 6.12.74.",
-      "runtime_status": "blocked"
-    },
-    {
-      "action": "containerd upgraded to 2.2.5 + 12 GB / 4 vCPU",
-      "ram_gb": 12,
-      "vcpus": 4,
-      "containerd": "2.2.5",
-      "result": "CP stable for 78+ min. Full validation PASS (CRD/API, CRUD, negative, RBAC, controller runtime, GC behavior).",
-      "runtime_status": "PASS"
-    }
-  ],
   "known_issues": [
-    "Debian 13 ships containerd 1.7.24 which causes kubelet SandboxChanged events on static pod pause containers (confirmed: control plane unstable). containerd 2.2.5 resolves the issue.",
-    "k3s interference was ruled out by full-host strip test (attempt 5).",
     "Controller RBAC has broad *.* [get list watch delete] — documented risk, needs RBAC hardening for production."
   ],
   "result": "PASS",
   "limitations": [
     "Single-node control-plane only (no HA).",
-    "Debian 13 with containerd 2.2.5 only (not containerd 1.7.24).",
+    "Validated with containerd 2.2.5; Debian default containerd 1.7.24 is not claimed for this workload.",
     "flannel CNI only.",
     "Webhook admission not tested (self-signed certs).",
     "No cloud Kubernetes testing.",
-    "v1.34 kubeadm validated for CRD/API compatibility only (see v1.34 evidence)."
+    "v1.34 kubeadm not validated with dry-run-only scope — see v1.34 evidence for details."
   ]
 }

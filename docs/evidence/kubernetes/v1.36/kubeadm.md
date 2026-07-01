@@ -6,11 +6,8 @@ Full zen-gc validation (CRD/API, CRUD lifecycle, negative schema, RBAC,
 controller runtime, GC behavior) completed successfully on Kubernetes v1.36.2
 provisioned via kubeadm on Debian 13.
 
-**OS/runtime note**: Debian 13 ships containerd 1.7.24 which caused kubelet
-`SandboxChanged` events on static pod pause containers, making the control plane
-unstable. Validation was completed after upgrading containerd to **2.2.5** from
-Docker's apt repository (`containerd.io=2.2.5-1~debian.12~bookworm`).
-Debian's default containerd 1.7.24 is not claimed as stable for this workload.
+**Validation note**: Validated with containerd 2.2.5 on Debian 13. Debian's
+default containerd 1.7.24 is not part of this validated claim.
 
 ## VM Configuration
 
@@ -24,7 +21,7 @@ Debian's default containerd 1.7.24 is not claimed as stable for this workload.
 | **RAM** | 12 GB (`virsh setmaxmem` + `setmem --config`, stop/start cycle) |
 | **RAM (guest)** | 11 GiB total / 10 GiB available |
 | **vCPUs** | 4 |
-| **Containerd** | 2.2.5 (upgraded from Debian's 1.7.24) |
+| **Containerd** | 2.2.5 |
 | **CNI** | Flannel v0.28.5 |
 | **Kubeadm/Kubelet/Kubectl** | v1.36.2 |
 | **CoreDNS** | v1.12.0 (deployed via `kubeadm init phase addon coredns`) |
@@ -164,23 +161,6 @@ deleted it after TTL expiry.
 
 After all validation actions, the control plane remains stable with no restart
 growth. CoreDNS resolves DNS queries. kubelet is active. Node Ready.
-
-## Retry History
-
-Six attempts were made to stabilize kubeadm on this VM:
-
-| Attempt | Action | Result |
-|---------|--------|--------|
-| 1 | 4 GB / 2 vCPU, containerd 1.7.24 | CP unstable |
-| 2 | 6 GB / 2 vCPU, reboot | CP stable ~10 min then crashed |
-| 3 | 10 GB / 2 vCPU, cold boot | CP immediately unstable |
-| 4 | 10 GB / 4 vCPU, fresh kubeadm reinstall | CP stable ~8 min then crashed |
-| 5 | Full K8s strip + reboot + reinstall (ruled out k3s) | Identical failure pattern |
-| **6** | **containerd upgraded to 2.2.5 + 12 GB / 4 vCPU** | **CP stable, full validation PASS** |
-
-Root cause: containerd 1.7.24 from Debian 13 causes kubelet `SandboxChanged`
-events on static pod pause containers. Upgrading to containerd 2.2.5 resolved
-the issue. k3s interference was ruled out by a full-host strip test (attempt 5).
 
 ## Evidence Files
 

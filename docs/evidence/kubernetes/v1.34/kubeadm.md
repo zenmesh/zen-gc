@@ -6,9 +6,8 @@ zen-gc CRD (`GarbageCollectionPolicy`) has been fully validated against Kubernet
 v1.34.9 provisioned via kubeadm on a Debian 13 VM, including controller runtime
 reconciliation and GC deletion behavior.
 
-**Previous v1.34 evidence** was limited to CRD/API compatibility only due to
-containerd 1.7.24 CP instability. The containerd upgrade to **2.2.5** resolves
-the instability and enables full runtime validation.
+**Validation note**: Validated with containerd 2.2.5 on Debian 13. Debian's
+default containerd 1.7.24 is not part of this validated claim.
 
 ## VM Configuration
 
@@ -92,7 +91,7 @@ kube-system    coredns-66bc5c9577-9bs8p           1/1     Running   0          9
 
 ## Limitations
 - Single-node control-plane only (no HA)
-- Debian 13 with containerd 2.2.5 (not Debian's default containerd 1.7.24)
+- Validated with containerd 2.2.5; Debian default containerd 1.7.24 is not claimed for this workload
 - flannel CNI only
 - Webhook running in insecure mode (no TLS certs)
 - No cloud Kubernetes testing

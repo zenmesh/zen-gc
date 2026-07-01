@@ -56,14 +56,14 @@
       "id": "kubernetes-compatibility-kubeadm-136",
       "name": "Kubernetes v1.36 kubeadm validation",
       "status": "present",
-      "detail": "Validated on kubeadm with K8s v1.36.2 (single control-plane, flannel CNI). CRDs registered, CRUD operations pass, schema validation enforces types.",
+      "detail": "Validated on kubeadm with K8s v1.36.2 (single control-plane, flannel CNI, containerd 2.2.5). CRDs registered, CRUD operations pass, schema validation enforces types. Full controller runtime + GC deletion behavior validated.",
       "location": "docs/evidence/kubernetes/v1.36/kubeadm.md"
     },
     {
       "id": "kubernetes-compatibility-kubeadm-134",
       "name": "Kubernetes v1.34 kubeadm validation",
       "status": "present",
-      "detail": "Validated on kubeadm with K8s v1.34.9 (single control-plane, flannel CNI). CRDs registered, CRUD operations pass, schema validation enforces types. Control-plane stability issues documented.",
+      "detail": "Validated on kubeadm with K8s v1.34.9 (single control-plane, flannel CNI). CRDs registered, CRUD operations pass, schema validation enforces types. Full controller runtime + GC deletion behavior validated with containerd 2.2.5.",
       "location": "docs/evidence/kubernetes/v1.34/kubeadm.md"
     },
     {

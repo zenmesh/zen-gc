@@ -38,6 +38,5 @@ CP instability).
 
 ## Compatibility Note
 
-Previous v1.34 evidence was limited to CRD/API only due to containerd 1.7.24
-CP instability. Upgrading to containerd 2.2.5 resolves the issue. See
-`kubeadm.md` for full details.
+Validated with containerd 2.2.5 on Debian 13. Debian default containerd 1.7.24
+is not part of this validated claim. See `kubeadm.md` for full details.

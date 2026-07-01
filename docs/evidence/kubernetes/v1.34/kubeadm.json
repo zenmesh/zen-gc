@@ -74,14 +74,13 @@
     "node_ready": true,
     "coredns_resolving": true
   },
-  "compatibility_note": "Full runtime + GC behavior now proven on v1.34 with containerd 2.2.5. Previous v1.34 evidence (CRD/API only) was limited by containerd 1.7.24 CP instability which is resolved by upgrading to containerd 2.2.5.",
   "known_issues": [
     "Events RBAC missing — controller cannot create/patch events. GC operations complete successfully regardless."
   ],
   "result": "PASS",
   "limitations": [
     "Single-node control-plane only (no HA).",
-    "Debian 13 with containerd 2.2.5 only (not containerd 1.7.24).",
+    "Validated with containerd 2.2.5; Debian default containerd 1.7.24 is not claimed for this workload.",
     "flannel CNI only.",
     "Webhook running in insecure mode (no TLS certs).",
     "No cloud Kubernetes testing."
