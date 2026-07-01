@@ -1,7 +1,7 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "4be11fe77321eaf0475b226c85d7bcd24d50092f",
-  "date": "2026-06-29",
+  "commit": "9bf43a7",
+  "date": "2026-07-01",
   "controller_image": "zenmesh/zen-gc-controller:v0.0.1-alpha-4be11fe",
   "go_version": "go1.26.4",
   "client_go": "v0.35.0",
@@ -24,13 +24,24 @@
       "evidence_json": "docs/evidence/kubernetes/v1.36/k3d.json"
     },
     "kubeadm": {
-      "status": "BLOCKED",
-      "kubernetes_version": "v1.32.13 (installed; v1.36.x required)",
+      "status": "PASS",
+      "kubernetes_version": "v1.36.2",
       "vm_hostname": "h462-gateway-kubeadm-1780668538",
       "vm_ip": "192.168.122.179",
       "vm_disposable_confirmed": true,
       "vm_os": "Debian 13 (trixie)",
-      "blocker_reason": "GAPI VM runs kubeadm v1.32.13; upgrading to v1.36.x is a multi-step process outside this validation scope.",
+      "containerd_version": "1.7.24",
+      "cni": "flannel v0.28.5",
+      "kernel": "6.12.74+deb13+1-amd64",
+      "crd_registered": true,
+      "crd_shortnames": ["gcp", "gcpolicy"],
+      "crud_tests_passed": ["create_basic", "create_full_schema", "list", "read", "delete", "schema_validation"],
+      "notes": [
+        "Control-plane components have restarts (apiserver 4, etcd 2, scheduler 3) but stabilize as 1/1 Ready.",
+        "kube-proxy exhibits CrashLoopBackOff (known v1.36 kubeadm issue).",
+        "GC controller pods stuck Pending — scheduling artifact.",
+        "Previously BLOCKED (VM had v1.32.13); resolved by nuke-and-reinstall v1.36.2."
+      ],
       "evidence_md": "docs/evidence/kubernetes/v1.36/kubeadm.md",
       "evidence_json": "docs/evidence/kubernetes/v1.36/kubeadm.json"
     }

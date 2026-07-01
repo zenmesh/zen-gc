@@ -9,7 +9,7 @@ Each subdirectory or file represents a specific cluster provisioning method.
 |--------|-------------|--------|
 | [kind](kind.md) | v1.36.1 | PASS |
 | [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS |
-| [kubeadm](kubeadm.md) | — | BLOCKED |
+| [kubeadm](kubeadm.md) | v1.36.2 (kubeadm) | PASS |
 
 ## Scope
 
