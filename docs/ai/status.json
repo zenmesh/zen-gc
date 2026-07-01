@@ -46,7 +46,7 @@
   "validation_evidence_dir": "docs/evidence/kubernetes/v1.36/",
   "known_gaps": [
     "No cloud Kubernetes E2E evidence",
-    "kubeadm v1.36.x runtime evidence is PARTIAL (CP instability)",
+    "kubeadm v1.36.x runtime evidence is PASS (containerd 2.2.5 upgraded from Debian 1.7.24)",
     "No SBOM generation",
     "No SLSA provenance",
     "No image signing",

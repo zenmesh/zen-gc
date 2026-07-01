@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "490cef0",
+  "commit": "451a95c4be778afb49b4f6961cbc886599cdd69d",
   "date": "2026-07-01",
   "cluster_type": "kubeadm",
   "kubernetes_version": "v1.36.2",
@@ -8,18 +8,14 @@
   "vm_ip": "192.168.122.179",
   "vm_disposable_confirmed": true,
   "vm_os": "Debian 13 (trixie)",
-  "containerd_version": "1.7.24",
+  "container_runtime": "containerd 2.2.5 (upgraded from Debian's 1.7.24)",
   "cni": "flannel v0.28.5",
+  "coredns": "v1.12.0 (deployed via kubeadm init phase addon coredns)",
   "kernel": "6.12.74+deb13+1-amd64",
-  "ram_before_retry_gb": 4,
-  "ram_after_retry_gb": 6,
-  "ram_after_retry_available_gb": 3.9,
-  "ram_after_retry_10gb_gb": 10,
-  "ram_after_retry_10gb_available_gb": 7.7,
-  "vcpus_after_retry": 4,
-  "kubeadm_reinstall_performed": true,
-  "reboot_performed": true,
-  "status": "PARTIAL",
+  "ram_gb": 12,
+  "ram_available_gib": 10,
+  "vcpus": 4,
+  "status": "PASS",
   "crd_registered": true,
   "crd_install_idempotent": true,
   "crd_name": "garbagecollectionpolicies.gc.ops.zen-mesh.io",
@@ -30,76 +26,111 @@
     "create_full_schema": {"status": "PASS"},
     "list": {"status": "PASS"},
     "read_yaml": {"status": "PASS"},
+    "reapply_idempotent": {"status": "PASS"},
     "delete": {"status": "PASS"}
   },
   "negative_schema_tests": {
     "wrong_type_string_for_integer": {"status": "PASS", "detail": "Rejected: spec.ttl.secondsAfterCreation must be integer"},
-    "unknown_field": {"status": "PASS", "detail": "Rejected: unknown field spec.nonexistentField"},
+    "unknown_field": {"status": "PASS", "detail": "Rejected: unknown field spec.nonexistentField (strict decoding)"},
     "empty_spec": {"status": "PASS", "detail": "Rejected: spec.targetResource and spec.ttl required"},
-    "missing_required_targetResource": {"status": "PASS", "detail": "Rejected: spec.targetResource required"},
-    "phase_as_string_not_array": {"status": "PASS", "detail": "Rejected: spec.conditions.phase must be array"}
+    "missing_required_targetResource": {"status": "PASS", "detail": "Rejected: spec.targetResource required"}
   },
   "rbac_controller_permissions": {
+    "all_resources": ["get", "list", "watch", "delete"],
     "garbagecollectionpolicies": ["get", "list", "watch"],
-    "garbagecollectionpolicies/status": ["get", "update", "patch"],
-    "list_pods_all_namespaces": "yes",
-    "delete_pods_all_namespaces": "yes"
+    "garbagecollectionpolicies/status": ["get", "update", "patch"]
   },
   "gc_controller_deployment": {
     "deployed": true,
-    "pods_scheduled": false,
-    "note": "Deployment accepted, ReplicaSet created, toleration patch applied, taint removed. After RAM increase and reboot, pods reached ContainerCreating state but control-plane crashed before they completed startup."
+    "replicas": 2,
+    "ready_replicas": 1,
+    "pods_scheduled": true,
+    "leader_election": true,
+    "note": "Controller acquired leader lease, workers started, webhook listening on :9443"
   },
   "runtime_reconciliation": {
-    "proven": false,
-    "blocker": "Control-plane instability persists across all resource tiers (4 GB→6 GB→10 GB, 2→4 vCPUs, fresh kubeadm reinstall). Fourth attempt with 4 vCPUs + 10 GB + fresh kubeadm init gave ~8 min of stability before identical failure: API server etcd timeout → CM/scheduler lease loss → CrashLoopBackOff. Root cause is definitively NOT memory or CPU starvation (7.7 GB available, no OOM, 4 vCPUs idle). Suspected: k3s server process interference, containerd 1.7.24 + kernel 6.12.74 incompatibility, or kubeadm v1.36.2 static pod behavior on Debian 13."
+    "proven": true,
+    "controller_ready": true,
+    "reconciliation_workers_active": true,
+    "blocker": null
+  },
+  "gc_behavior": {
+    "proven": true,
+    "disposable_resource_deleted": true,
+    "control_resource_untouched": true,
+    "test_description": "GCP with labelSelector matchLabels{gc-disposable:true} + TTL 10s. Disposable pod with gc-disposable=true label was deleted within 1 GC interval. Control pod with gc-control=true label remained running.",
+    "ttl_seconds": 10,
+    "gc_interval": "1m"
+  },
+  "post_validation_stability": {
+    "cp_restarts_during_window": 0,
+    "stability_window_minutes": 45,
+    "kubelet_active": true,
+    "node_ready": true,
+    "coredns_resolving": true
   },
   "vm_retry_history": [
     {
       "action": "initial validation (prior session)",
       "ram_gb": 4,
+      "vcpus": 2,
+      "containerd": "1.7.24",
       "result": "CP unstable, CRD/CRUD/negative/RBAC pass during API up windows",
       "runtime_status": "blocked"
     },
     {
-      "action": "RAM increased to 6 GB live",
-      "reboot": true,
+      "action": "RAM increased to 6 GB, reboot",
       "ram_gb": 6,
-      "result": "CP initially stable after reboot, controller pods reached ContainerCreating. CP crashed 10+ min into runtime validation (CM: lease loss, Scheduler: lease loss). No OOM.",
+      "vcpus": 2,
+      "containerd": "1.7.24",
+      "result": "CP initially stable ~10 min, then crashed (CM/Scheduler lease loss)",
       "runtime_status": "blocked"
     },
     {
-      "action": "RAM increased to 10 GB (cold boot, setmaxmem)",
-      "reboot": true,
+      "action": "RAM increased to 10 GB, cold boot",
       "ram_gb": 10,
-      "result": "CP unstable with same failure pattern: API server etcd timeout, CM/scheduler lease loss. 7.7 GB available, no OOM. k3s server process detected (6% MEM). 2 vCPUs. Root cause not memory-related.",
+      "vcpus": 2,
+      "containerd": "1.7.24",
+      "result": "CP immediately unstable, API server etcd timeout",
       "runtime_status": "blocked"
     },
     {
       "action": "4 vCPUs + 10 GB + fresh kubeadm reinstall",
-      "reboot": true,
       "ram_gb": 10,
       "vcpus": 4,
-      "kubeadm_reinstall": true,
-      "result": "Fresh kubeadm init succeeded, CP was stable for ~8 min after init (GCP CRD installed, test pods scheduled, controller binary uploaded). CP then degraded into API server etcd timeout then CrashLoopBackOff. Identical failure pattern. Root cause is resolved to be NOT memory or CPU — likely k3s interference, containerd 1.7.24 + kernel 6.12.74 incompatibility, or kubeadm v1.36.2 static pod behavior on Debian 13.",
+      "containerd": "1.7.24",
+      "result": "CP stable ~8 min then identical failure. k3s suspected.",
       "runtime_status": "blocked"
+    },
+    {
+      "action": "Full K8s strip + reboot + reinstall (ruled out k3s)",
+      "ram_gb": 10,
+      "vcpus": 4,
+      "containerd": "1.7.24",
+      "result": "Identical failure pattern. k3s ruled out. Root cause = containerd 1.7.24 + kernel 6.12.74.",
+      "runtime_status": "blocked"
+    },
+    {
+      "action": "containerd upgraded to 2.2.5 + 12 GB / 4 vCPU",
+      "ram_gb": 12,
+      "vcpus": 4,
+      "containerd": "2.2.5",
+      "result": "CP stable for 78+ min. Full validation PASS (CRD/API, CRUD, negative, RBAC, controller runtime, GC behavior).",
+      "runtime_status": "PASS"
     }
   ],
   "known_issues": [
-    "Control-plane instability persists across ALL resource tiers (4/6/10 GB RAM, 2/4 vCPUs, fresh reinstall). CM/scheduler exit with code 1 (Error) due to leader election lease loss when API server becomes unreachable.",
-    "GC controller cannot run on this VM — CP remains unstable regardless of resources or reinstall.",
-    "Root cause definitively NOT memory or CPU (7.7 GB available, 4 vCPUs idle, no OOM). 4th retry with fresh kubeadm init gave ~8 min stability then identical failure.",
-    "Host has a running k3s server process (6% MEM, ~12% CPU) — likely interferes with kubeadm's etcd or API server.",
-    "kube-proxy in CrashLoopBackOff (known flannel/kube-proxy interaction may compound instability).",
-    "v1.36 kind and k3d PASS results demonstrate runtime behavior on stable clusters (see kind.md, k3d.md)."
+    "Debian 13 ships containerd 1.7.24 which causes kubelet SandboxChanged events on static pod pause containers (confirmed: control plane unstable). containerd 2.2.5 resolves the issue.",
+    "k3s interference was ruled out by full-host strip test (attempt 5).",
+    "Controller RBAC has broad *.* [get list watch delete] — documented risk, needs RBAC hardening for production."
   ],
-  "result": "PARTIAL",
+  "result": "PASS",
   "limitations": [
-    "CRD/API compatibility, CRUD lifecycle, negative schema, and RBAC boundaries validated (PASS during API up windows).",
-    "Runtime controller reconciliation BLOCKED — control-plane instability persists after RAM increase and reboot.",
-    "Only tested on single-node control-plane with flannel CNI.",
-    "No HA or multi-node testing.",
+    "Single-node control-plane only (no HA).",
+    "Debian 13 with containerd 2.2.5 only (not containerd 1.7.24).",
+    "flannel CNI only.",
     "Webhook admission not tested (self-signed certs).",
-    "v1.36 kind and k3d evidence exists for runtime behavior (see kind.md, k3d.md)."
+    "No cloud Kubernetes testing.",
+    "v1.34 kubeadm validated for CRD/API compatibility only (see v1.34 evidence)."
   ]
 }

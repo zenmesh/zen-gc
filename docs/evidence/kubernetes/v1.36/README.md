@@ -9,7 +9,7 @@ Each subdirectory or file represents a specific cluster provisioning method.
 |--------|-------------|--------|-------|
 | [kind](kind.md) | v1.36.1 | PASS | CRD + runtime |
 | [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS | CRD + runtime |
-| [kubeadm](kubeadm.md) | v1.36.2 | PARTIAL | CRD/API + negative + RBAC (runtime blocked by CP instability; retried with 6 GB RAM and reboot) |
+| [kubeadm](kubeadm.md) | v1.36.2 | PASS | CRD/API + negative + RBAC + controller runtime + GC behavior (containerd 2.2.5 upgraded from Debian's 1.7.24) |
 
 ## Scope
 
@@ -38,7 +38,7 @@ environment.
 ## Repo
 
 - **Repo**: `zenmesh/zen-gc`
-- **Commit**: `ee5fea2`
+- **Commit**: `451a95c`
 - **Controller image**: `zenmesh/zen-gc-controller:v0.0.1-alpha-4be11fe` (build from commit, statically linked, scratch base)
 - **Go**: 1.26.4
 - **client-go**: v0.35.0

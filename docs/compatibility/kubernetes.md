@@ -27,7 +27,7 @@ Build requirement: **Go 1.26+** (see `go.mod`).
 |-------------|-------------|--------|----------|
 | kind | v1.36.1 | PASS | `docs/evidence/kubernetes/v1.36/kind.md` |
 | k3d (K3s) | v1.36.2+k3s1 | PASS | `docs/evidence/kubernetes/v1.36/k3d.md` |
-| kubeadm | v1.36.2 | PARTIAL | `docs/evidence/kubernetes/v1.36/kubeadm.md` |
+| kubeadm | v1.36.2 | PASS | `docs/evidence/kubernetes/v1.36/kubeadm.md` |
 | kubeadm | v1.34.9 | PASS | `docs/evidence/kubernetes/v1.34/kubeadm.md` |
 
 This does **not** imply validation on EKS, GKE, AKS, OpenShift, Rancher, all CNIs, all storage providers, or all Kubernetes 1.36 environments. Operators should validate in their own environment.
