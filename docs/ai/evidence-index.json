@@ -55,9 +55,16 @@
     {
       "id": "kubernetes-compatibility-kubeadm-136",
       "name": "Kubernetes v1.36 kubeadm validation",
-      "status": "blocked",
-      "detail": "GAPI VM identified (h462-gateway-kubeadm-1780668538, K8s v1.32.13). v1.36.x upgrade required before validation.",
+      "status": "present",
+      "detail": "Validated on kubeadm with K8s v1.36.2 (single control-plane, flannel CNI). CRDs registered, CRUD operations pass, schema validation enforces types.",
       "location": "docs/evidence/kubernetes/v1.36/kubeadm.md"
+    },
+    {
+      "id": "kubernetes-compatibility-kubeadm-134",
+      "name": "Kubernetes v1.34 kubeadm validation",
+      "status": "present",
+      "detail": "Validated on kubeadm with K8s v1.34.9 (single control-plane, flannel CNI). CRDs registered, CRUD operations pass, schema validation enforces types. Control-plane stability issues documented.",
+      "location": "docs/evidence/kubernetes/v1.34/kubeadm.md"
     },
     {
       "id": "kubernetes-compatibility-cloud-e2e",

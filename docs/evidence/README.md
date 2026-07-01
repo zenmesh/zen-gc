@@ -40,10 +40,11 @@ This index catalogs what is evidenced about zen-gc. Each category states whether
 | client-go version | ✅ Present | `v0.35` — compatible with K8s 1.31.x API |
 | CRD API version | ✅ Present | `apiextensions.k8s.io/v1` (via controller-runtime) |
 | Tested on cloud K8s | ❌ Missing | No EKS/GKE/AKS test results published |
-| Tested on kind (K8s v1.36.1) | ✅ Present | `docs/evidence/kubernetes/v1.36/kind.md` |
-| Tested on k3d (K3s v1.36.2+k3s1) | ✅ Present | `docs/evidence/kubernetes/v1.36/k3d.md` |
-| Tested on kubeadm (v1.36.2) | ✅ Present | `docs/evidence/kubernetes/v1.36/kubeadm.md` |
-| Tested on kubeadm (v1.34.9) | ✅ Present | `docs/evidence/kubernetes/v1.34/kubeadm.md` |
+| Tested on kind (K8s v1.36.1) | ✅ Present | `docs/evidence/kubernetes/v1.36/kind.md` — CRD + runtime |
+| Tested on k3d (K3s v1.36.2+k3s1) | ✅ Present | `docs/evidence/kubernetes/v1.36/k3d.md` — CRD + runtime |
+| Tested on kubeadm (K8s v1.36.2) | ✅ Present | `docs/evidence/kubernetes/v1.36/kubeadm.md` — CRD + (runtime in progress) |
+| Tested on kubeadm (K8s v1.34.9) | ✅ Present | `docs/evidence/kubernetes/v1.34/kubeadm.md` — CRD/API compatibility only |
+| kind/k3d (K8s v1.34.x) | ❌ Not tested | Not validated on v1.34 beyond kubeadm |
 
 ## Release evidence
 
