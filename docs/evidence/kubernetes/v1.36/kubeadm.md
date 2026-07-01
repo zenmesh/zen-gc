@@ -5,6 +5,10 @@
 zen-gc CRD (`GarbageCollectionPolicy`) has been validated against Kubernetes
 v1.36.2 provisioned via kubeadm on a Debian 13 VM.
 
+**Scope**: CRD/API compatibility, CRUD lifecycle, schema validation, RBAC
+boundaries, and install idempotency. Runtime controller reconciliation is
+**not proven** on this VM due to control-plane instability (see Known Issues).
+
 ## VM Configuration
 
 | Field | Value |
@@ -22,31 +26,21 @@ v1.36.2 provisioned via kubeadm on a Debian 13 VM.
 
 ## Cluster Configuration
 
-kubeadm `v1beta4` config with custom `InitConfiguration` + `ClusterConfiguration`,
-single control-plane node, flannel CNI with default pod network CIDR `10.244.0.0/16`.
-Containerd sandbox_image set to `pause:3.10.1` before init to match kubeadm expectation.
+kubeadm `v1beta4` config, single control-plane node, flannel CNI with
+`10.244.0.0/16` pod CIDR. Containerd sandbox_image set to `pause:3.10.1`
+before init.
 
 ## Evidence
 
-### kubeadm Version
+### CRD Install Idempotency
 ```
-kubeadm version: v1.36.2
-  GitCommit:"24e2b02af5543d7910c2bb074c7264df5a8f0467"
-  GoVersion:"go1.26.4"
-```
+$ kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+  customresourcedefinition.apiextensions.k8s.io/garbagecollectionpolicies.gc.ops.zen-mesh.io created
 
-### Node Status
+$ kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+  customresourcedefinition.apiextensions.k8s.io/garbagecollectionpolicies.gc.ops.zen-mesh.io unchanged
 ```
-NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP
-debian13   Ready    control-plane   6m    v1.36.2   192.168.122.179
-```
-
-### CRD Registration
-```
-$ kubectl get crds garbagecollectionpolicies.gc.ops.zen-mesh.io
-NAME                                           CREATED AT
-garbagecollectionpolicies.gc.ops.zen-mesh.io   2026-07-01T13:10:12Z
-```
+Re-applying the CRD is safe — results in `unchanged`, no errors.
 
 ### API Resource Discovery
 ```
@@ -55,102 +49,66 @@ NAME                        SHORTNAMES     APIVERSION                    NAMESPA
 garbagecollectionpolicies   gcp,gcpolicy   gc.ops.zen-mesh.io/v1alpha1   true         GarbageCollectionPolicy
 ```
 
-### CRUD Validation
+### CRUD Lifecycle
+| Operation | Result |
+|-----------|--------|
+| Create minimal GCP | ✅ created |
+| Create full-schema GCP (all spec fields) | ✅ created |
+| List GCPs | ✅ appears with namespace/name/age |
+| Read GCP YAML | ✅ all spec fields persisted |
+| Delete GCP | ✅ deleted |
+| GCPs after delete | ✅ empty list |
 
-#### 1. Minimal GCP (basic target + TTL)
-```yaml
-apiVersion: gc.ops.zen-mesh.io/v1alpha1
-kind: GarbageCollectionPolicy
-metadata:
-  name: test-policy
-  namespace: gc-system
-spec:
-  targetResource:
-    apiVersion: v1
-    kind: Pod
-    namespace: default
-  ttl:
-    secondsAfterCreation: 3600
-```
-```
-$ kubectl apply -f - → garbagecollectionpolicy.gc.ops.zen-mesh.io/test-policy created
-$ kubectl get garbagecollectionpolicies -A → list shows the policy
-$ kubectl delete garbagecollectionpolicies -n gc-system test-policy → deleted
-```
-Result: **PASS**
+### Negative Schema Validation
+| Test | Input | Result |
+|------|-------|--------|
+| Wrong type | `ttl.secondsAfterCreation: "3600"` (string) | ❌ Rejected: "must be of type integer" |
+| Unknown field | `spec.nonexistentField: true` | ❌ Rejected: "unknown field" |
+| Empty spec | `spec: {}` | ❌ Rejected: "targetResource: Required value" + "ttl: Required value" |
+| Missing required | no `spec.targetResource` | ❌ Rejected: "targetResource: Required value" |
+| Wrong array type | `conditions.phase: Succeeded` (string) | ❌ Rejected: "must be of type array" |
 
-#### 2. Full-schema GCP (all fields)
-```yaml
-spec:
-  targetResource:
-    apiVersion: apps/v1
-    kind: Deployment
-    namespace: gc-system
-  ttl:
-    secondsAfterCreation: 86400
-  conditions:
-    phase: [Succeeded]
-  behavior:
-    maxDeletionsPerSecond: 5
-    batchSize: 10
-    propagationPolicy: Foreground
-    gracePeriodSeconds: 30
-```
-```
-$ kubectl apply -f - → garbagecollectionpolicy.gc.ops.zen-mesh.io/full-policy created
-```
-All fields persisted correctly in returned YAML:
-```yaml
-spec:
-  behavior:
-    batchSize: 10
-    gracePeriodSeconds: 30
-    maxDeletionsPerSecond: 5
-    propagationPolicy: Foreground
-  conditions:
-    phase:
-    - Succeeded
-  targetResource:
-    apiVersion: apps/v1
-    kind: Deployment
-    namespace: gc-system
-  ttl:
-    secondsAfterCreation: 86400
-```
-Result: **PASS**
+All invalid inputs are correctly rejected by the API server with descriptive
+error messages — not by client-side tooling.
 
-#### 3. Schema validation
-```
-$ kubectl apply -f - (with phase: "Succeeded" as string instead of array)
-  The GarbageCollectionPolicy "bad-policy" is invalid:
-  spec.conditions.phase: Invalid value: "string": spec.conditions.phase
-  in body must be of type array: "string"
-```
-Result: **PASS** — CRD schema validation correctly enforces types on v1.36.2.
+### RBAC / Permission Boundaries
 
-### Control-Plane Status
+The gc-controller service account permissions (from `deploy/manifests/rbac.yaml`):
 ```
-NAMESPACE      NAME                               READY   STATUS    RESTARTS      AGE
-kube-system    coredns-589f44dc88-kt62r           1/1     Running   2             6m
-kube-system    coredns-589f44dc88-zk8jp           1/1     Running   0             6m
-kube-system    etcd-debian13                      1/1     Running   2             7m
-kube-system    kube-apiserver-debian13            1/1     Running   4             7m
-kube-system    kube-controller-manager-debian13   1/1     Running   4             6m
-kube-system    kube-proxy-kqqmn                   0/1     Running   3             6m
-kube-system    kube-scheduler-debian13            1/1     Running   3             6m
+$ kubectl auth can-i --list --as=system:serviceaccount:gc-system:gc-controller
+  garbagecollectionpolicies.gc.ops.zen-mesh.io          → [get list watch]
+  garbagecollectionpolicies.gc.ops.zen-mesh.io/status   → [get update patch]
+
+$ kubectl auth can-i list pods -n gc-system --as=...
+  yes
+
+$ kubectl auth can-i delete pods --all-namespaces --as=...
+  yes
 ```
 
-All control-plane components eventually stabilize as 1/1 Ready.
-kube-proxy has CrashLoopBackOff cycles (known issue on v1.36 kubeadm).
+The controller has read access to GCP resources, write access to GCP status,
+and the ability to list/delete pods in its target namespace (required for
+garbage collection).
 
-## Conclusion
+## Known Issues
 
-**The zen-gc CRD (`GarbageCollectionPolicy`) is compatible with Kubernetes
-v1.36.2.** The CRD schema was accepted, API resources are discoverable, and
-all CRUD operations pass. Schema validation enforces type correctness.
+### Control-Plane Instability
+The kubelet continuously cycles `kube-controller-manager` and
+`kube-scheduler` through CrashLoopBackOff every 1–5 minutes, even after
+nuclear reset (`crictl rm -a && crictl rmp -a && systemctl restart kubelet`)
+and with correct `sandbox_image = pause:3.10.1` from the start.
 
-This completes the kubeadm validation matrix for both v1.34 and v1.36,
-matching the existing kind and k3d PASS results for v1.36.
+Root cause is unresolved — likely a kubelet/pause-container reconciliation
+loop specific to kernel `6.12.74+deb13+1-amd64` + containerd `1.7.24` on
+Debian 13. Memory is adequate (1.7 GiB available during cycling).
+
+This prevents:
+- GC controller pod scheduling (requires functional scheduler + CMS)
+- Runtime reconciliation verification on this VM
+
+### Where Runtime IS Verified
+Runtime controller behavior was verified on **kind** (v1.36.1) and **k3d**
+(K3s v1.36.2+k3s1) — see `kind.md` and `k3d.md` in this directory.
 
 ## Evidence Files
 

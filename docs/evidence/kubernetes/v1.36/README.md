@@ -5,11 +5,11 @@ Each subdirectory or file represents a specific cluster provisioning method.
 
 ## Summary
 
-| Method | K8s Version | Status |
-|--------|-------------|--------|
-| [kind](kind.md) | v1.36.1 | PASS |
-| [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS |
-| [kubeadm](kubeadm.md) | v1.36.2 (kubeadm) | PASS |
+| Method | K8s Version | Status | Scope |
+|--------|-------------|--------|-------|
+| [kind](kind.md) | v1.36.1 | PASS | CRD + runtime |
+| [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS | CRD + runtime |
+| [kubeadm](kubeadm.md) | v1.36.2 | PASS | CRD + negative + RBAC (runtime blocked by VM instability) |
 
 ## Scope
 
@@ -38,7 +38,7 @@ environment.
 ## Repo
 
 - **Repo**: `zenmesh/zen-gc`
-- **Commit**: `4be11fe77321eaf0475b226c85d7bcd24d50092f`
+- **Commit**: `ee5fea2`
 - **Controller image**: `zenmesh/zen-gc-controller:v0.0.1-alpha-4be11fe` (build from commit, statically linked, scratch base)
 - **Go**: 1.26.4
 - **client-go**: v0.35.0

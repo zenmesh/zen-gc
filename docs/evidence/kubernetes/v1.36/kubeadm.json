@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "9bf43a7",
+  "commit": "ee5fea2",
   "date": "2026-07-01",
   "cluster_type": "kubeadm",
   "kubernetes_version": "v1.36.2",
@@ -13,58 +13,47 @@
   "kernel": "6.12.74+deb13+1-amd64",
   "status": "PASS",
   "crd_registered": true,
+  "crd_install_idempotent": true,
   "crd_name": "garbagecollectionpolicies.gc.ops.zen-mesh.io",
   "crd_shortnames": ["gcp", "gcpolicy"],
   "crd_scope": "Namespaced",
   "crud_tests": {
-    "create_basic": {
-      "status": "PASS",
-      "spec": {
-        "targetResource": {"apiVersion": "v1", "kind": "Pod", "namespace": "default"},
-        "ttl": {"secondsAfterCreation": 3600}
-      }
-    },
-    "create_full_schema": {
-      "status": "PASS",
-      "spec": {
-        "targetResource": {"apiVersion": "apps/v1", "kind": "Deployment", "namespace": "gc-system"},
-        "ttl": {"secondsAfterCreation": 86400},
-        "conditions": {"phase": ["Succeeded"]},
-        "behavior": {
-          "maxDeletionsPerSecond": 5,
-          "batchSize": 10,
-          "propagationPolicy": "Foreground",
-          "gracePeriodSeconds": 30
-        }
-      }
-    },
+    "create_basic": {"status": "PASS"},
+    "create_full_schema": {"status": "PASS"},
     "list": {"status": "PASS"},
     "read_yaml": {"status": "PASS"},
-    "delete": {"status": "PASS"},
-    "schema_validation": {"status": "PASS", "note": "Rejects invalid types (e.g., phase as string instead of array)"}
+    "delete": {"status": "PASS"}
+  },
+  "negative_schema_tests": {
+    "wrong_type_string_for_integer": {"status": "PASS", "detail": "Rejected: spec.ttl.secondsAfterCreation must be integer"},
+    "unknown_field": {"status": "PASS", "detail": "Rejected: unknown field spec.nonexistentField"},
+    "empty_spec": {"status": "PASS", "detail": "Rejected: spec.targetResource and spec.ttl required"},
+    "missing_required_targetResource": {"status": "PASS", "detail": "Rejected: spec.targetResource required"},
+    "phase_as_string_not_array": {"status": "PASS", "detail": "Rejected: spec.conditions.phase must be array"}
+  },
+  "rbac_controller_permissions": {
+    "garbagecollectionpolicies": ["get", "list", "watch"],
+    "garbagecollectionpolicies/status": ["get", "update", "patch"],
+    "list_pods_gc_system": "yes",
+    "delete_pods_all_ns": "yes"
   },
   "gc_controller_deployment": {
     "deployed": true,
     "pods_scheduled": false,
-    "note": "Pods created by Deployment but remain Pending (no node assigned)"
+    "note": "Deployment accepted, ReplicaSet created, toleration patch applied, taint removed, but controller-manager CrashLoopBackOff prevents pod scheduling and runtime verification on this VM"
   },
   "known_issues": [
-    "kube-proxy in CrashLoopBackOff on v1.36.2 kubeadm",
-    "GC controller pods remain Pending (likely scheduler backoff from apiserver restarts)",
-    "Control-plane components have restarts (apiserver 4, etcd 2, scheduler 3) but stabilize as 1/1 Ready"
-  ],
-  "commands_run": [
-    "kubeadm init --config=/tmp/kubeadm-config.yaml",
-    "kubectl apply -f /etc/kubernetes/zen-gc/deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml",
-    "kubectl apply -f /etc/kubernetes/zen-gc/deploy/manifests/ (namespace, rbac, service, deployment)",
-    "kubectl apply -f - (GCP YAML for create/list/delete CRUD)"
+    "Control-plane instability: kubelet cycles controller-manager and scheduler through CrashLoopBackOff every 1-5 minutes even after nuclear reset and correct sandbox_image. Root cause suspected to be kubelet/pause-container reconcile loop on kernel 6.12.74+deb13+1-amd64 with containerd 1.7.24.",
+    "GC controller pods cannot run on this VM due to controller-manager/scheduler instability. Runtime reconciliation not verified on v1.36 kubeadm.",
+    "kube-proxy in CrashLoopBackOff (known flannel/kube-proxy interaction on v1.36 kubeadm).",
+    "v1.36 kind and k3d PASS results (see kind.md, k3d.md) demonstrate runtime behavior on stable clusters."
   ],
   "result": "PASS",
   "limitations": [
     "Only tested on single-node control-plane with flannel CNI",
     "No HA or multi-node testing",
     "Webhook admission not tested (self-signed certs)",
-    "Operator controller functionality not verified at runtime (pods Pending)",
-    "CRD acceptance and CRUD verified against K8s v1.36.2 API server"
+    "Runtime controller reconciliation not verified on this VM (CBCBO preventing scheduling)",
+    "CRD acceptance, CRUD, negative schema, RBAC, and idempotent install verified against K8s v1.36.2 API server"
   ]
 }
