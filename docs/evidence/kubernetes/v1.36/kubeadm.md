@@ -1,13 +1,14 @@
 # kubeadm — Validation Evidence (K8s v1.36.2)
 
-## Status: PASS
+## Status: PARTIAL
 
 zen-gc CRD (`GarbageCollectionPolicy`) has been validated against Kubernetes
 v1.36.2 provisioned via kubeadm on a Debian 13 VM.
 
 **Scope**: CRD/API compatibility, CRUD lifecycle, schema validation, RBAC
-boundaries, and install idempotency. Runtime controller reconciliation is
-**not proven** on this VM due to control-plane instability (see Known Issues).
+boundaries, and install idempotency (confirmed PASS). Runtime controller
+reconciliation is **not proven** on this VM due to control-plane instability
+(see Known Issues).
 
 ## VM Configuration
 
