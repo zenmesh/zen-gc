@@ -4,26 +4,100 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' RED='\033[0;31m' CYAN='\033[0;36m' NC='\033[0m'
 
-PASS() { echo -e "  ${GREEN}PASS${NC} $1"; }
-FAIL() { echo -e "  ${RED}FAIL${NC} $1"; failures=$((failures+1)); }
-INFO() { echo -e "  ${BLUE}INFO${NC} $1"; }
-WARN() { echo -e "  ${YELLOW}WARN${NC} $1"; }
-STEP() { echo -e "\n${CYAN}=== $1 ===${NC}"; }
+PASS()     { echo -e "  ${GREEN}PASS${NC} $1"; }
+FAIL()     { echo -e "  ${RED}FAIL${NC} $1"; failures=$((failures+1)); if [[ -n "$FAIL_FAST" ]]; then exit 1; fi; }
+SKIP()     { echo -e "  ${YELLOW}SKIP${NC} $1"; }
+BLOCKED()  { echo -e "  ${RED}BLOCKED${NC} $1"; is_blocked=1; }
+CLEANUP_FAIL() { echo -e "  ${RED}CLEANUP_FAIL${NC} $1"; }
+INFO()     { echo -e "  ${BLUE}INFO${NC} $1"; }
+WARN()     { echo -e "  ${YELLOW}WARN${NC} $1"; }
+STEP()     { echo -e "\n${CYAN}=== $1 ===${NC}"; }
 
-CLUSTER_TYPE="${1:-kind}"
-OUTPUT_DIR="${2:-/tmp/zen-gc-validation}"
-CLUSTER_NAME="${3:-zen-gc-validate}"
-KEEP_CLUSTER="${KEEP_CLUSTER:-}"
+# --- Argument parsing ---
+DRY_RUN=""
+FAIL_FAST=""
+KEEP_ON_FAILURE=""
+CLUSTER_TYPE="kind"
+OUTPUT_DIR="/tmp/zen-gc-validation"
+CLUSTER_NAME="zen-gc-validate"
+NAMESPACE_PREFIX=""
+TTL_MODE_FILTER=""
+RESOURCE_KIND_FILTER=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry-run-plan)     DRY_RUN=1; shift ;;
+        --fail-fast)        FAIL_FAST=1; shift ;;
+        --keep-on-failure)  KEEP_ON_FAILURE=1; shift ;;
+        --output-dir)       OUTPUT_DIR="$2"; shift 2 ;;
+        --namespace)        NAMESPACE_PREFIX="$2"; shift 2 ;;
+        --ttl-mode)         TTL_MODE_FILTER="$2"; shift 2 ;;
+        --resource-kind)    RESOURCE_KIND_FILTER="$2"; shift 2 ;;
+        --cluster-kind)     CLUSTER_TYPE="kind"; shift ;;
+        --cluster-k3d)      CLUSTER_TYPE="k3d"; shift ;;
+        --cluster-kubeadm)  CLUSTER_TYPE="kubeadm"; shift ;;
+        --cluster-name)     CLUSTER_NAME="$2"; shift 2 ;;
+        -h|--help)
+            echo "Usage: $0 [options] [cluster-type] [output-dir] [cluster-name]"
+            echo ""
+            echo "Options:"
+            echo "  --dry-run-plan       Print planned actions without executing"
+            echo "  --fail-fast          Exit on first test failure"
+            echo "  --keep-on-failure    Keep cluster/resources on failure (default: cleanup)"
+            echo "  --output-dir DIR     Output directory for evidence (default: /tmp/zen-gc-validation)"
+            echo "  --namespace PREFIX   Namespace prefix for test resources (default: gc-<mode>)"
+            echo "  --ttl-mode MODE      Only run specified TTL mode (fixed|dynamic|mapped|relative)"
+            echo "  --resource-kind KIND Only run specified resource kind (Pod|ReplicaSet)"
+            echo "  --cluster-kind       Use kind cluster (default if not specified)"
+            echo "  --cluster-k3d        Use k3d cluster"
+            echo "  --cluster-kubeadm    Use existing kubeadm cluster"
+            echo "  --cluster-name NAME  Cluster name (default: zen-gc-validate)"
+            echo ""
+            echo "Positional args (legacy):"
+            echo "  1: cluster-type (kind|k3d|kubeadm)    default: kind"
+            echo "  2: output-dir                          default: /tmp/zen-gc-validation"
+            echo "  3: cluster-name                        default: zen-gc-validate"
+            echo ""
+            echo "Environment variables (backward-compat):"
+            echo "  KEEP_CLUSTER, GC_INTERVAL, TTL_SHORT, TAG, KIND_NODE_IMAGE, K3S_IMAGE"
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1 (use --help for usage)"
+            exit 1
+            ;;
+        *)
+            # Positional args (legacy)
+            if [[ -z "$(eval echo \$arg1_set 2>/dev/null)" ]]; then
+                CLUSTER_TYPE="$1"; arg1_set=1
+            elif [[ -z "$(eval echo \$arg2_set 2>/dev/null)" ]]; then
+                OUTPUT_DIR="$1"; arg2_set=1
+            elif [[ -z "$(eval echo \$arg3_set 2>/dev/null)" ]]; then
+                CLUSTER_NAME="$1"; arg3_set=1
+            else
+                echo "Too many positional arguments: $1"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
+# Legacy env var support
+KEEP_CLUSTER="${KEEP_CLUSTER:-$KEEP_ON_FAILURE}"
 GC_INTERVAL="${GC_INTERVAL:-20s}"
-TTL_SHORT="${TTL_SHORT:-15}"     # seconds
+TTL_SHORT="${TTL_SHORT:-15}"
 TAG="${TAG:-zenmesh/zen-gc-controller:validate}"
 KIND_NODE_IMAGE="${KIND_NODE_IMAGE:-kindest/node:v1.36.1}"
 K3S_IMAGE="${K3S_IMAGE:-rancher/k3s:v1.36.2-k3s1}"
 failures=0
+is_blocked=0
 KUBECONFIG_FILE=""
 CERT_DIR=""
+RUN_ID="${RUN_ID:-zen-gc-validate-$(date -u +%Y%m%dT%H%M%S)}"
+EVIDENCE_DIR="${OUTPUT_DIR}/evidence-${RUN_ID}"
 
-mkdir -p "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR" "$EVIDENCE_DIR"
 
 require_cmd() {
     if ! command -v "$1" &>/dev/null 2>&1; then
@@ -32,15 +106,52 @@ require_cmd() {
     fi
 }
 
+# Dry-run plan mode
+if [[ -n "$DRY_RUN" ]]; then
+    STEP "DRY RUN PLAN"
+    INFO "Cluster type:     $CLUSTER_TYPE"
+    INFO "Cluster name:     $CLUSTER_NAME"
+    INFO "Output dir:       $OUTPUT_DIR"
+    INFO "Evidence dir:     $EVIDENCE_DIR"
+    INFO "Run ID:           $RUN_ID"
+    INFO "GC interval:      $GC_INTERVAL"
+    INFO "TTL (short):      ${TTL_SHORT}s"
+    INFO "Controller image: $TAG"
+    INFO "KIND node image:  ${KIND_NODE_IMAGE}"
+    INFO "K3s image:        ${K3S_IMAGE}"
+    if [[ -n "$TTL_MODE_FILTER" ]];    then INFO "TTL mode filter:  $TTL_MODE_FILTER"; fi
+    if [[ -n "$RESOURCE_KIND_FILTER" ]]; then INFO "Resource filter:   $RESOURCE_KIND_FILTER"; fi
+    if [[ -n "$FAIL_FAST" ]];          then INFO "Fail-fast:         yes"; fi
+    if [[ -n "$KEEP_ON_FAILURE" ]];    then INFO "Keep on failure:   yes"; fi
+    INFO ""
+    INFO "Planned resources:"
+    for kind in Pod ReplicaSet; do
+        [[ -n "$RESOURCE_KIND_FILTER" && "$kind" != "$RESOURCE_KIND_FILTER" ]] && continue
+        for ttl_mode in fixed dynamic mapped relative; do
+            [[ -n "$TTL_MODE_FILTER" && "$ttl_mode" != "$TTL_MODE_FILTER" ]] && continue
+            ns_prefix="${kind,,}-${ttl_mode}"
+            [[ -n "$NAMESPACE_PREFIX" ]] && ns_prefix="${NAMESPACE_PREFIX}-${ttl_mode}"
+            INFO "  - ${kind} / ${ttl_mode} → namespace gc-${ns_prefix}"
+        done
+    done
+    INFO ""
+    PASS "Dry-run plan complete. No changes made."
+    exit 0
+fi
+
 cleanup() {
     local rv=$?
     if [[ -n "${KUBECONFIG_FILE}" && -f "${KUBECONFIG_FILE}" ]]; then rm -f "${KUBECONFIG_FILE}"; fi
     if [[ -n "${CERT_DIR}" && -d "${CERT_DIR}" ]]; then rm -rf "${CERT_DIR}"; fi
     if [[ -z "${KEEP_CLUSTER}" ]]; then
         case "$CLUSTER_TYPE" in
-            kind) kind delete cluster --name "$CLUSTER_NAME" 2>/dev/null || true ;;
-            k3d)  k3d cluster delete "$CLUSTER_NAME" 2>/dev/null || true ;;
+            kind) kind delete cluster --name "$CLUSTER_NAME" 2>/dev/null || CLEANUP_FAIL "kind cluster deletion failed" ;;
+            k3d)  k3d cluster delete "$CLUSTER_NAME" 2>/dev/null || CLEANUP_FAIL "k3d cluster deletion failed" ;;
         esac
+    fi
+    if [[ $rv -ne 0 && -n "$KEEP_ON_FAILURE" ]]; then
+        INFO "Cluster kept for debugging: $CLUSTER_NAME"
+        INFO "Evidence: $EVIDENCE_DIR"
     fi
     exit $rv
 }
@@ -592,8 +703,10 @@ STEP "Running validation matrix"
 
 total=0
 
-# Pod
+# Pod scenarios
 for ttl_mode in fixed dynamic mapped relative; do
+    [[ -n "$TTL_MODE_FILTER" && "$ttl_mode" != "$TTL_MODE_FILTER" ]] && continue
+    [[ -n "$RESOURCE_KIND_FILTER" && "Pod" != "$RESOURCE_KIND_FILTER" ]] && continue
     total=$((total+1))
     run_ttl_scenario \
         "Pod/${ttl_mode}" \
@@ -603,8 +716,10 @@ for ttl_mode in fixed dynamic mapped relative; do
     echo ""
 done
 
-# ReplicaSet
+# ReplicaSet scenarios
 for ttl_mode in fixed dynamic mapped relative; do
+    [[ -n "$TTL_MODE_FILTER" && "$ttl_mode" != "$TTL_MODE_FILTER" ]] && continue
+    [[ -n "$RESOURCE_KIND_FILTER" && "ReplicaSet" != "$RESOURCE_KIND_FILTER" ]] && continue
     total=$((total+1))
     run_ttl_scenario \
         "ReplicaSet/${ttl_mode}" \
@@ -622,8 +737,68 @@ INFO "Total: $total | Passed: $((total - failures)) | Failed: $failures"
 
 results_json "${OUTPUT_DIR}/validation-results.json"
 
+# Generate evidence manifest
+EVIDENCE_MANIFEST="${EVIDENCE_DIR}/manifest.json"
+cat > "$EVIDENCE_MANIFEST" <<MANIFESTEOF
+{
+  "run_id": "$RUN_ID",
+  "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "git_commit": "$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || echo 'unknown')",
+  "cluster_type": "$CLUSTER_TYPE",
+  "cluster_name": "$CLUSTER_NAME",
+  "kubernetes_version": "$K8S_VERSION",
+  "node_image": "$NODE_IMAGE",
+  "gc_interval": "$GC_INTERVAL",
+  "ttl_short": $TTL_SHORT,
+  "controller_image": "$TAG",
+  "total_tests": $total,
+  "passed": $((total - failures)),
+  "failed": $failures,
+  "blocked": $is_blocked,
+  "result": "$( [[ $failures -eq 0 && $is_blocked -eq 0 ]] && echo 'PASS' || echo 'FAIL' )"
+}
+MANIFESTEOF
+INFO "Evidence manifest: $EVIDENCE_MANIFEST"
+
+# Generate markdown summary
+MD_SUMMARY="${EVIDENCE_DIR}/summary.md"
+{
+    echo "# Validation Summary"
+    echo ""
+    echo "| Field | Value |"
+    echo "|-------|-------|"
+    echo "| Run ID | \`$RUN_ID\` |"
+    echo "| Date | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+    echo "| Cluster type | $CLUSTER_TYPE |"
+    echo "| K8s version | $K8S_VERSION |"
+    echo "| Result | $( [[ $failures -eq 0 ]] && echo '✅ PASS' || echo '❌ FAIL' ) |"
+    echo "| Total tests | $total |"
+    echo "| Passed | $((total - failures)) |"
+    echo "| Failed | $failures |"
+    echo ""
+    echo "## Test Results"
+    echo ""
+    echo "| Test | Result |"
+    echo "|------|--------|"
+    for r in "${RESULTS[@]}"; do
+        echo "| $r | ✅ PASS |"
+    done
+    if [[ $failures -gt 0 ]]; then
+        echo ""
+        echo "⚠️  ${failures} test(s) failed."
+    fi
+    echo ""
+    echo "---"
+    echo "*Generated by validate-real-gc-deletion.sh*"
+} > "$MD_SUMMARY"
+INFO "Markdown summary: $MD_SUMMARY"
+
 if [[ $failures -gt 0 ]]; then
     FAIL "Some tests failed ($failures)"
+    exit 1
+fi
+if [[ $is_blocked -gt 0 ]]; then
+    BLOCKED "Substrate blocked — cannot complete validation"
     exit 1
 fi
 PASS "All tests passed"
