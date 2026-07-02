@@ -142,8 +142,8 @@ func IsExpired(resource *unstructured.Unstructured, spec *Spec) (bool, error) {
 
 // Parses a dot-separated field path into a slice for nested field access.
 // Backslash-escaped dots are supported for annotation keys containing literal dots.
-// Example: "spec.severity" -> ["spec", "severity"]
-// Example: "status.lastProcessedAt" -> ["status", "lastProcessedAt"]
+// Example: "spec.severity" -> ["spec", "severity"].
+// Example: "status.lastProcessedAt" -> ["status", "lastProcessedAt"].
 func parseFieldPath(path string) []string {
 	if path == "" {
 		return nil

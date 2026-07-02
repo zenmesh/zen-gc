@@ -219,7 +219,7 @@ func TestGCPolicyReconciler_Reconcile_NotFound(t *testing.T) {
 		t.Errorf("Reconcile() should not error on not found, got: %v", err)
 	}
 
-	if result.Requeue {
+	if result != (reconcile.Result{}) {
 		t.Error("Reconcile() should not requeue on not found")
 	}
 
@@ -322,7 +322,7 @@ func TestGCPolicyReconciler_Reconcile_PolicyDeletion(t *testing.T) {
 		t.Errorf("Reconcile() should not error on deletion, got: %v", err)
 	}
 
-	if result.Requeue {
+	if result != (reconcile.Result{}) {
 		t.Error("Reconcile() should not requeue on deletion")
 	}
 
