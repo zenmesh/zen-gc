@@ -18,12 +18,14 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
+	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
@@ -307,6 +309,11 @@ func (s *PolicyEvaluationService) shouldDelete(resource *unstructured.Unstructur
 	// Calculate expiration time using shared function
 	expirationTime, err := calculateExpirationTimeShared(resource, &policy.Spec.TTL)
 	if err != nil {
+		// ErrRelativeTTLExpired means the relative TTL is already in the past —
+		// the resource is expired and should be deleted now.
+		if errors.Is(err, sdkttl.ErrRelativeTTLExpired) {
+			return true, ReasonTTLExpired
+		}
 		s.logger.Debug("Could not calculate expiration time for resource", sdklog.Operation("should_delete"), sdklog.String("resource", fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName())), sdklog.Error(err))
 		return false, ReasonNoTTL
 	}

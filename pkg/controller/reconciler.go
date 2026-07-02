@@ -18,11 +18,12 @@ package controller
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
 	"sync"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,6 +36,7 @@ import (
 
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
 	"github.com/zenmesh/zen-gc/internal/ratelimiter"
+	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
@@ -104,12 +106,13 @@ type GCPolicyReconciler struct {
 	// Uses RESTMapper if available, otherwise falls back to pluralization.
 	gvrResolver *GVRResolver
 
-	// PolicyEvaluationService for the primary (lister + DI) evaluation path.
-	// Lazily created and then cached; see getOrCreateEvaluationService.
+	// PolicyEvaluationServices for the primary (lister + DI) evaluation path.
+	// Keyed by target resource identifier (apiVersion/kind/namespace) so each
+	// GVR gets its own lister. Lazily created; see getOrCreateEvaluationService.
 	// Protected by evaluationServiceMu.
-	evaluationService *PolicyEvaluationService
+	evaluationServices map[string]*PolicyEvaluationService
 
-	// Mutex to protect evaluationService.
+	// Mutex to protect evaluationServices.
 	evaluationServiceMu sync.RWMutex
 }
 
@@ -160,6 +163,7 @@ func NewGCPolicyReconcilerWithRESTMapper(
 		logger:                    sdklog.NewLogger("zen-gc"),
 		restMapper:                restMapper,
 		gvrResolver:               gvrResolver,
+		evaluationServices:        make(map[string]*PolicyEvaluationService),
 	}
 }
 
@@ -195,6 +199,7 @@ func NewGCPolicyReconcilerWithLeaderCheck(
 		statusUpdater:             statusUpdater,
 		eventRecorder:             eventRecorder,
 		logger:                    sdklog.NewLogger("zen-gc"),
+		evaluationServices:        make(map[string]*PolicyEvaluationService),
 	}
 }
 
@@ -208,7 +213,7 @@ func (r *GCPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	// Fetch the GarbageCollectionPolicy instance
 	policy := &v1alpha1.GarbageCollectionPolicy{}
 	if err := r.Get(ctx, req.NamespacedName, policy); err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			return r.handlePolicyDeletion(ctx, req)
 		}
 		return r.handlePolicyFetchError(err)
@@ -269,16 +274,26 @@ func (r *GCPolicyReconciler) getRequeueIntervalForPolicy(policy *v1alpha1.Garbag
 	return interval
 }
 
-// getOrCreateEvaluationService builds the lister-based PolicyEvaluationService once (adapter pattern)
-// and caches it on the reconciler. Policy is only used when the service is first constructed (resource lister wiring).
+// evaluationServiceKey builds a cache key for a policy's target resource.
+// Each unique (apiVersion, kind, namespace) tuple gets its own service.
+func evaluationServiceKey(policy *v1alpha1.GarbageCollectionPolicy) string {
+	return policy.Spec.TargetResource.APIVersion + "/" +
+		policy.Spec.TargetResource.Kind + "/" +
+		policy.Spec.TargetResource.Namespace
+}
+
+// getOrCreateEvaluationService builds or returns the cached PolicyEvaluationService
+// for a given policy's target resource. Each unique (apiVersion, kind, namespace)
+// tuple gets its own service with the correct resource lister.
 // Thread-safe: double-checked locking under evaluationServiceMu.
 func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, policy *v1alpha1.GarbageCollectionPolicy) (*PolicyEvaluationService, error) {
+	key := evaluationServiceKey(policy)
+
 	// Fast path: check with read lock
 	r.evaluationServiceMu.RLock()
-	if r.evaluationService != nil {
-		service := r.evaluationService
+	if svc, ok := r.evaluationServices[key]; ok {
 		r.evaluationServiceMu.RUnlock()
-		return service, nil
+		return svc, nil
 	}
 	r.evaluationServiceMu.RUnlock()
 
@@ -287,8 +302,8 @@ func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, p
 	defer r.evaluationServiceMu.Unlock()
 
 	// Double-check after acquiring write lock (another goroutine might have created it)
-	if r.evaluationService != nil {
-		return r.evaluationService, nil
+	if svc, ok := r.evaluationServices[key]; ok {
+		return svc, nil
 	}
 
 	// Create adapter
@@ -302,7 +317,7 @@ func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, p
 
 	// Create service with adapters
 	// TTLCalculator is nil because PolicyEvaluationService uses shared functions internally
-	r.evaluationService = NewPolicyEvaluationService(
+	svc := NewPolicyEvaluationService(
 		resourceLister,
 		adapter.GetSelectorMatcher(),
 		adapter.GetConditionMatcher(),
@@ -315,7 +330,8 @@ func (r *GCPolicyReconciler) getOrCreateEvaluationService(ctx context.Context, p
 		r.logger,
 	)
 
-	return r.evaluationService, nil
+	r.evaluationServices[key] = svc
+	return svc, nil
 }
 
 // evaluatePolicy runs one evaluation cycle for policy: PolicyEvaluationService
@@ -397,6 +413,11 @@ func (r *GCPolicyReconciler) shouldDelete(resource *unstructured.Unstructured, p
 	// Calculate expiration time
 	expirationTime, err := r.calculateExpirationTime(resource, &policy.Spec.TTL)
 	if err != nil {
+		// ErrRelativeTTLExpired means the relative TTL is already in the past —
+		// the resource is expired and should be deleted now.
+		if stderrors.Is(err, sdkttl.ErrRelativeTTLExpired) {
+			return true, ReasonTTLExpired
+		}
 		// Use struct logger to avoid allocations
 		r.logger.Debug("Could not calculate expiration time for resource", sdklog.Operation("should_delete"), sdklog.String("resource", fmt.Sprintf("%s/%s", resource.GetNamespace(), resource.GetName())), sdklog.Error(err))
 		return false, ReasonNoTTL
@@ -582,10 +603,12 @@ func (r *GCPolicyReconciler) GetLogger() *sdklog.Logger {
 // EvaluatePolicyForTesting allows injecting a PolicyEvaluationService for testing.
 // This bypasses the normal getOrCreateEvaluationService flow.
 func (r *GCPolicyReconciler) EvaluatePolicyForTesting(ctx context.Context, policy *v1alpha1.GarbageCollectionPolicy, service *PolicyEvaluationService) error {
+	key := evaluationServiceKey(policy)
+
 	// Inject the service
 	r.evaluationServiceMu.Lock()
-	oldService := r.evaluationService
-	r.evaluationService = service
+	oldService := r.evaluationServices[key]
+	r.evaluationServices[key] = service
 	r.evaluationServiceMu.Unlock()
 
 	// Evaluate using the injected service
@@ -593,7 +616,7 @@ func (r *GCPolicyReconciler) EvaluatePolicyForTesting(ctx context.Context, polic
 
 	// Restore old service
 	r.evaluationServiceMu.Lock()
-	r.evaluationService = oldService
+	r.evaluationServices[key] = oldService
 	r.evaluationServiceMu.Unlock()
 
 	return err

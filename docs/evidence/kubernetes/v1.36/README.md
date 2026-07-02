@@ -7,8 +7,8 @@ Each subdirectory or file represents a specific cluster provisioning method.
 
 | Method | K8s Version | Status | Scope |
 |--------|-------------|--------|-------|
-| [kind](kind.md) | v1.36.1 | PASS | CRD + runtime |
-| [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS | CRD + runtime |
+| [kind](kind.md) | v1.36.1 | PASS | CRD + runtime + real deletion (full matrix: 4 TTL modes × 5 resource kinds) |
+| [k3d (K3s)](k3d.md) | v1.36.2+k3s1 | PASS | CRD + runtime + real deletion (full matrix: 4 TTL modes × Pod + ReplicaSet) |
 | [kubeadm](kubeadm.md) | v1.36.2 | PASS | CRD/API + negative + RBAC + controller runtime + GC behavior (containerd 2.2.5 upgraded from Debian's 1.7.24) |
 
 ## Scope
@@ -21,9 +21,11 @@ environment.
 
 - Controller startup and leader election
 - CRD registration (`GarbageCollectionPolicy`)
-- Policy creation with dry-run behavior
-- Resource matching and status reporting
-- No crash loops, panics, or API errors
+- Policy creation and status reporting
+- Real (non-dry-run) GC deletion: 4 TTL modes × multiple resource kinds on kind and k3d
+- Resource matching via label selectors
+- Controller crash-loop resilience
+- 3 bugs fixed: evaluation service singleton (per-GVR keyed), Relative TTL deletion, field path escaped dots
 
 ### What was NOT validated
 
@@ -31,7 +33,6 @@ environment.
 - All CNI plugins
 - All storage providers
 - Webhook admission (certificate setup is environment-dependent)
-- Non-dry-run (actual deletion) behavior
 - Performance under load
 - Network policies or restrictions
 

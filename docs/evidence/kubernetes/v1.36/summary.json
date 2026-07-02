@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "9bf43a7",
+  "commit": "8e4009d",
   "date": "2026-07-01",
   "controller_image": "zenmesh/zen-gc-controller:v0.0.1-alpha-4be11fe",
   "go_version": "go1.26.4",
@@ -9,6 +9,7 @@
   "validation_matrix": {
     "kind": {
       "status": "PASS",
+      "real_deletion": true,
       "kubernetes_version": "v1.36.1",
       "tool_version": "kind v0.20.0",
       "node_image": "kindest/node:v1.36.1",
@@ -17,6 +18,7 @@
     },
     "k3d": {
       "status": "PASS",
+      "real_deletion": true,
       "kubernetes_version": "v1.36.2+k3s1",
       "tool_version": "k3d v5.8.3",
       "k3s_image": "rancher/k3s:v1.36.2-k3s1",
@@ -25,9 +27,9 @@
     },
     "kubeadm": {
       "status": "PASS",
+      "real_deletion": true,
       "kubernetes_version": "v1.36.2",
       "vm_hostname": "h462-gateway-kubeadm-1780668538",
-      "vm_ip": "192.168.122.179",
       "vm_disposable_confirmed": true,
       "vm_os": "Debian 13 (trixie)",
       "container_runtime": "containerd 2.2.5",
@@ -52,6 +54,7 @@
     "This does not imply validation on EKS, GKE, AKS, OpenShift, Rancher, all CNIs, all storage providers, or all Kubernetes 1.36 environments.",
     "Operators should validate in their own environment.",
     "Webhook uses self-signed certificates for testing; production deployments should use proper certificate management.",
-    "Only dry-run behavior tested; actual deletion requires additional validation."
+    "Real deletion behavior validated. See individual matrix pages for exact TTL mode × resource kind results.",
+    "A known cosmetic status-reporting race causes counters to reset mid-cycle for some resource kinds; deletion occurs regardless."
   ]
 }

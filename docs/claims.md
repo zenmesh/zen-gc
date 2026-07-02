@@ -5,13 +5,28 @@
 zen-gc is a Kubernetes controller that provides **declarative garbage collection** for any Kubernetes resource. It:
 
 - Watches `GarbageCollectionPolicy` CRDs and reconciles matching resources
-- Supports **four TTL modes**: fixed (`secondsAfterCreation`), field-based, mapped, relative
+- Supports **four TTL modes**: fixed (`secondsAfterCreation`), field-based dynamic (`fieldPath`), mapped (`fieldPath` + `mappings`), relative (`relativeTo` + `secondsAfter`)
 - Supports **label selectors, field selectors, and conditions** (phase, labels, annotations, fields)
 - Provides **rate limiting** (per-policy token bucket) and **dry-run** mode
 - Emits **Prometheus metrics**, Kubernetes events, and structured logs
 - Runs **leader election** for HA (2+ replicas)
 - Runs **non-root** with **restricted** Pod Security Standards
 - Compiles with **Go 1.26** using `controller-runtime v0.19`
+
+### Validated deletion behavior (real, non-dry-run)
+
+The following matrix has been validated with real deletion confirmed via controller logs:
+
+| TTL Mode | Pod | ReplicaSet | ConfigMap | Secret | Job |
+|----------|:---:|:----------:|:---------:|:-----:|:---:|
+| Fixed (`secondsAfterCreation`) | ✅ kind, k3d | ✅ kind, k3d | ✅ kind | ✅ kind | ✅ kind |
+| Field-based dynamic (`fieldPath`: int64) | ✅ kind, k3d | — | — | — | — |
+| Mapped (`fieldPath` + `mappings`) | ✅ kind, k3d | ✅ kind, k3d | ✅ kind | ✅ kind | ✅ kind |
+| Relative (`relativeTo` + `secondsAfter`) | ✅ kind, k3d | — | — | — | — |
+
+See `docs/evidence/kubernetes/v1.36/kind.md` and `docs/evidence/kubernetes/v1.36/k3d.md` for full matrix detail.
+
+**Not validated**: Cloud K8s, OpenShift, Rancher, older Kubernetes versions, multi-node HA, webhook admission, performance under load.
 
 ## What zen-gc does NOT do
 

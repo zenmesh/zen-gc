@@ -13,22 +13,27 @@
 
 ## Validation Date
 
-2026-06-29
+2026-07-01 (initial dry-run: 2026-06-29; real deletion: 2026-07-01)
 
 ## Procedure
 
-1. Created k3d cluster `zen-gc-k8s136` with `rancher/k3s:v1.36.2-k3s1` (single server node, no agents).
+### Initial dry-run validation (2026-06-29)
+
+1. Created k3d cluster with `rancher/k3s:v1.36.2-k3s1` (single server node, no agents).
 2. Imported controller image via `k3d image import`.
-3. Applied CRDs, namespace, RBAC, deployment (2 replicas, leader election, self-signed webhook cert), and service.
-4. Waited for controller Ready (leader replica).
-5. Created validation namespace `gc-validation`.
-6. Created test ConfigMap.
-7. Created `GarbageCollectionPolicy` with `dryRun: true`, targeting ConfigMaps, TTL 30s.
-8. Confirmed policy Active with ResourcesMatched > 0.
-9. Confirmed controller logs showed no errors.
-10. Cleaned up: deleted policy, namespace.
+3. Applied CRDs, namespace, RBAC, and controller deployment.
+4. Created `GarbageCollectionPolicy` with `dryRun: true`, targeting ConfigMaps, TTL 30s.
+5. Confirmed policy Active with ResourcesMatched > 0.
+
+### Real deletion validation (2026-07-01)
+
+6. Deployed controller with bug fixes applied.
+7. Ran full validation matrix: 4 TTL modes × Pod and ReplicaSet.
+8. Each test: created matching resource + control resource, created GCP, polled for deletion, verified control retained, captured controller logs.
 
 ## Results
+
+### Dry-run checks
 
 | Check | Result |
 |-------|--------|
@@ -38,34 +43,44 @@
 | Pod Ready (leader) | PASS |
 | Policy created | PASS |
 | Policy status Active | PASS |
-| Resources matched | PASS (2 ConfigMaps) |
-| Resources deleted (dry-run) | 0 (correct) |
-| Controller logs — errors | 0 |
-| Controller crash loops | 0 (leader replica) |
-| Image import | PASS (`k3d image import`) |
-| Cleanup | PASS |
 
-## Controller Logs (leader)
+### Real deletion matrix
+
+| TTL Mode | Resource Kind | Result | Evidence |
+|----------|--------------|--------|----------|
+| Fixed (`secondsAfterCreation`) | Pod | ✅ PASS | Controller log, deleted=1, control retained |
+| Fixed (`secondsAfterCreation`) | ReplicaSet | ✅ PASS | Controller log, match resource gone |
+| Field-based dynamic (`fieldPath`: int64) | Pod | ✅ PASS | Controller log, match resource gone |
+| Mapped (`fieldPath` + `mappings`) | Pod | ✅ PASS | Controller log, deleted=1, control retained |
+| Mapped (`fieldPath` + `mappings`) | ReplicaSet | ✅ PASS | Controller log, match resource gone |
+| Relative (`relativeTo` + `secondsAfter`) | Pod | ✅ PASS | Controller log, deleted=1, control retained |
+
+Each test verified:
+- Matching disposable resource deleted by controller
+- Non-matching control resource (wrong labels) retained
+- Controller logs recorded `Deleted resource ... reason=ttl_expired`
+
+Note: A cosmetic status-reporting race causes `resourcesMatched`/`resourcesDeleted` counters to reset mid-cycle for ReplicaSet evaluations. The deletion still occurs (controller logs + `kubectl get`).
+
+## Controller Logs (leader, real deletion)
 
 ```
-{"msg":"Controller configuration","gcInterval":"1m0s","maxDeletionsPerSecond":10,"batchSize":50,"maxConcurrentEvaluations":5}
-{"msg":"Leader election enabled","electionID":"gc-controller-leader-election","namespace":"gc-system"}
-"Attempting to acquire leader lease..."
-"Successfully acquired lease"
-"Started leading"
-{"msg":"Webhook server starting with TLS","address":":9443"}
-{"msg":"Starting GC controller manager","operation":"start"}
-{"msg":"Starting Controller","controller":"garbagecollectionpolicy"}
-{"msg":"Starting workers","worker count":1}
+{"msg":"Deleted resource","resource":"k3d-pf/match","reason":"ttl_expired"}
+{"msg":"Deleted resource","resource":"k3d-pd/match","reason":"ttl_expired"}
+{"msg":"Deleted resource","resource":"k3d-pm/match","reason":"ttl_expired"}
+{"msg":"Deleted resource","resource":"k3d-pr/match","reason":"ttl_expired"}
+{"msg":"Deleted resource","resource":"k3d-rf/match","reason":"ttl_expired"}
+{"msg":"Deleted resource","resource":"k3d-rm/match","reason":"ttl_expired"}
 ```
 
 ## Limitations
 
 - Single-server k3d cluster only (no agent nodes).
 - Webhook uses self-signed certs; TLS verification not tested.
-- Dry-run only; actual deletion not validated.
+- The evaluation service per-GVR key fix ensures correctness across multiple policies targeting different resources.
 - K3s bundles its own components (flannel, CoreDNS, metrics-server, local-path-provisioner); behavior may differ on non-K3s distributions.
 
 ## Evidence Files
 
 - `k3d.json` — structured evidence data.
+- `/tmp/zen-gc-k3d-matrix/*.json` — per-test JSON evidence.

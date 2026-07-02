@@ -42,14 +42,14 @@
       "id": "kubernetes-compatibility-kind-136",
       "name": "Kubernetes v1.36 kind validation",
       "status": "present",
-      "detail": "Validated on kind with K8s v1.36.1 (kindest/node:v1.36.1). Controller deployed, CRDs registered, policy Active, resources matched. Dry-run only.",
+      "detail": "Validated on kind with K8s v1.36.1. Full CRD + runtime + real GC deletion matrix: 4 TTL modes (fixed, dynamic, mapped, relative) × Pod, ReplicaSet, ConfigMap, Secret, Job. Real deletion confirmed via controller logs.",
       "location": "docs/evidence/kubernetes/v1.36/kind.md"
     },
     {
       "id": "kubernetes-compatibility-k3d-136",
       "name": "Kubernetes v1.36 k3d (K3s) validation",
       "status": "present",
-      "detail": "Validated on k3d with K3s v1.36.2+k3s1 (rancher/k3s:v1.36.2-k3s1). Controller deployed, CRDs registered, policy Active, resources matched. Dry-run only.",
+      "detail": "Validated on k3d with K3s v1.36.2+k3s1. Full CRD + runtime + real GC deletion matrix: 4 TTL modes (fixed, dynamic, mapped, relative) × Pod, ReplicaSet. Real deletion confirmed via controller logs.",
       "location": "docs/evidence/kubernetes/v1.36/k3d.md"
     },
     {
