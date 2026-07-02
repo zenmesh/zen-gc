@@ -36,7 +36,15 @@
     "evidence_index": "docs/evidence/README.md",
     "claims_doc": "docs/claims.md",
     "ai_evidence_index": "docs/ai/evidence-index.json",
-    "release_evidence": "docs/evidence/releases/README.md"
+    "release_evidence": "docs/evidence/releases/README.md",
+    "leader_election_validation": "docs/evidence/kubernetes/v1.36/leader-election.md"
+  },
+  "leader_election": {
+    "validated_on_kind": true,
+    "replica_counts": "2,3",
+    "kubernetes_version": "kind v1.36.1",
+    "k3d_attempted": "not completed (namespace timing issue)",
+    "kind_result": "PASS — all 10 safety checks met"
   },
   "validated_environments": [
     "kind with Kubernetes v1.36.1 (PASS)",

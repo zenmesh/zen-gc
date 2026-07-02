@@ -11,8 +11,30 @@
   - k3d (K3s) v1.36.2+k3s1
   - kubeadm v1.36.2 (containerd 2.2.5, Debian 13)
   - kubeadm v1.34.9 (containerd 2.2.5, Debian 13)
-- **Validation harness:** `scripts/validation/validate-real-gc-deletion.sh`
-- **Runbook:** `docs/validation/real-gc-deletion.md`
+- **Validation harness:**
+  - `scripts/validation/validate-real-gc-deletion.sh` — Real-GC deletion
+  - `scripts/validation/validate-leader-election-safety.sh` — Leader-election safety
+- **Runbooks:**
+  - `docs/validation/real-gc-deletion.md` — Real-GC deletion procedure
+  - `docs/validation/leader-election-safety.md` — Leader-election safety procedure
+
+## Leader-Election Safety (Added)
+
+Multi-replica leader-election safety validated on kind v1.36.1 (2 and 3 controller replicas):
+
+| Check | 2 Replicas | 3 Replicas |
+|-------|:----------:|:----------:|
+| Exactly one leader | ✅ | ✅ |
+| Non-leader pods idle | ✅ | ✅ |
+| Leader kill → failover to different pod | ✅ | ✅ |
+| Matching resources deleted after TTL | ✅ | ✅ |
+| Control resources retained | ✅ | ✅ |
+| Mapped-ConfigMap deleted | ✅ | ✅ |
+| No cross-leader duplicate deletions | ✅ | ✅ |
+| No error entries in leader logs | ✅ | ✅ |
+
+Run: `./scripts/validation/validate-leader-election-safety.sh --cluster-kind --replica-counts "2,3" --output-dir /tmp/zen-gc-le-validation`
+Evidence: `docs/evidence/kubernetes/v1.36/leader-election.md`
 
 ## Validation Summary
 
@@ -58,6 +80,8 @@ go test ./pkg/controller/... ./internal/ttl/... -count=1
 
 | Evidence | Location |
 |----------|----------|
+| Leader-election safety | `docs/evidence/kubernetes/v1.36/leader-election.md` |
+| Leader-election structured data | `docs/evidence/kubernetes/v1.36/leader-election/manifest.json` |
 | Kind validation | `docs/evidence/kubernetes/v1.36/kind.md` |
 | Kind structured data | `docs/evidence/kubernetes/v1.36/kind.json` |
 | K3d validation | `docs/evidence/kubernetes/v1.36/k3d.md` |
@@ -69,8 +93,10 @@ go test ./pkg/controller/... ./internal/ttl/... -count=1
 | K8s compatibility | `docs/compatibility/kubernetes.md` |
 | Machine-readable status | `docs/ai/status.json` |
 | Machine-readable evidence index | `docs/ai/evidence-index.json` |
-| Validation runbook | `docs/validation/real-gc-deletion.md` |
-| Validation harness | `scripts/validation/validate-real-gc-deletion.sh` |
+| Validation runbook (GC) | `docs/validation/real-gc-deletion.md` |
+| Validation harness (GC) | `scripts/validation/validate-real-gc-deletion.sh` |
+| Validation runbook (leader-election) | `docs/validation/leader-election-safety.md` |
+| Validation harness (leader-election) | `scripts/validation/validate-leader-election-safety.sh` |
 
 ## Unsupported / Non-Claimed Scope
 

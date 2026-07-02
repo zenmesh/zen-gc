@@ -82,7 +82,9 @@ This index catalogs what is evidenced about zen-gc. Each category states whether
 
 | Evidence | Status | Notes |
 |----------|--------|-------|
-| Leader election | ✅ Tested | `pkg/controller/leader_election_test.go` |
+| Leader election unit tests | ✅ Tested | `internal/election/` tests |
+| Leader election safety (2+3 replicas) | ✅ Validated | `docs/evidence/kubernetes/v1.36/leader-election.md` — multi-replica failover, no-double-delete |
+| Leader election safety (kind) | ✅ PASS | 2 and 3 replicas, leader failover, no cross-leader conflicts |
 | Rate limiting | ✅ Tested | `pkg/controller/rate_limiter_test.go` |
 | TTL evaluation | ✅ Tested | `internal/ttl/` tests |
 | Policy reconciliation | ✅ Tested | `pkg/controller/` tests |

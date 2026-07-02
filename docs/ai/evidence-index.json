@@ -81,6 +81,20 @@
       "location": ".github/workflows/build-multiarch.yml"
     },
     {
+      "id": "leader-election-kind",
+      "name": "Leader election safety (kind)",
+      "status": "present",
+      "detail": "Validated on kind with K8s v1.36.1 (2 and 3 controller replicas). Single leader, non-leader idle, leader failover works, no cross-leader duplicate deletions, matching resources deleted after TTL, control resources retained.",
+      "location": "docs/evidence/kubernetes/v1.36/leader-election.md"
+    },
+    {
+      "id": "leader-election-claims",
+      "name": "Leader election public claims",
+      "status": "present",
+      "detail": "Public claims qualified: leader-election validated on kind only; not a cloud HA or multi-node HA claim.",
+      "location": "docs/claims.md"
+    },
+    {
       "id": "helm-chart",
       "name": "Helm chart",
       "status": "present",

@@ -50,6 +50,7 @@ See `docs/evidence/kubernetes/v1.36/kind.md` and `docs/evidence/kubernetes/v1.36
 | Race detection | ✅ `go test -race` | CI test job |
 | Vulnerability scan | ✅ `govulncheck` + `gosec` | CI security job |
 | Container image | ✅ Multi-arch (amd64, arm64) | CI build job |
+| Leader election safety (kind) | ✅ Validated (2+3 replicas) | `docs/evidence/kubernetes/v1.36/leader-election.md` |
 | SLSA/provenance | ❌ Not published | — |
 | SBOM | ❌ Not generated | — |
 | Fuzz testing | ❌ Not implemented | — |
