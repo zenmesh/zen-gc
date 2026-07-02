@@ -38,7 +38,7 @@ The following are **not** actively tested or evidenced:
 
 - Cloud Kubernetes (EKS, GKE, AKS)
 - Kubernetes distributions (OpenShift, Rancher, k0s, etc.)
-- Kubernetes versions older than 1.32
+- Kubernetes versions other than the specific validated versions (v1.34.9, v1.36.1, v1.36.2+k3s1)
 - Network plugins (Calico, Cilium, Flannel)
 - Storage providers (CSI drivers)
 - ARM64 Kubernetes clusters

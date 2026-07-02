@@ -2,7 +2,7 @@
 
 ## Overview
 
-`zen-gc` is a Kubernetes controller for automatic garbage collection of any Kubernetes resource. It is available as free open-source software (Apache-2.0) from the [Zen Mesh](https://zen-mesh.io) team.
+`zen-gc` is a Kubernetes controller for automatic garbage collection of Kubernetes resources (validated on Pod, ReplicaSet, ConfigMap, Secret, Job). It is available as free open-source software (Apache-2.0) from the [Zen Mesh](https://zen-mesh.io) team.
 
 ## Ecosystem Boundary
 
@@ -10,7 +10,7 @@
 
 - **Free OSS Kubernetes garbage collection controller**
 - Declarative cleanup policies with TTL, selectors, conditions, and rate limiting
-- Works with any Kubernetes resource type
+- Works with any Kubernetes resource type (validated: Pod, ReplicaSet, ConfigMap, Secret, Job)
 - Fully independent — no Zen Mesh required
 - Apache-2.0 licensed for community use, self-managed clusters, and contributions
 
@@ -23,7 +23,7 @@
 
 ### Relationship
 
-Both projects are built by **Zen Mesh Inc.** and share engineering practices and infrastructure, but they serve different needs. zen-gc is useful independently on any Kubernetes cluster and does not require a Zen Mesh subscription.
+Both projects are built by **Zen Mesh Inc.** and share engineering practices and infrastructure, but they serve different needs. zen-gc is useful independently on any Kubernetes cluster (validated on kind, k3d, kubeadm) and does not require a Zen Mesh subscription.
 
 ## Project Goals
 
@@ -72,7 +72,7 @@ If zen-gc gains significant community adoption and proves valuable to the Kubern
 ## Key Principles
 
 1. **Kubernetes-Native**: Uses standard Kubernetes patterns
-2. **Generic**: Works with any Kubernetes resource
+2. **Generic**: Works with any Kubernetes resource (validated: Pod, ReplicaSet, ConfigMap, Secret, Job)
 3. **Community-Driven**: Open source, community feedback welcome
 4. **Observable**: Built-in rate limiting, metrics, and observability
 

@@ -2,7 +2,7 @@
 
 Welcome to the **zen-gc** documentation.
 
-zen-gc is a free Apache-2.0 **Kubernetes garbage collection controller** that provides declarative cleanup policies for Kubernetes resources. Define TTL-based, selector-based, and condition-based policies for any resource type.
+zen-gc is a free Apache-2.0 **Kubernetes garbage collection controller** that provides declarative cleanup policies for Kubernetes resources. Define TTL-based, selector-based, and condition-based policies for Kubernetes resources (validated on Pod, ReplicaSet, ConfigMap, Secret, Job).
 
 ## Where this fits with Zen Mesh
 

@@ -2,14 +2,14 @@
 
 ## What zen-gc does
 
-zen-gc is a Kubernetes controller that provides **declarative garbage collection** for any Kubernetes resource. It:
+zen-gc is a Kubernetes controller that provides **declarative garbage collection** for Kubernetes resources matched by `GarbageCollectionPolicy` CRDs. It:
 
 - Watches `GarbageCollectionPolicy` CRDs and reconciles matching resources
 - Supports **four TTL modes**: fixed (`secondsAfterCreation`), field-based dynamic (`fieldPath`), mapped (`fieldPath` + `mappings`), relative (`relativeTo` + `secondsAfter`)
 - Supports **label selectors, field selectors, and conditions** (phase, labels, annotations, fields)
 - Provides **rate limiting** (per-policy token bucket) and **dry-run** mode
 - Emits **Prometheus metrics**, Kubernetes events, and structured logs
-- Runs **leader election** for HA (2+ replicas)
+- Runs **leader election** (2+ replicas; multi-node HA runtime not validated)
 - Runs **non-root** with **restricted** Pod Security Standards
 - Compiles with **Go 1.26** using `controller-runtime v0.19`
 

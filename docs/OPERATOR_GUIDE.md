@@ -17,7 +17,7 @@ This guide is for operators who need to install, configure, and maintain the GC 
 
 ### Prerequisites
 
-- Kubernetes cluster 1.23+
+- Kubernetes cluster 1.31.x+ (compiled target; validated on v1.34.9, v1.36.x)
 - kubectl configured
 - Cluster admin permissions (for CRD installation)
 
@@ -42,14 +42,16 @@ kubectl apply -f deploy/manifests/namespace.yaml
 # Install RBAC (includes leader election and event permissions)
 kubectl apply -f deploy/manifests/rbac.yaml
 
-# Install Deployment (configured for HA with 2 replicas)
+# Install Deployment (2 replicas with leader election; multi-node HA runtime not validated)
 kubectl apply -f deploy/manifests/deployment.yaml
 
 # Install Service
 kubectl apply -f deploy/manifests/service.yaml
 ```
 
-**Note**: The deployment is configured with 2 replicas and leader election for high availability. Only the leader instance will actively process policies.
+**Note**: The deployment is configured with 2 replicas and leader election.
+Only the leader instance will actively process policies.
+Multi-node HA runtime behavior has not been validated.
 
 Or use kustomize:
 
@@ -117,6 +119,8 @@ resources:
 ```
 
 #### Resource Requirements by Scale
+
+> **Note**: The following resource numbers are **estimates based on typical controller-runtime patterns**, not validated benchmarks. Performance under load has not been validated. See `docs/claims.md` for validation boundaries.
 
 **Small Scale (< 10 policies, < 1,000 resources)**
 - **CPU Request**: 100m

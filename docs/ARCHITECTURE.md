@@ -2,7 +2,7 @@
 
 ## Overview
 
-`zen-gc` is a Kubernetes controller that implements generic garbage collection policies for any Kubernetes resource. It uses [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) for event-driven reconciliation, built-in leader election, and standard Kubernetes controller patterns.
+`zen-gc` is a Kubernetes controller that implements garbage collection policies for Kubernetes resources (validated on Pod, ReplicaSet, ConfigMap, Secret, Job). It uses [controller-runtime](https://github.com/kubernetes-sigs/controller-runtime) for event-driven reconciliation, built-in leader election, and standard Kubernetes controller patterns.
 
 ## System Architecture
 

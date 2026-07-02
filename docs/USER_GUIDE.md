@@ -8,7 +8,7 @@ zen-gc makes it easy to automatically clean up Kubernetes resources based on tim
 - **Reduce Costs**: Automatically remove unused resources
 - **Improve Security**: Clean up temporary secrets and configs
 - **Better Organization**: Keep your clusters clean and organized
-- **Production Ready**: Built-in rate limiting and observability
+- **Rate-Limited & Observable**: Built-in rate limiting and observability
 
 ## Table of Contents
 

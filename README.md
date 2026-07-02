@@ -9,9 +9,9 @@ Kubernetes controller for **declarative garbage collection**: define **`GarbageC
 
 **zen-gc** is a free and open source (Apache-2.0) **Kubernetes garbage collection controller** from the **[Zen Mesh](https://zen-mesh.io)** team. It is designed for community use, self-managed Kubernetes clusters, and contributions. zen-gc is **complementary to but independent of** Zen Mesh — you can use zen-gc without Zen Mesh, and Zen Mesh does not require zen-gc.
 
-- **Clean up** completed Jobs, temporary ConfigMaps, expired Secrets, evicted Pods, orphaned ReplicaSets, released PVCs, and any other Kubernetes resource.
+- **Clean up** completed Jobs, temporary ConfigMaps, expired Secrets, evicted Pods, orphaned ReplicaSets, released PVCs, and other Kubernetes resources via declarative GC policies.
 - **Declarative TTL policies** — fixed, field-based, mapped, and relative expiration modes.
-- **Safe, rate-limited, observable** — dry-run mode, Prometheus metrics, Kubernetes events, leader election for HA.
+- **Safe, rate-limited, observable** — dry-run mode, Prometheus metrics, Kubernetes events, leader election.
 
 **Related project — Zen Mesh:** [zen-mesh.io](https://zen-mesh.io) is a commercial webhook delivery and data-plane operations platform for private Kubernetes networks. zen-gc is the free OSS Kubernetes cleanup controller from the same team; the two projects are separate and independent.
 
@@ -127,7 +127,7 @@ ttl:
 
 - Works with any Kubernetes resource type the API server exposes
 - Policies as CRDs — no custom binaries per workload
-- Rate limiting, metrics, events, leader election for HA
+- Rate limiting, metrics, events, leader election
 - Dry-run mode to validate behavior before destructive deletes
 - Observable via Prometheus and Kubernetes events
 
@@ -156,11 +156,11 @@ ttl:
 
 ## Features
 
-- Generic resource support (including CRDs)
+- Resource support (validated: Pod, ReplicaSet, ConfigMap, Secret, Job; CRDs not validated)
 - Four TTL modes: fixed, field-based, mapped, relative
 - Label / field selectors and conditions
 - Rate limiting and dry-run
-- Prometheus metrics, Kubernetes events, HA via leader election
+- Prometheus metrics, Kubernetes events, leader election
 - Test suite with CI and optional kind e2e (`make e2e-kind`)
 
 ## Status

@@ -9,12 +9,12 @@ This document outlines the planned features and improvements for zen-gc. The roa
 ## 🎯 Current Status
 
 zen-gc is currently in **0.0.1-alpha** with core functionality complete:
-- ✅ Generic garbage collection for any Kubernetes resource
+- ✅ Garbage collection for Kubernetes resources (validated: Pod, ReplicaSet, ConfigMap, Secret, Job)
 - ✅ Multiple TTL modes (fixed, dynamic, field-based, mapped, relative)
 - ✅ Per-policy rate limiting and batching
-- ✅ Leader election for HA deployments
+- ✅ Leader election (multi-node HA runtime not yet validated)
 - ✅ Comprehensive metrics and observability
-- ✅ Validating and mutating admission webhooks
+- ✅ Validating webhook (partial implementation; mutating webhook does not exist)
 - ✅ Structured logging with correlation IDs
 - ✅ Parallel policy evaluation
 - ✅ Graceful shutdown and error handling
