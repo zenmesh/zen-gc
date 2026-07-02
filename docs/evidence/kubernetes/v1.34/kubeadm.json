@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "ea627eb",
+  "commit": "a07dd9a",
   "date": "2026-07-01",
   "cluster_type": "kubeadm",
   "kubernetes_version": "v1.34.9",

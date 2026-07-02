@@ -34,7 +34,7 @@ CP instability).
 ## Repo
 
 - **Repo**: `zenmesh/zen-gc`
-- **Commit**: `ea627eb`
+- **Commit**: `a07dd9a`
 
 ## Compatibility Note
 

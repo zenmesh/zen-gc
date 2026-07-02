@@ -1,6 +1,6 @@
 {
   "repo": "zenmesh/zen-gc",
-  "commit": "ea627eb",
+  "commit": "a07dd9a",
   "date": "2026-07-01",
   "validation_scope": "CRD/API + controller runtime + GC behavior",
   "validation_matrix": {
