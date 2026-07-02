@@ -140,11 +140,10 @@ func IsExpired(resource *unstructured.Unstructured, spec *Spec) (bool, error) {
 	return time.Now().After(expirationTime), nil
 }
 
-// parseFieldPath parses a dot-separated field path into a slice for nested field access.
-// Supports backslash-escaped dots (\.) for annotation keys containing dots.
+// Parses a dot-separated field path into a slice for nested field access.
+// Backslash-escaped dots are supported for annotation keys containing literal dots.
 // Example: "spec.severity" -> ["spec", "severity"]
 // Example: "status.lastProcessedAt" -> ["status", "lastProcessedAt"]
-// Example: `metadata.annotations.gc\.ops\.zen-mesh\.io/ttl-seconds` -> ["metadata", "annotations", "gc.ops.zen-mesh.io/ttl-seconds"].
 func parseFieldPath(path string) []string {
 	if path == "" {
 		return nil
@@ -152,13 +151,14 @@ func parseFieldPath(path string) []string {
 	var result []string
 	var current strings.Builder
 	for i := 0; i < len(path); i++ {
-		if path[i] == '\\' && i+1 < len(path) && path[i+1] == '.' {
+		switch {
+		case path[i] == '\\' && i+1 < len(path) && path[i+1] == '.':
 			current.WriteByte('.')
 			i++
-		} else if path[i] == '.' {
+		case path[i] == '.':
 			result = append(result, current.String())
 			current.Reset()
-		} else {
+		default:
 			current.WriteByte(path[i])
 		}
 	}
