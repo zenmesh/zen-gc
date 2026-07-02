@@ -113,6 +113,78 @@ func TestGCPolicyReconciler_shouldDelete_ConditionNotMet(t *testing.T) {
 	}
 }
 
+func TestGCPolicyReconciler_shouldDelete_RelativeTTL_Expired(t *testing.T) {
+	reconciler := &GCPolicyReconciler{
+		logger: sdklog.NewLogger("zen-gc"),
+	}
+
+	// RelativeTo timestamp 3 hours ago + 1 hour SecondsAfter = already expired
+	lastProcessed := metav1.NewTime(time.Now().Add(-3 * time.Hour))
+	resource := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"creationTimestamp": metav1.NewTime(time.Now().Add(-3 * time.Hour)).Format(time.RFC3339),
+			},
+			"status": map[string]interface{}{
+				"lastProcessedAt": lastProcessed.Format(time.RFC3339),
+			},
+		},
+	}
+
+	policy := &v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TTL: v1alpha1.TTLSpec{
+				RelativeTo:   "status.lastProcessedAt",
+				SecondsAfter: int64Ptr(3600), // 1 hour after lastProcessedAt (3h ago → expired)
+			},
+		},
+	}
+
+	shouldDelete, reason := reconciler.shouldDelete(resource, policy)
+	if !shouldDelete {
+		t.Error("BUG-002: shouldDelete() = false, want true (relative TTL already expired)")
+	}
+	if reason != ReasonTTLExpired {
+		t.Errorf("BUG-002: shouldDelete() reason = %q, want %q", reason, ReasonTTLExpired)
+	}
+}
+
+func TestGCPolicyReconciler_shouldDelete_RelativeTTL_NotExpired(t *testing.T) {
+	reconciler := &GCPolicyReconciler{
+		logger: sdklog.NewLogger("zen-gc"),
+	}
+
+	// RelativeTo timestamp 30 minutes ago + 2 hours SecondsAfter = not yet expired
+	lastProcessed := metav1.NewTime(time.Now().Add(-30 * time.Minute))
+	resource := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"creationTimestamp": metav1.NewTime(time.Now().Add(-30 * time.Minute)).Format(time.RFC3339),
+			},
+			"status": map[string]interface{}{
+				"lastProcessedAt": lastProcessed.Format(time.RFC3339),
+			},
+		},
+	}
+
+	policy := &v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TTL: v1alpha1.TTLSpec{
+				RelativeTo:   "status.lastProcessedAt",
+				SecondsAfter: int64Ptr(7200), // 2 hours after lastProcessedAt (30min ago → not expired)
+			},
+		},
+	}
+
+	shouldDelete, reason := reconciler.shouldDelete(resource, policy)
+	if shouldDelete {
+		t.Error("shouldDelete() = true, want false (relative TTL not yet expired)")
+	}
+	if reason != ReasonNotExpired {
+		t.Errorf("shouldDelete() reason = %q, want %q", reason, ReasonNotExpired)
+	}
+}
+
 func TestGCPolicyReconciler_shouldDelete_NoTTL(t *testing.T) {
 	reconciler := &GCPolicyReconciler{
 		logger: sdklog.NewLogger("zen-gc"),

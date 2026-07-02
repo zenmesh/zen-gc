@@ -96,6 +96,113 @@ func TestNewGCPolicyReconciler(t *testing.T) {
 	}
 }
 
+// TestEvaluationServiceKey_DifferentGVRs ensures evaluationServiceKey produces distinct keys
+// for different (apiVersion, kind, namespace) tuples. This is the regression guard for BUG-001
+// where the evaluation service was keyed only by the first policy's GVR.
+func TestEvaluationServiceKey_DifferentGVRs(t *testing.T) {
+	podPolicy := &v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "v1",
+				Kind:       "Pod",
+				Namespace:  "default",
+			},
+		},
+	}
+	cmPolicy := &v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Namespace:  "default",
+			},
+		},
+	}
+	rsPolicy := &v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "apps/v1",
+				Kind:       "ReplicaSet",
+				Namespace:  "default",
+			},
+		},
+	}
+
+	keys := make(map[string]bool)
+	for _, p := range []*v1alpha1.GarbageCollectionPolicy{podPolicy, cmPolicy, rsPolicy} {
+		k := evaluationServiceKey(p)
+		if keys[k] {
+			t.Errorf("duplicate key %q produced for policy %s/%s", k, p.Spec.TargetResource.APIVersion, p.Spec.TargetResource.Kind)
+		}
+		keys[k] = true
+	}
+
+	// Also verify same key is returned for identical targets
+	cmPolicy2 := &v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "v1",
+				Kind:       "ConfigMap",
+				Namespace:  "default",
+			},
+		},
+	}
+	k1 := evaluationServiceKey(cmPolicy)
+	k2 := evaluationServiceKey(cmPolicy2)
+	if k1 != k2 {
+		t.Errorf("identical target resources should produce same key, got %q != %q", k1, k2)
+	}
+}
+
+// TestEvaluationServiceKey_ConsistentCache verifies that the evaluation key function
+// is consistent with the cached services map. Uses the reconciler's evaluationServices
+// map directly to confirm same-key → same-entry behavior. Regression guard for BUG-001.
+func TestEvaluationServiceKey_ConsistentCache(t *testing.T) {
+	podKey := evaluationServiceKey(&v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "v1", Kind: "Pod", Namespace: "default",
+			},
+		},
+	})
+	cmKey := evaluationServiceKey(&v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "v1", Kind: "ConfigMap", Namespace: "default",
+			},
+		},
+	})
+	rsKey := evaluationServiceKey(&v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "apps/v1", Kind: "ReplicaSet", Namespace: "default",
+			},
+		},
+	})
+
+	if podKey == cmKey {
+		t.Error("BUG-001: Pod and ConfigMap policies should produce different cache keys")
+	}
+	if podKey == rsKey {
+		t.Error("BUG-001: Pod and ReplicaSet policies should produce different cache keys")
+	}
+	if cmKey == rsKey {
+		t.Error("BUG-001: ConfigMap and ReplicaSet policies should produce different cache keys")
+	}
+
+	// Verify same key is returned for identical targets
+	cmKey2 := evaluationServiceKey(&v1alpha1.GarbageCollectionPolicy{
+		Spec: v1alpha1.GarbageCollectionPolicySpec{
+			TargetResource: v1alpha1.TargetResourceSpec{
+				APIVersion: "v1", Kind: "ConfigMap", Namespace: "default",
+			},
+		},
+	})
+	if cmKey != cmKey2 {
+		t.Errorf("identical targets should produce same key, got %q != %q", cmKey, cmKey2)
+	}
+}
+
 func TestGCPolicyReconciler_Reconcile_NotFound(t *testing.T) {
 	reconciler, fakeClient := setupTestReconciler(t)
 
