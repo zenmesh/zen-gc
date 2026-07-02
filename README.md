@@ -125,7 +125,7 @@ ttl:
 
 ## Key benefits
 
-- Works with any Kubernetes resource type the API server exposes
+- Works with Kubernetes resources matched by label/field selectors
 - Policies as CRDs — no custom binaries per workload
 - Rate limiting, metrics, events, leader election
 - Dry-run mode to validate behavior before destructive deletes
