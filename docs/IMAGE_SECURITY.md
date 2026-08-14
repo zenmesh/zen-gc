@@ -110,13 +110,13 @@ sudo apt-get install trivy  # Ubuntu/Debian
 make build-image
 
 # Scan image
-trivy image zen-mesh/gc-controller:latest
+trivy image zenmesh/gc-controller:latest
 
 # Scan with specific severity
-trivy image --severity CRITICAL,HIGH zen-mesh/gc-controller:latest
+trivy image --severity CRITICAL,HIGH zenmesh/gc-controller:latest
 
 # Scan and save report
-trivy image --format json --output trivy-report.json zen-mesh/gc-controller:latest
+trivy image --format json --output trivy-report.json zenmesh/gc-controller:latest
 ```
 
 #### Scan Go Dependencies
@@ -205,10 +205,10 @@ FROM alpine:3.20@sha256:<NEW_SHA>
 make build-image
 
 # Run security scan
-trivy image zen-mesh/gc-controller:test
+trivy image zenmesh/gc-controller:test
 
 # Test the image
-docker run --rm zen-mesh/gc-controller:test --help
+docker run --rm zenmesh/gc-controller:test --help
 ```
 
 #### Step 6: Update Documentation

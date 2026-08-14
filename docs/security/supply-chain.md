@@ -28,7 +28,7 @@ This document describes zen-gc's supply chain security posture. As of June 2026,
 
 | Artifact | Published to | Signed | SBOM | Provenance |
 |----------|-------------|--------|------|------------|
-| Container image | Docker Hub (`zenmesh/zen-gc-controller`) | ❌ No | ❌ No | ❌ No |
+| Container image | Docker Hub (`zenmesh/gc-controller`) | ❌ No | ❌ No | ❌ No |
 | Helm chart | Artifact Hub | ❌ No | ❌ No | ❌ No |
 | Source code | GitHub | ✅ git tag | N/A | N/A |
 

@@ -1,4 +1,4 @@
-# Copyright 2026 Kube-ZEN Contributors
+# Copyright 2026 Zen Mesh
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gc-controller
-          image: docker.io/zenmesh/zen-gc-controller:latest
+          image: docker.io/zenmesh/gc-controller:latest
           imagePullPolicy: IfNotPresent
           args:
             - --metrics-addr=:8080

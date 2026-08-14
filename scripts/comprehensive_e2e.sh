@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2026 Kube-ZEN Contributors
+# Copyright 2026 Zen Mesh
 #
 # End-to-end validation on a disposable kind cluster: CRDs, controller (image),
 # validating webhook with locally generated TLS + caBundle, policy workloads,
@@ -23,7 +23,7 @@ log_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 NAMESPACE="${NAMESPACE:-gc-e2e-test}"
 CLUSTER_NAME="${CLUSTER_NAME:-zen-gc-e2e}"
-IMAGE_TAG="${IMAGE_TAG:-zenmesh/zen-gc-controller:e2e-${USER:-local}}"
+IMAGE_TAG="${IMAGE_TAG:-zenmesh/gc-controller:e2e-${USER:-local}}"
 E2E_KEEP_CLUSTER="${E2E_KEEP_CLUSTER:-}"
 E2E_SKIP_GO_TESTS="${E2E_SKIP_GO_TESTS:-}"
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2026 Kube-ZEN Contributors
+# Copyright 2026 Zen Mesh
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,12 +117,12 @@ deploy_controller() {
     
     # Build and load image
     log_info "Building controller image..."
-    docker build -t zenmesh/zen-gc-controller:test ../../.
-    kind load docker-image zenmesh/zen-gc-controller:test --name "$CLUSTER_NAME"
+    docker build -t zenmesh/gc-controller:test ../../.
+    kind load docker-image zenmesh/gc-controller:test --name "$CLUSTER_NAME"
     
     # Apply deployment (modify image tag)
     kubectl apply -f ../../deploy/manifests/deployment.yaml
-    kubectl set image deployment/gc-controller gc-controller=zenmesh/zen-gc-controller:test -n gc-system
+    kubectl set image deployment/gc-controller gc-controller=zenmesh/gc-controller:test -n gc-system
     
     log_info "Waiting for controller to be ready..."
     kubectl wait --for=condition=available --timeout=120s deployment/gc-controller -n gc-system

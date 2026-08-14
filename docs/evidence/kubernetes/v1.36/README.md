@@ -40,7 +40,7 @@ environment.
 
 - **Repo**: `zenmesh/zen-gc`
 - **Commit**: `a07dd9a`
-- **Controller image**: `zenmesh/zen-gc-controller:v0.0.1-alpha-a07dd9a` (build from commit, statically linked, scratch base)
+- **Controller image**: `zenmesh/gc-controller:v0.0.1-alpha-a07dd9a` (build from commit, statically linked, scratch base)
 - **Go**: 1.26.4
 - **client-go**: v0.35.0
 - **controller-runtime**: v0.19.0

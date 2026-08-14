@@ -7,7 +7,7 @@ This directory contains release evidence for zen-gc. Each release should documen
 - **Version:** `0.0.1-alpha` (pre-release)
 - **Commit:** `12b31bca14da24d3bf5b0ef5062186fc768f9015` (initial alpha tag)
 - **Helm chart:** `docs/gc-controller-0.0.1-alpha.tgz`
-- **Container image:** `zenmesh/zen-gc-controller:0.0.1-alpha`
+- **Container image:** `zenmesh/gc-controller:0.0.1-alpha`
 
 ## Release evidence status
 

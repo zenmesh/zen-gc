@@ -4,7 +4,7 @@ This document describes the governance model for the zen-gc project.
 
 ## Project Status
 
-zen-gc is currently in **Draft** status as a Kubernetes Enhancement Proposal (KEP). The project is maintained by the Kube-ZEN community.
+zen-gc is currently in **Draft** status as a Kubernetes Enhancement Proposal (KEP). The project is maintained by the Zen Mesh community.
 
 ## Maintainers
 
@@ -17,7 +17,7 @@ Maintainers are responsible for:
 
 ### Current Maintainers
 
-- Kube-ZEN Community
+- Zen Mesh community
 
 ## Decision Making
 

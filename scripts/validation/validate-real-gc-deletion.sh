@@ -87,7 +87,7 @@ done
 KEEP_CLUSTER="${KEEP_CLUSTER:-$KEEP_ON_FAILURE}"
 GC_INTERVAL="${GC_INTERVAL:-20s}"
 TTL_SHORT="${TTL_SHORT:-15}"
-TAG="${TAG:-zenmesh/zen-gc-controller:validate}"
+TAG="${TAG:-zenmesh/gc-controller:validate}"
 KIND_NODE_IMAGE="${KIND_NODE_IMAGE:-kindest/node:v1.36.1}"
 K3S_IMAGE="${K3S_IMAGE:-rancher/k3s:v1.36.2-k3s1}"
 failures=0

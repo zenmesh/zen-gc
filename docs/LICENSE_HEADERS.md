@@ -8,7 +8,7 @@ All source files should include Apache 2.0 license headers.
 
 ```go
 /*
-Copyright 2026 Kube-ZEN Contributors
+Copyright 2026 Zen Mesh
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ package controller
 ### YAML Files
 
 ```yaml
-# Copyright 2026 Kube-ZEN Contributors
+# Copyright 2026 Zen Mesh
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ You can use a tool like `addlicense`:
 
 ```bash
 go install github.com/google/addlicense@latest
-addlicense -c "Kube-ZEN Contributors" -l apache .
+addlicense -c "Zen Mesh" -l apache .
 ```
 
 ## Exceptions

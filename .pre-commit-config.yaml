@@ -1,4 +1,4 @@
-# Copyright 2026 Kube-ZEN Contributors
+# Copyright 2026 Zen Mesh
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,6 +68,6 @@ repos:
     rev: v1.1.1
     hooks:
       - id: addlicense
-        args: ['-c', 'Kube-ZEN Contributors', '-l', 'apache']
+        args: ['-c', 'Zen Mesh', '-l', 'apache']
         exclude: ^(zz_generated|\.git|vendor|bin|coverage\.out|coverage\.html)
 

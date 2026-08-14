@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: gc-controller
-        image: zenmesh/zen-gc-controller:latest
+        image: zenmesh/gc-controller:latest
         args:
         - --leader-election=true
         - --leader-election-namespace=zen-gc-system
@@ -66,7 +66,7 @@ spec:
     spec:
       containers:
       - name: gc-controller
-        image: zenmesh/zen-gc-controller:latest
+        image: zenmesh/gc-controller:latest
         args:
         - --leader-election=false
 ```

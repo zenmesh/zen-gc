@@ -31,7 +31,7 @@
 
 ## Image/build evidence
 
-- **Image:** `zenmesh/zen-gc-controller:vX.Y.Z`
+- **Image:** `zenmesh/gc-controller:vX.Y.Z`
 - **Architectures:** linux/amd64, linux/arm64
 - **Base image SHA:** `<sha256>`
 - **Image digest:** `<sha256>`
@@ -57,5 +57,5 @@
 ## Artifacts
 
 - Helm chart: `docs/gc-controller-vX.Y.Z.tgz`
-- Container image: `docker.io/zenmesh/zen-gc-controller:vX.Y.Z`
+- Container image: `docker.io/zenmesh/gc-controller:vX.Y.Z`
 - Release tag: `vX.Y.Z`

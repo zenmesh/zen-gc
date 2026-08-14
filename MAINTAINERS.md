@@ -4,9 +4,9 @@ This file lists the maintainers of the zen-gc project.
 
 ## Current Maintainers
 
-### Kube-ZEN Community
+### Zen Mesh community
 
-The zen-gc project is maintained by the Kube-ZEN community.
+The zen-gc project is maintained by the Zen Mesh community.
 
 ## Maintainer Responsibilities
 

@@ -2,7 +2,7 @@
 
 **Status**: Draft (Future Consideration)  
 **Last Updated**: 2026-05-08  
-**Authors**: Kube-ZEN Community  
+**Authors**: Zen Mesh community  
 **SIG**: sig-apps (primary), sig-architecture (secondary)  
 **KEP Number**: TBD
 

@@ -62,12 +62,12 @@ Thank you for your interest in contributing to zen-gc! This document provides gu
 2. **Build and deploy controller:**
    ```bash
    # Build image
-   docker build -t zen-mesh/gc-controller:dev .
-   kind load docker-image zen-mesh/gc-controller:dev --name zen-gc-e2e
+   docker build -t zenmesh/gc-controller:dev .
+   kind load docker-image zenmesh/gc-controller:dev --name zen-gc-e2e
    
    # Deploy
    kubectl apply -f deploy/manifests/
-   kubectl set image deployment/gc-controller gc-controller=zen-mesh/gc-controller:dev -n gc-system
+   kubectl set image deployment/gc-controller gc-controller=zenmesh/gc-controller:dev -n gc-system
    ```
 
 3. **Run controller locally (for faster iteration):**

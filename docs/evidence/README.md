@@ -52,7 +52,7 @@ This index catalogs what is evidenced about zen-gc. Each category states whether
 |----------|--------|----------|
 | git tags | ✅ Present | `v0.0.1-alpha` |
 | Helm chart | ✅ Present | `docs/gc-controller-0.0.1-alpha.tgz` |
-| Container image | ✅ Present | `zenmesh/zen-gc-controller:0.0.1-alpha` |
+| Container image | ✅ Present | `zenmesh/gc-controller:0.0.1-alpha` |
 | Release notes | ⚠️ Template-only | Template in `docs/evidence/releases/template.md` |
 | SBOM | ❌ Missing | Not generated |
 | SLSA provenance | ❌ Missing | Not published |

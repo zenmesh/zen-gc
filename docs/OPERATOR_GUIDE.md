@@ -380,7 +380,7 @@ kubectl get garbagecollectionpolicies --all-namespaces -o yaml > policies-backup
    ```
 3. **Update controller:**
    ```bash
-   kubectl set image deployment/gc-controller gc-controller=zen-mesh/gc-controller:<new-version> -n gc-system
+   kubectl set image deployment/gc-controller gc-controller=zenmesh/gc-controller:<new-version> -n gc-system
    ```
 4. **Verify upgrade:**
    ```bash
