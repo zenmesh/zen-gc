@@ -26,7 +26,7 @@ Builds require **Go 1.26+** (see `go.mod`). Published container images are built
 From a clone of this repo (paths match the tree layout):
 
 ```bash
-kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
 kubectl apply -f deploy/manifests/namespace.yaml
 kubectl apply -f deploy/manifests/rbac.yaml
 # Point deploy/manifests/deployment.yaml at your image (build locally or use a registry tag).
@@ -44,7 +44,7 @@ kubectl apply -f examples/temp-configmap-cleanup.yaml
 **Remote raw manifests** (replace branch/tag as needed):
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
 kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/manifests/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/manifests/rbac.yaml
 kubectl apply -f https://raw.githubusercontent.com/zenmesh/zen-gc/main/deploy/manifests/deployment.yaml
@@ -173,7 +173,7 @@ zen-gc is a public repository available for community use, feedback, and contrib
 - **Public trust & evidence:** [docs/evidence/README.md](docs/evidence/README.md)
 - **Claims and maturity:** [docs/claims.md](docs/claims.md)
 - **AI context:** [llms.txt](llms.txt)
-- **No hosted website:** zen-gc does not have a dedicated website; `kube-zen.io` is a parked/legacy domain that is not used for zen-gc
+- **No hosted website:** zen-gc does not have a dedicated website; `zen-mesh.io` is a parked/legacy domain that is not used for zen-gc
 
 ## From the Zen Mesh team
 

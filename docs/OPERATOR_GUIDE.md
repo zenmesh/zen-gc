@@ -24,7 +24,7 @@ This guide is for operators who need to install, configure, and maintain the GC 
 ### Step 1: Install CRD
 
 ```bash
-kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
 ```
 
 Verify installation:

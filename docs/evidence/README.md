@@ -62,7 +62,7 @@ This index catalogs what is evidenced about zen-gc. Each category states whether
 
 | Evidence | Status | Notes |
 |----------|--------|-------|
-| CRD manifest | ✅ Present | `deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml` |
+| CRD manifest | ✅ Present | `deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml` |
 | API reference | ✅ Present | `docs/API_REFERENCE.md` |
 | OpenAPI schema | ✅ Present | Embedded in CRD |
 | Conversion webhook | ❌ Missing | No CRD version conversion |

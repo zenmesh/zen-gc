@@ -448,7 +448,7 @@ go test ./... -cover
 
 # E2E tests (requires kind cluster)
 kind create cluster --name zen-gc-test
-kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
 KUBECONFIG=$(kind get kubeconfig --name zen-gc-test) go test -tags=e2e ./test/e2e/...
 kind delete cluster --name zen-gc-test
 ```

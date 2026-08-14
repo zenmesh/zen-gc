@@ -60,10 +60,10 @@ upgrade). **Zero new restarts during the 45+ minute validation window.**
 ### CRD Install Idempotency
 
 ```
-$ kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+$ kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
   customresourcedefinition.apiextensions.k8s.io/garbagecollectionpolicies.gc.ops.zen-mesh.io created
 
-$ kubectl apply -f deploy/crds/gc.kube-zen.io_garbagecollectionpolicies.yaml
+$ kubectl apply -f deploy/crds/gc.ops.zen-mesh.io_garbagecollectionpolicies.yaml
   customresourcedefinition.apiextensions.k8s.io/garbagecollectionpolicies.gc.ops.zen-mesh.io unchanged
 ```
 
