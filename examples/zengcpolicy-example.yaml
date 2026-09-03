@@ -1,0 +1,11 @@
+# Example ZenGCPolicy (Zen-named public API)
+apiVersion: gc.ops.zen-mesh.io/v1alpha1
+kind: ZenGCPolicy
+metadata:
+  name: example-zengcpolicy
+spec:
+  targetResource:
+    apiVersion: v1
+    kind: ConfigMap
+  ttl:
+    secondsAfterCreation: 604800
