@@ -36,7 +36,7 @@ or the install script:
 | `rbac.targetKinds` | Explicit allowlist of resource classes the controller may collect (default deny; no wildcards) |
 | `rbac.namespaceScope` | `true` = deletion confined to the release namespace (Role); `false` = cluster-wide deletion (ClusterRole). Reads are always cluster-wide. |
 | `leaderElection.enabled` | controller-runtime leader election |
-| `networkPolicy.enabled` | Egress-restricted NetworkPolicy (Kubernetes API + DNS only) |
+| `networkPolicy.enabled` | Egress-restricted NetworkPolicy (Kubernetes API over 443 via CIDR — the API endpoint is host-network and cannot be selected by namespace — plus DNS to kube-system) |
 
 Scope the controller by granting only the resource classes it should manage
 (`rbac.targetKinds`) and, with `rbac.namespaceScope: true`, by installing one
@@ -46,9 +46,12 @@ release per namespace so deletions stay inside each release's namespace.
 
 - Default deny: an unknown GVK is never GC-able
 - Explicit resource-class allowlist via `rbac.targetKinds`
-- Protection annotation: `gc.ops.zen-mesh.io/protected: "true"` means never deleted
-- Dry-run: full selection/planning without mutation
-- Bounded batch: max deletions per cycle configurable
+- Policy-expressed protection: selection conditions (`conditions.hasLabels`,
+  `hasAnnotations`, field conditions, with `NotIn`/`NotEquals` exclusion)
+  keep protected objects out of the delete set
+- Paused policies (`spec.paused`) are skipped entirely
+- Dry-run: `behavior.dryRun: true` selects/plans without mutation
+- Bounded batch: `behavior.maxDeletionsPerSecond` caps deletion rate
 - Finalizers respected: blocked deletions are recorded, never stripped
 - Native Kubernetes GC is preferred where sufficient (TTL-after-finished,
   ownerReferences)

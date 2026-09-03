@@ -9,11 +9,23 @@ spec:
       app.kubernetes.io/instance: {{ .Release.Name }}
   policyTypes: [Egress]
   egress:
-    # Kubernetes API + DNS only (minimum egress).
+    # Kubernetes API: the API server endpoint is a host-network address
+    # (the kubernetes Service resolves to it), not a pod, so it can only be
+    # selected by CIDR. A namespaceSelector rule never matches it and some
+    # CNIs REJECT the unmatched egress outright.
     - to:
-        - namespaceSelector: {}
+        - ipBlock:
+            cidr: 0.0.0.0/0
       ports:
         - port: 443
           protocol: TCP
+    # DNS: CoreDNS pods live in kube-system; TCP is needed for large replies.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
         - port: 53
           protocol: UDP
+        - port: 53
+          protocol: TCP
