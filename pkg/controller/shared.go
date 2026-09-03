@@ -29,13 +29,13 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 
+	"github.com/zenmesh/zen-gc/internal/backoff"
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
+	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
-	"github.com/zenmesh/zen-sdk/pkg/gc/backoff"
-	"github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
 )
 
 var (
