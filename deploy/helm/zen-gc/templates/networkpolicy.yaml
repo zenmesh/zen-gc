@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-zen-gc
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: zen-gc
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes: [Egress]
+  egress:
+    # Kubernetes API + DNS only (minimum egress).
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 53
+          protocol: UDP

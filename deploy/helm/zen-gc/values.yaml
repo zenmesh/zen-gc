@@ -1,0 +1,48 @@
+image:
+  repository: ghcr.io/zenmesh/zen-gc-controller
+  tag: latest
+  digest: ""
+  pullPolicy: IfNotPresent
+
+profile: control  # control | data
+
+replicas: 1
+
+leaderElection:
+  enabled: true
+
+rbac:
+  # Explicit per-profile resource allowlists (default deny; no wildcards).
+  control:
+    targetKinds:
+      - group: batch
+        resource: jobs
+    namespaceScope: true
+  data:
+    targetKinds:
+      - group: batch
+        resource: jobs
+    namespaceScope: true
+
+networkPolicy:
+  enabled: true
+  # Minimum egress: Kubernetes API + DNS only.
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits: {}
+
+probes:
+  scheme: HTTP
+  readiness:
+    initialDelaySeconds: 3
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 5
+    periodSeconds: 15
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1

@@ -1,0 +1,7 @@
+# Control-plane profile: scoped to control-plane transient resources.
+profile: control
+rbac:
+  control:
+    targetKinds:
+      - group: batch
+        resource: jobs

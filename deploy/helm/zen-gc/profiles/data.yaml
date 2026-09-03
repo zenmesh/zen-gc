@@ -1,0 +1,7 @@
+# Data-plane profile: scoped to data-plane transient resources.
+profile: data
+rbac:
+  data:
+    targetKinds:
+      - group: batch
+        resource: jobs
