@@ -12,9 +12,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 	clientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
+	"github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
 )
 
 func TestNewInformerStoreResourceLister(t *testing.T) {

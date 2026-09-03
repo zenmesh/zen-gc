@@ -35,12 +35,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	sdkttl "github.com/zenmesh/zen-gc/internal/ttl"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
 	"github.com/zenmesh/zen-gc/pkg/validation"
+	"github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
 )
 
 // GCPolicyReconciler reconciles GarbageCollectionPolicy resources.

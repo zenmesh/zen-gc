@@ -25,9 +25,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	sdklog "github.com/zenmesh/zen-gc/internal/logging"
-	"github.com/zenmesh/zen-gc/internal/ratelimiter"
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
+	"github.com/zenmesh/zen-sdk/pkg/gc/ratelimiter"
 )
 
 // PolicyEvaluator provides methods needed for policy evaluation.
