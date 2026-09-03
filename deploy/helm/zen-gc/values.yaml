@@ -16,8 +16,9 @@ rbac:
   targetKinds:
     - group: batch
       resource: jobs
-  # true: permissions are namespace-scoped (Role in the release namespace).
-  # false: a ClusterRole grants cluster-wide scope.
+  # true: deletion is confined to the release namespace (Role); reads are
+  # always cluster-wide. false: deletion is granted cluster-wide
+  # (ClusterRole).
   namespaceScope: true
 
 networkPolicy:

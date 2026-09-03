@@ -34,14 +34,13 @@ or the install script:
 |---|---|
 | `image.repository/tag/digest` | Controller image |
 | `rbac.targetKinds` | Explicit allowlist of resource classes the controller may collect (default deny; no wildcards) |
-| `rbac.namespaceScope` | `true` = Role in the release namespace; `false` = ClusterRole (cluster-wide) |
+| `rbac.namespaceScope` | `true` = deletion confined to the release namespace (Role); `false` = cluster-wide deletion (ClusterRole). Reads are always cluster-wide. |
 | `leaderElection.enabled` | controller-runtime leader election |
 | `networkPolicy.enabled` | Egress-restricted NetworkPolicy (Kubernetes API + DNS only) |
 
-Scope the controller by granting only the namespaces and resource classes
-it should manage. For namespace-scoped deployments, install one release per
-namespace with `rbac.namespaceScope: true` and an explicit
-`rbac.targetKinds` allowlist.
+Scope the controller by granting only the resource classes it should manage
+(`rbac.targetKinds`) and, with `rbac.namespaceScope: true`, by installing one
+release per namespace so deletions stay inside each release's namespace.
 
 ## Safety
 
