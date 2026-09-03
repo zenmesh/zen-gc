@@ -29,8 +29,8 @@ Stable releases follow semantic versioning:
 - [ ] CHANGELOG.md is updated with release notes
 - [ ] Version numbers are updated in:
   - [ ] `go.mod` (if needed)
-  - [ ] `charts/gc-controller/Chart.yaml`
-  - [ ] `charts/gc-controller/values.yaml` (if needed)
+  - [ ] `deploy/helm/zen-gc/Chart.yaml`
+  - [ ] `deploy/helm/zen-gc/values.yaml` (if needed)
   - [ ] `docs/KEP_GENERIC_GARBAGE_COLLECTION.md` (if needed)
 
 ### Creating a Release

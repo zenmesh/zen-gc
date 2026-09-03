@@ -4,25 +4,21 @@ image:
   digest: ""
   pullPolicy: IfNotPresent
 
-profile: control  # control | data
-
 replicas: 1
 
 leaderElection:
   enabled: true
 
 rbac:
-  # Explicit per-profile resource allowlists (default deny; no wildcards).
-  control:
-    targetKinds:
-      - group: batch
-        resource: jobs
-    namespaceScope: true
-  data:
-    targetKinds:
-      - group: batch
-        resource: jobs
-    namespaceScope: true
+  # Explicit allowlist of resource classes the controller may collect
+  # (default deny; no wildcards). Grant only what the controller should
+  # manage in your deployment.
+  targetKinds:
+    - group: batch
+      resource: jobs
+  # true: permissions are namespace-scoped (Role in the release namespace).
+  # false: a ClusterRole grants cluster-wide scope.
+  namespaceScope: true
 
 networkPolicy:
   enabled: true
@@ -35,7 +31,6 @@ resources:
   limits: {}
 
 probes:
-  scheme: HTTP
   readiness:
     initialDelaySeconds: 3
     periodSeconds: 10

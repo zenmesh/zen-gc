@@ -6,7 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: zen-gc
     app.kubernetes.io/instance: {{ .Release.Name }}
-    zen-gc.io/profile: {{ .Values.profile }}
 spec:
   replicas: {{ .Values.replicas }}
   selector:
@@ -18,7 +17,6 @@ spec:
       labels:
         app.kubernetes.io/name: zen-gc
         app.kubernetes.io/instance: {{ .Release.Name }}
-        zen-gc.io/profile: {{ .Values.profile }}
     spec:
       serviceAccountName: {{ .Release.Name }}-zen-gc
       containers:

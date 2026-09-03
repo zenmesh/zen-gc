@@ -1,19 +1,21 @@
-{{- $profile := .Values.profile }}
-{{- $kinds := index .Values.rbac $profile "targetKinds" }}
+{{- $kinds := .Values.rbac.targetKinds }}
+{{- $scope := .Values.rbac.namespaceScope }}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: {{ if $scope }}Role{{ else }}ClusterRole{{ end }}
 metadata:
   name: {{ .Release.Name }}-zen-gc
+  {{- if $scope }}
   namespace: {{ .Release.Namespace }}
+  {{- end }}
 rules:
-  # CRD access (both kinds, same group).
+  # Policy CRD access (read + status update).
   - apiGroups: ["gc.ops.zen-mesh.io"]
-    resources: ["garbagecollectionpolicies", "zengcpolicies"]
+    resources: ["garbagecollectionpolicies"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["gc.ops.zen-mesh.io"]
-    resources: ["garbagecollectionpolicies/status", "zengcpolicies/status"]
+    resources: ["garbagecollectionpolicies/status"]
     verbs: ["get", "update", "patch"]
-  # Profile-scoped target resource classes (default deny; explicit allowlist).
+  # Scoped target resource classes (default deny; explicit allowlist).
   {{- range $kinds }}
   - apiGroups: [{{ .group | quote }}]
     resources: [{{ .resource | quote }}]
@@ -21,13 +23,15 @@ rules:
   {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: {{ if $scope }}RoleBinding{{ else }}ClusterRoleBinding{{ end }}
 metadata:
   name: {{ .Release.Name }}-zen-gc
+  {{- if $scope }}
   namespace: {{ .Release.Namespace }}
+  {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: {{ if $scope }}Role{{ else }}ClusterRole{{ end }}
   name: {{ .Release.Name }}-zen-gc
 subjects:
   - kind: ServiceAccount

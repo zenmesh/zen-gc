@@ -86,12 +86,12 @@ func main() {
 }
 
 func runMain() int {
-	// Initialize zen-sdk logger (configures controller-runtime logger automatically)
+	// Initialize the zen-gc logger (configures the controller-runtime logger automatically)
 	logger = sdklog.NewLogger("zen-gc")
 	setupLog = logger.WithComponent("setup")
 	setupLog.Debug("GC Controller starting", sdklog.String("version", version), sdklog.String("commit", commit), sdklog.String("buildDate", buildDate))
 
-	// OpenTelemetry tracing initialization can be added here when zen-sdk/pkg/observability is available
+	// OpenTelemetry tracing initialization can be added here when a tracing backend is configured
 	// For now, continue without tracing
 
 	// Get config using controller-runtime (handles kubeconfig flag automatically)
