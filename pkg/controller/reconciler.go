@@ -58,11 +58,11 @@ type GCPolicyReconciler struct {
 
 	// Resource informers (one per policy).
 	// Protected by resourceInformersMu mutex.
-	resourceInformers map[types.UID]cache.SharedInformer
+	resourceInformers map[string]cache.SharedInformer
 
 	// Resource informer factories (one per policy).
 	// Protected by resourceInformersMu mutex.
-	resourceInformerFactories map[types.UID]dynamicinformer.DynamicSharedInformerFactory
+	resourceInformerFactories map[string]dynamicinformer.DynamicSharedInformerFactory
 
 	// Mutex to protect resourceInformers and resourceInformerFactories maps.
 	resourceInformersMu sync.RWMutex
@@ -152,8 +152,8 @@ func NewGCPolicyReconcilerWithRESTMapper(
 		dynamicClient:             dynamicClient,
 		config:                    cfg,
 		shouldReconcile:           func() bool { return true }, // Default: always reconcile
-		resourceInformers:         make(map[types.UID]cache.SharedInformer),
-		resourceInformerFactories: make(map[types.UID]dynamicinformer.DynamicSharedInformerFactory),
+		resourceInformers:         make(map[string]cache.SharedInformer),
+		resourceInformerFactories: make(map[string]dynamicinformer.DynamicSharedInformerFactory),
 		rateLimiters:              make(map[types.UID]*ratelimiter.RateLimiter),
 		policyUIDs:                make(map[types.NamespacedName]types.UID),
 		policySpecs:               make(map[types.UID]*v1alpha1.GarbageCollectionPolicySpec),
@@ -190,8 +190,8 @@ func NewGCPolicyReconcilerWithLeaderCheck(
 		dynamicClient:             dynamicClient,
 		config:                    cfg,
 		shouldReconcile:           func() bool { return true }, // Always true (Manager handles leader election)
-		resourceInformers:         make(map[types.UID]cache.SharedInformer),
-		resourceInformerFactories: make(map[types.UID]dynamicinformer.DynamicSharedInformerFactory),
+		resourceInformers:         make(map[string]cache.SharedInformer),
+		resourceInformerFactories: make(map[string]dynamicinformer.DynamicSharedInformerFactory),
 		rateLimiters:              make(map[types.UID]*ratelimiter.RateLimiter),
 		policyUIDs:                make(map[types.NamespacedName]types.UID),
 		policySpecs:               make(map[types.UID]*v1alpha1.GarbageCollectionPolicySpec),
@@ -471,8 +471,10 @@ func (r *GCPolicyReconciler) deleteResource(ctx context.Context, resource *unstr
 // getOrCreateResourceInformer gets or creates a resource informer for a policy.
 func (r *GCPolicyReconciler) getOrCreateResourceInformer(ctx context.Context, policy *v1alpha1.GarbageCollectionPolicy) (cache.SharedInformer, error) {
 	// Check if informer already exists (with read lock)
+	// Shared-informer lookup: keyed by target GVR+namespace, not policy UID.
+	informerKey := evaluationServiceKey(policy)
 	r.resourceInformersMu.RLock()
-	if informer, ok := r.resourceInformers[policy.UID]; ok {
+	if informer, ok := r.resourceInformers[informerKey]; ok {
 		r.resourceInformersMu.RUnlock()
 		return informer, nil
 	}
@@ -483,7 +485,7 @@ func (r *GCPolicyReconciler) getOrCreateResourceInformer(ctx context.Context, po
 	defer r.resourceInformersMu.Unlock()
 
 	// Double-check after acquiring write lock (another goroutine might have created it)
-	if informer, ok := r.resourceInformers[policy.UID]; ok {
+	if informer, ok := r.resourceInformers[informerKey]; ok {
 		return informer, nil
 	}
 
@@ -506,20 +508,30 @@ func (r *GCPolicyReconciler) getOrCreateResourceInformer(ctx context.Context, po
 		interval = r.config.GCInterval
 	}
 
-	// Create informer factory with label selector filter
+	// Shared observation infrastructure: ONE informer per target
+	// (apiVersion/kind/namespace), deliberately UNFILTERED by policy label
+	// selectors. Policy-specific selection (labels, fields, conditions, TTL)
+	// is applied per-policy at evaluation time. Baking a policy's selector
+	// into the shared informer would leak policy semantics across policies
+	// that target the same GVR (observed as a dry-run policy suppressing a
+	// later destructive policy's deletions).
+	if informer, exists := r.resourceInformers[informerKey]; exists {
+		return informer, nil
+	}
+
 	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(
 		r.dynamicClient,
 		interval,
 		namespace,
-		buildLabelSelectorFilter(policy),
+		nil,
 	)
 
 	// Create informer
-	informer := factory.ForResource(gvr).Informer()
+	createdInformer := factory.ForResource(gvr).Informer()
 
 	// Store informer and factory
-	r.resourceInformers[policy.UID] = informer
-	r.resourceInformerFactories[policy.UID] = factory
+	r.resourceInformers[informerKey] = createdInformer
+	r.resourceInformerFactories[informerKey] = factory
 
 	// Update metrics
 	recordInformerCount(len(r.resourceInformers))
@@ -531,10 +543,10 @@ func (r *GCPolicyReconciler) getOrCreateResourceInformer(ctx context.Context, po
 	syncCtx, syncCancel := context.WithTimeout(ctx, DefaultCacheSyncTimeout)
 	defer syncCancel()
 
-	if !cache.WaitForCacheSync(syncCtx.Done(), informer.HasSynced) {
+	if !cache.WaitForCacheSync(syncCtx.Done(), createdInformer.HasSynced) {
 		// Clean up on failure
-		delete(r.resourceInformers, policy.UID)
-		delete(r.resourceInformerFactories, policy.UID)
+		delete(r.resourceInformers, informerKey)
+		delete(r.resourceInformerFactories, informerKey)
 		if syncCtx.Err() != nil {
 			return nil, fmt.Errorf("resource informer cache sync timed out: %w", syncCtx.Err())
 		}
@@ -543,7 +555,7 @@ func (r *GCPolicyReconciler) getOrCreateResourceInformer(ctx context.Context, po
 
 	// Use struct logger to avoid allocations
 	r.logger.Debug("Created resource informer for policy", sdklog.Operation("get_or_create_informer"), sdklog.String("policy", fmt.Sprintf("%s/%s", policy.Namespace, policy.Name)), sdklog.String("uid", string(policy.UID)))
-	return informer, nil
+	return createdInformer, nil
 }
 
 // getOrCreateRateLimiter gets or creates a rate limiter for a policy.
@@ -705,36 +717,14 @@ func (r *GCPolicyReconciler) cleanupPolicyResources(nn types.NamespacedName) {
 	r.policySpecsMu.Unlock()
 }
 
-// cleanupResourceInformer cleans up a resource informer for a given policy UID.
+// cleanupResourceInformer retains shared per-target informers: informers are
+// observation infrastructure shared by every policy with the same target
+// GVR/namespace, so a single policy deletion must not tear down observation
+// for the remaining policies. Unreferenced informers are bounded by the
+// distinct target set (small); lifecycle review tracked as a follow-up.
 func (r *GCPolicyReconciler) cleanupResourceInformer(policyUID types.UID) {
-	r.resourceInformersMu.Lock()
-	defer r.resourceInformersMu.Unlock()
-
-	_, informerExists := r.resourceInformers[policyUID]
-	_, factoryExists := r.resourceInformerFactories[policyUID]
-
-	if !informerExists && !factoryExists {
-		// Already cleaned up or never existed
-		return
-	}
-
-	// Stop the informer factory (which will stop all informers created by it)
-	if factoryExists {
-		// DynamicSharedInformerFactory doesn't have a Stop method,
-		// but stopping is handled by context cancellation.
-		// We just need to remove it from our tracking.
-		delete(r.resourceInformerFactories, policyUID)
-	}
-
-	// Remove informer from map
-	if informerExists {
-		delete(r.resourceInformers, policyUID)
-		// Use struct logger to avoid allocations
-		r.logger.Debug("Cleaned up resource informer for policy", sdklog.Operation("cleanup_informer"), sdklog.String("uid", string(policyUID)))
-	}
-
-	// Update metrics
-	recordInformerCount(len(r.resourceInformers))
+	// Intentionally retained: shared-informer lifecycle is not policy-owned.
+	_ = policyUID
 }
 
 // cleanupRateLimiter cleans up a rate limiter for a given policy UID.

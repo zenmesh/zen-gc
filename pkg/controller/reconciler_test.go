@@ -437,28 +437,27 @@ func TestGCPolicyReconciler_cleanupResourceInformer(t *testing.T) {
 
 	uid := types.UID("test-uid")
 
-	// Create a mock informer entry
+	// D039: informers are SHARED per target GVR/namespace — a single policy
+	// deletion must NOT tear down observation shared by remaining policies.
 	reconciler.resourceInformersMu.Lock()
-	reconciler.resourceInformers[uid] = nil // nil is OK for this test
-	reconciler.resourceInformerFactories[uid] = nil
+	key := "v1/ConfigMap/test-ns"
+	reconciler.resourceInformers[key] = nil // nil is OK for this test
+	reconciler.resourceInformerFactories[key] = nil
 	initialCount := len(reconciler.resourceInformers)
 	reconciler.resourceInformersMu.Unlock()
 
-	// Cleanup
 	reconciler.cleanupResourceInformer(uid)
 
-	// Verify cleanup
 	reconciler.resourceInformersMu.RLock()
 	finalCount := len(reconciler.resourceInformers)
-	_, exists := reconciler.resourceInformers[uid]
+	_, exists := reconciler.resourceInformers[key]
 	reconciler.resourceInformersMu.RUnlock()
 
-	if exists {
-		t.Error("Resource informer should be cleaned up")
+	if !exists {
+		t.Error("shared informer must be retained on policy deletion (other policies may share the target)")
 	}
-
-	if finalCount != initialCount-1 {
-		t.Errorf("Expected informer count to decrease by 1, got %d -> %d", initialCount, finalCount)
+	if finalCount != initialCount {
+		t.Errorf("cleanup must not change informer count, got %d -> %d", initialCount, finalCount)
 	}
 }
 

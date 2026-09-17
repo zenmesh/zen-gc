@@ -168,7 +168,6 @@ func runtimeToUnstructured(policy *v1alpha1.GarbageCollectionPolicy) (*unstructu
 func mustCreatePolicy(t *testing.T, dyn dynamic.Interface, ns string, pol *v1alpha1.GarbageCollectionPolicy) {
 	t.Helper()
 	pol = pol.DeepCopy()
-	pol.Name = polName(t, pol)
 	pol.Namespace = ns
 	obj, err := runtimeToUnstructured(pol)
 	if err != nil {
@@ -177,17 +176,6 @@ func mustCreatePolicy(t *testing.T, dyn dynamic.Interface, ns string, pol *v1alp
 	if _, err := dyn.Resource(polGVR).Namespace(ns).Create(context.Background(), obj, metav1.CreateOptions{}); err != nil {
 		t.Fatalf("create policy: %v", err)
 	}
-}
-
-var polNameCounters = map[string]int{}
-
-func polName(t *testing.T, pol *v1alpha1.GarbageCollectionPolicy) string {
-	t.Helper()
-	key := t.Name()
-	polNameCounters[key]++
-	name := fmt.Sprintf("%s-%d", pol.Name, polNameCounters[key])
-	pol.Name = name
-	return name
 }
 
 // cmGVR returns the ConfigMap GVR.
@@ -369,6 +357,21 @@ func nsResourceGVR(apiVersion, kind string) schema.GroupVersionResource {
 	return schema.GroupVersionResource{}
 }
 
+// setProbeStatus writes the status subresource for a probe. Kubernetes
+// strips status at creation (subresource), so status fields must be applied
+// via a separate UpdateStatus carrying the live resourceVersion.
+func setProbeStatus(t *testing.T, dyn dynamic.Interface, ns string, obj *unstructured.Unstructured, field, value string) {
+	t.Helper()
+	live, err := dyn.Resource(probeGVR).Namespace(ns).Get(context.Background(), obj.GetName(), metav1.GetOptions{})
+	if err != nil {
+		t.Fatalf("get probe for status: %v", err)
+	}
+	live.Object["status"] = map[string]interface{}{field: value}
+	if _, err := dyn.Resource(probeGVR).Namespace(ns).UpdateStatus(context.Background(), live, metav1.UpdateOptions{}); err != nil {
+		t.Fatalf("set %s: %v", field, err)
+	}
+}
+
 // TestE2E_DestructiveSuite proves real deletion behavior (E01..E10).
 func TestE2E_DestructiveSuite(t *testing.T) {
 	if testing.Short() {
@@ -507,7 +510,10 @@ func TestE2E_DestructiveSuite(t *testing.T) {
 		pol := basePolicy("e10-policy", ns, map[string]string{"e2e": "e10"}, 1)
 		mustCreatePolicy(t, dyn, ns, pol)
 		// Simulate uninstall: policies are removed first, then controller.
-		waitFor(t, "policy deletion", 30*time.Second, func() (bool, string) {
+		if err := dyn.Resource(polGVR).Namespace(ns).Delete(context.Background(), "e10-policy", metav1.DeleteOptions{}); err != nil {
+			t.Fatalf("delete policy: %v", err)
+		}
+		waitFor(t, "policy deletion", pollTimeout, func() (bool, string) {
 			_, err := dyn.Resource(polGVR).Namespace(ns).Get(ctx, "e10-policy", metav1.GetOptions{})
 			return err != nil, resourceState(err)
 		})
@@ -544,10 +550,11 @@ func TestE2E_TTL_Modes(t *testing.T) {
 
 	t.Run("FieldBased_Positive", func(t *testing.T) {
 		pr := probe("ttl-field-expired", ns, "", 3, "")
+		pr.SetLabels(map[string]string{"e2e": "ttl-field"})
 		createResource(t, dyn, ns, pr)
 		pol := basePolicy("ttl-field", ns, map[string]string{"e2e": "ttl-field"}, 0)
 		pol.Spec.TTL = v1alpha1.TTLSpec{FieldPath: "spec.ttlSeconds"}
-		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns, LabelSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"e2e": "ttl-field"}}}
 		mustCreatePolicy(t, dyn, ns, pol)
 		waitFor(t, "field-based TTL deletion", pollTimeout, func() (bool, string) {
 			_, err := dyn.Resource(probeGVR).Namespace(ns).Get(ctx, "ttl-field-expired", metav1.GetOptions{})
@@ -559,6 +566,7 @@ func TestE2E_TTL_Modes(t *testing.T) {
 		pr := probe("ttl-mapped-ephemeral", ns, "ephemeral", 0, "")
 		_ = pr
 		obj := probe("ttl-mapped-ephemeral", ns, "ephemeral", 3, "")
+		obj.SetLabels(map[string]string{"e2e": "ttl-mapped"})
 		createResource(t, dyn, ns, obj)
 		pol := basePolicy("ttl-mapped", ns, map[string]string{"e2e": "ttl-mapped"}, 0)
 		pol.Spec.TTL = v1alpha1.TTLSpec{
@@ -566,7 +574,7 @@ func TestE2E_TTL_Modes(t *testing.T) {
 			Mappings:  map[string]int64{"ephemeral": 3, "persistent": 86400},
 			Default:   int64Ptr(86400),
 		}
-		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns, LabelSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"e2e": "ttl-mapped"}}}
 		mustCreatePolicy(t, dyn, ns, pol)
 		waitFor(t, "mapped TTL deletion", pollTimeout, func() (bool, string) {
 			_, err := dyn.Resource(probeGVR).Namespace(ns).Get(ctx, "ttl-mapped-ephemeral", metav1.GetOptions{})
@@ -576,6 +584,7 @@ func TestE2E_TTL_Modes(t *testing.T) {
 
 	t.Run("Mapped_Negative_DefaultSurvives", func(t *testing.T) {
 		obj := probe("ttl-mapped-unknown", ns, "mystery-tier", 0, "")
+		obj.SetLabels(map[string]string{"e2e": "ttl-mapped-neg"})
 		createResource(t, dyn, ns, obj)
 		pol := basePolicy("ttl-mapped-neg", ns, map[string]string{"e2e": "ttl-mapped-neg"}, 0)
 		pol.Spec.TTL = v1alpha1.TTLSpec{
@@ -583,7 +592,7 @@ func TestE2E_TTL_Modes(t *testing.T) {
 			Mappings:  map[string]int64{"ephemeral": 3},
 			Default:   int64Ptr(86400),
 		}
-		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns, LabelSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"e2e": "ttl-mapped-neg"}}}
 		mustCreatePolicy(t, dyn, ns, pol)
 		time.Sleep(12 * time.Second)
 		if _, err := dyn.Resource(probeGVR).Namespace(ns).Get(ctx, "ttl-mapped-unknown", metav1.GetOptions{}); err != nil {
@@ -593,11 +602,13 @@ func TestE2E_TTL_Modes(t *testing.T) {
 
 	t.Run("Relative_Positive", func(t *testing.T) {
 		old := time.Now().UTC().Add(-10 * time.Minute).Format(time.RFC3339)
-		obj := probe("ttl-relative-expired", ns, "", 0, old)
+		obj := probe("ttl-relative-expired", ns, "", 0, "")
+		obj.SetLabels(map[string]string{"e2e": "ttl-relative"})
 		createResource(t, dyn, ns, obj)
+		setProbeStatus(t, dyn, ns, obj, "completedAt", old)
 		pol := basePolicy("ttl-relative", ns, map[string]string{"e2e": "ttl-relative"}, 0)
 		pol.Spec.TTL = v1alpha1.TTLSpec{RelativeTo: "status.completedAt", SecondsAfter: int64Ptr(60)}
-		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns, LabelSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"e2e": "ttl-relative"}}}
 		mustCreatePolicy(t, dyn, ns, pol)
 		waitFor(t, "relative TTL deletion", pollTimeout, func() (bool, string) {
 			_, err := dyn.Resource(probeGVR).Namespace(ns).Get(ctx, "ttl-relative-expired", metav1.GetOptions{})
@@ -607,11 +618,13 @@ func TestE2E_TTL_Modes(t *testing.T) {
 
 	t.Run("Relative_Negative_NotExpiredSurvives", func(t *testing.T) {
 		recent := time.Now().UTC().Format(time.RFC3339)
-		obj := probe("ttl-relative-fresh", ns, "", 0, recent)
+		obj := probe("ttl-relative-fresh", ns, "", 0, "")
+		obj.SetLabels(map[string]string{"e2e": "ttl-relative-neg"})
 		createResource(t, dyn, ns, obj)
+		setProbeStatus(t, dyn, ns, obj, "completedAt", recent)
 		pol := basePolicy("ttl-relative-neg", ns, map[string]string{"e2e": "ttl-relative-neg"}, 0)
 		pol.Spec.TTL = v1alpha1.TTLSpec{RelativeTo: "status.completedAt", SecondsAfter: int64Ptr(3600)}
-		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+		pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns, LabelSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"e2e": "ttl-relative-neg"}}}
 		mustCreatePolicy(t, dyn, ns, pol)
 		time.Sleep(12 * time.Second)
 		if _, err := dyn.Resource(probeGVR).Namespace(ns).Get(ctx, "ttl-relative-fresh", metav1.GetOptions{}); err != nil {
@@ -637,11 +650,11 @@ func TestE2E_ArbitraryCRD(t *testing.T) {
 	// A policy targeting the CRD by Kind alone must resolve the irregular
 	// plural zgprobes through the RESTMapper, not naive pluralization.
 	pr := probe("crd-e2e-probe", ns, "ephemeral", 3, "")
+	pr.SetLabels(map[string]string{"e2e": "crd-e2e"})
 	createResource(t, dyn, ns, pr)
-	pol := basePolicy("crd-e2e", ns, nil, 0)
-	pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+	pol := basePolicy("crd-e2e", ns, map[string]string{"e2e": "crd-e2e"}, 0)
 	pol.Spec.TTL = v1alpha1.TTLSpec{FieldPath: "spec.ttlSeconds"}
-	pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns}
+	pol.Spec.TargetResource = v1alpha1.TargetResourceSpec{APIVersion: probeGroup + "/" + probeVersion, Kind: probeKind, Namespace: ns, LabelSelector: &metav1.LabelSelector{MatchLabels: map[string]string{"e2e": "crd-e2e"}}}
 	mustCreatePolicy(t, dyn, ns, pol)
 	waitFor(t, "arbitrary-CRD deletion via RESTMapper resolution", pollTimeout, func() (bool, string) {
 		_, err := dyn.Resource(probeGVR).Namespace(ns).Get(ctx, "crd-e2e-probe", metav1.GetOptions{})
