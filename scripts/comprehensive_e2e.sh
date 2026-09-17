@@ -155,6 +155,35 @@ EOF
 
 kubectl create namespace "${NAMESPACE}" 2>/dev/null || true
 
+log_step "Waiting for webhook readiness (bounded canary create/delete)..."
+WEBHOOK_READY=0
+for i in $(seq 1 30); do
+	if kubectl apply -f - <<EOF 2>/dev/null
+apiVersion: gc.ops.zen-mesh.io/v1alpha1
+kind: GarbageCollectionPolicy
+metadata:
+  name: webhook-canary
+  namespace: ${NAMESPACE}
+spec:
+  targetResource:
+    apiVersion: v1
+    kind: ConfigMap
+  ttl:
+    secondsAfterCreation: 3600
+EOF
+	then
+		kubectl delete garbagecollectionpolicy webhook-canary -n "${NAMESPACE}" --wait=false 2>/dev/null || true
+		WEBHOOK_READY=1
+		log_info "Webhook ready after attempt ${i}"
+		break
+	fi
+	sleep 2
+done
+if [[ "${WEBHOOK_READY}" != "1" ]]; then
+	log_err "Webhook never became ready (30 attempts / ~60s)"
+	exit 1
+fi
+
 # --- Assertions -------------------------------------------------------------
 
 log_step "Test 1: valid GarbageCollectionPolicy..."
