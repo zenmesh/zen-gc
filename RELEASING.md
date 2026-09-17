@@ -100,3 +100,16 @@ This project follows [Semantic Versioning](https://semver.org/):
 - **MINOR** version for backward-compatible functionality additions
 - **PATCH** version for backward-compatible bug fixes
 
+
+## Supply-chain hardening checklist (D039)
+
+For every release, produce and attach:
+
+1. **Checksums**: `sha256sum gc-controller-<ver>.tgz gc-controller-<ver>.txt > checksums.txt`
+2. **SBOM**: `syft <image>:<tag> -o spdx-json > sbom-spdx.json` (attach to the GitHub release)
+3. **Image digest**: record the immutable `sha256:` digest in the release notes; charts must reference the digest, not a mutable tag
+4. **Vulnerability scan**: `trivy image --severity CRITICAL,HIGH <image>:<tag>` — attach the report; CRITICALs block the release
+5. **Signing**: `cosign sign --key <key-ref> <image>@<digest>` — requires the project signing identity (owner-held); run as the release step once keys are available
+6. **Provenance**: record build command + Go version + base image digest in the release notes
+
+`latest` is a development-only tag and must never be the documented production install path.

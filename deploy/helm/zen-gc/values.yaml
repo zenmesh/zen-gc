@@ -1,6 +1,7 @@
 image:
   repository: ghcr.io/zenmesh/zen-gc-controller
-  tag: latest
+  # Pinned version tag; never use :latest for production installs (D039 §4).
+  tag: "0.0.1-alpha"
   digest: ""
   pullPolicy: IfNotPresent
 
