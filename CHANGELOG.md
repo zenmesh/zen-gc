@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **GVR resolution cache poisoning**: pluralization fallback results are no longer cached; a freshly created CRD (or any resource whose discovery entry propagates late) now resolves correctly on the next evaluation instead of watching a nonexistent resource forever (found by the new arbitrary-CRD E2E)
+- **Informer creation** now resolves through the RESTMapper-backed resolver (was naive pluralization directly), completing the RESTMapper integration for irregular plural CRDs
+
+### Added
+- **Destructive E2E suite** (`test/e2e/destructive_e2e_test.go`): E01-E10 real-deletion proof (dry-run safety, eligible deletion, nonmatch/nonexpired survival, fail-closed malformed policy, rate limiting, controller-restart safety, uninstall safety) plus all four TTL modes (fixed/field-based/mapped/relative) and an arbitrary-CRD proof with irregular plural
+- **Webhook readiness gate** in the E2E script (bounded canary create/delete before assertions)
+
 ### Added
 - **Go 1.26 Upgrade**: Upgraded to Go 1.26.0 for improved performance and new features
 - Additional admission webhook tests (DELETE operations skip TTL/schema validation)

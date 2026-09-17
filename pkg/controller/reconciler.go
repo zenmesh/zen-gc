@@ -40,7 +40,6 @@ import (
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 	"github.com/zenmesh/zen-gc/pkg/config"
 	gcerrors "github.com/zenmesh/zen-gc/pkg/errors"
-	"github.com/zenmesh/zen-gc/pkg/validation"
 )
 
 // GCPolicyReconciler reconciles GarbageCollectionPolicy resources.
@@ -488,8 +487,12 @@ func (r *GCPolicyReconciler) getOrCreateResourceInformer(ctx context.Context, po
 		return informer, nil
 	}
 
-	// Create GVR
-	gvr, err := validation.ParseGVR(policy.Spec.TargetResource.APIVersion, policy.Spec.TargetResource.Kind)
+	// Resolve GVR through the RESTMapper-backed resolver (handles irregular
+	// plurals/CRDs; pluralization remains an uncached last-resort fallback).
+	sample := &unstructured.Unstructured{}
+	sample.SetAPIVersion(policy.Spec.TargetResource.APIVersion)
+	sample.SetKind(policy.Spec.TargetResource.Kind)
+	gvr, err := r.gvrResolver.ResolveGVR(sample)
 	if err != nil {
 		return nil, fmt.Errorf("invalid target resource: %w", err)
 	}

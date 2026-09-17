@@ -45,7 +45,10 @@ func NewGVRResolver(restMapper meta.RESTMapper) *GVRResolver {
 }
 
 // ResolveGVR resolves a GroupVersionResource from a resource's GroupVersionKind.
-// Uses RESTMapper if available, otherwise falls back to pluralization.
+// Uses the RESTMapper when available; pluralization is a last-resort fallback
+// whose result is NEVER cached, so a freshly created CRD resolves correctly
+// once discovery catches up (a poisoned cache would send watches to a GVR
+// that does not exist and never self-heal).
 func (r *GVRResolver) ResolveGVR(resource *unstructured.Unstructured) (schema.GroupVersionResource, error) {
 	gvk := resource.GroupVersionKind()
 
@@ -59,21 +62,24 @@ func (r *GVRResolver) ResolveGVR(resource *unstructured.Unstructured) (schema.Gr
 
 	var gvr schema.GroupVersionResource
 
-	// Use RESTMapper if available
 	if r.restMapper != nil {
 		mapping, err := r.restMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 		if err == nil {
 			gvr = mapping.Resource
 		} else {
-			// RESTMapper failed, fall back to pluralization
+			// RESTMapper failed — likely a freshly created CRD whose
+			// discovery entry has not propagated yet. Pluralization is
+			// used ONLY as an uncached last resort.
 			gvr = r.resolveGVRWithPluralization(gvk)
+			return gvr, nil
 		}
 	} else {
-		// No RESTMapper, use pluralization
+		// No RESTMapper, use pluralization (uncached)
 		gvr = r.resolveGVRWithPluralization(gvk)
+		return gvr, nil
 	}
 
-	// Cache the result
+	// Cache only mapper-confirmed resolutions
 	r.mu.Lock()
 	r.cache[gvk] = gvr
 	r.mu.Unlock()

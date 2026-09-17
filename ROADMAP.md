@@ -2,7 +2,7 @@
 
 This document outlines the planned features and improvements for zen-gc. The roadmap is organized by theme and prioritized for upcoming releases.
 
-**Last Updated**: 2026-01-15
+**Last Updated**: 2026-09-17 (D039 truth pass: RESTMapper status reconciled; SHIPPED vs NEXT separated)
 
 ---
 
@@ -154,20 +154,14 @@ zen-gc is currently in **0.0.1-alpha** with core functionality complete:
 - Memory usage optimization for large-scale deployments
 - Performance benchmarking and tuning
 
-#### GVR Resolution with RESTMapper
-- Replace naive pluralization with discovery-based RESTMapper resolution
-- Properly handle irregular Kinds and CRDs that don't follow standard pluralization rules
-- Cache GVR mappings for performance
-- Requires architectural change to pass discovery client through constructor
+#### GVR Resolution with RESTMapper — SHIPPED
+- Discovery-based RESTMapper resolution is implemented (`pkg/controller/gvr_resolver.go`, wired in `pkg/controller/reconciler.go`).
+- Irregular Kinds and CRDs that do not follow standard pluralization rules are resolved through discovery; proven by the arbitrary-CRD E2E (`TestE2E_ArbitraryCRD`, irregular plural `zgprobes`).
+- GVR mappings are cached for performance.
+- Residual follow-up: dynamic-informer creation previously used pluralization directly and could cache a wrong GVR for freshly created CRDs. Fixed (D039): pluralization fallback results are never cached, and informer creation resolves through the RESTMapper-backed resolver. See `test/e2e/destructive_e2e_test.go`.
 
-**Benefits**:
-- Reliable GVR resolution for all resource types
-- Support for CRDs with irregular plural forms
-- Prevents deletion failures due to incorrect resource paths
-
-**Known Limitation**:
-- Current implementation uses simple pluralization which may fail for irregular Kinds/CRDs
-- Workaround: Ensure CRD resource names follow standard pluralization rules
+**Known Limitation (current)**:
+- The pluralization fallback still exists as an uncached last resort for the window between CRD creation and discovery propagation. Deletion decisions against an unresolved GVR fail closed (resource skipped), and resolve correctly on a later evaluation.
 
 **Related Documentation**:
 - `pkg/controller/gc_controller.go` - Current GVR resolution implementation
