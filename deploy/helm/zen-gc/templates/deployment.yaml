@@ -34,16 +34,21 @@ spec:
           ports:
             - name: metrics
               containerPort: 8080
+            # controller-runtime serves health probes (/healthz) on its own
+            # bind address (:8081), NOT on the metrics port — probing the
+            # metrics port 404s and crash-loops the pod.
+            - name: health
+              containerPort: 8081
           readinessProbe:
             httpGet:
               path: /healthz
-              port: metrics
+              port: health
             initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
           livenessProbe:
             httpGet:
               path: /healthz
-              port: metrics
+              port: health
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
           resources:
