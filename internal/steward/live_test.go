@@ -116,8 +116,11 @@ func evidenceDir(t *testing.T, env string) string {
 }
 
 func changedPathsFor(t *testing.T, prNum int) []string {
+	// Raw per-line output: an array filter ([.files[].path]) returns a
+	// JSON array string that defeats prefix matching downstream (the
+	// M058 discovery defect — protected-path detection never fired).
 	out, err := exec.Command("gh", "pr", "view", fmt.Sprint(prNum),
-		"-R", "zenmesh/zen-gc", "--json", "files", "-q", "[.files[].path]").Output()
+		"-R", "zenmesh/zen-gc", "--json", "files", "-q", ".files[].path").Output()
 	if err != nil {
 		return nil
 	}
