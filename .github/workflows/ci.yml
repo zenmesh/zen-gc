@@ -25,11 +25,12 @@ jobs:
       - name: Verify Go version
         run: |
           go version
-          if ! go version | grep -q "go1.26.4"; then
-            echo "❌ Go version is not 1.26.4"
+          EXPECTED="$(awk '$1=="go" {print $2}' go.mod)"
+          if ! go version | grep -q "go$EXPECTED"; then
+            echo "❌ Go version does not match go.mod (expected go$EXPECTED)"
             exit 1
           fi
-          echo "✅ Go version is correct"
+          echo "✅ Go version matches go.mod (go$EXPECTED)"
       
       - name: Install dependencies
         run: go mod download
