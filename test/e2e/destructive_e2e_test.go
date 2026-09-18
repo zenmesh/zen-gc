@@ -33,13 +33,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
-	
+
 	"github.com/zenmesh/zen-gc/pkg/api/v1alpha1"
 )
 
 const (
-	policyGroup   = "gc.ops.zen-mesh.io"
-	policyVersion = "v1alpha1"
+	policyGroup    = "gc.ops.zen-mesh.io"
+	policyVersion  = "v1alpha1"
 	policyResource = "garbagecollectionpolicies"
 
 	// Arbitrary test CRD with an irregular plural (zgprobes — NOT the naive
@@ -57,14 +57,13 @@ var polGVR = schema.GroupVersionResource{Group: policyGroup, Version: policyVers
 var crdGVR = schema.GroupVersionResource{Group: "apiextensions.k8s.io", Version: "v1", Resource: "customresourcedefinitions"}
 
 const (
-	probePlural  = "zgprobes"
+	probePlural = "zgprobes"
 
 	pollInterval = 2 * time.Second
 	pollTimeout  = 90 * time.Second
 )
 
 var probeGVR = schema.GroupVersionResource{Group: probeGroup, Version: probeVersion, Resource: probePlural}
-
 
 func clients(t *testing.T) (dynamic.Interface, apiextensionsInterface) {
 	t.Helper()
@@ -89,24 +88,24 @@ func ensureTestCRD(ctx context.Context, ext apiextensionsInterface) error {
 		"spec": map[string]interface{}{
 			"group": probeGroup,
 			"names": map[string]interface{}{
-				"kind":     probeKind,
-				"listKind": probeKind + "List",
-				"plural":   probePlural,
-				"singular": "zengcprobe",
+				"kind":       probeKind,
+				"listKind":   probeKind + "List",
+				"plural":     probePlural,
+				"singular":   "zengcprobe",
 				"shortNames": []interface{}{"zgp"},
 			},
 			"scope": "Namespaced",
 			"versions": []interface{}{map[string]interface{}{
-				"name":   probeVersion,
-				"served": true,
-				"storage": true,
+				"name":         probeVersion,
+				"served":       true,
+				"storage":      true,
 				"subresources": map[string]interface{}{"status": map[string]interface{}{}},
 				"schema": map[string]interface{}{"openAPIV3Schema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"spec": map[string]interface{}{"type": "object", "properties": map[string]interface{}{
-							"tier":        map[string]interface{}{"type": "string"},
-							"ttlSeconds":  map[string]interface{}{"type": "integer"},
+							"tier":       map[string]interface{}{"type": "string"},
+							"ttlSeconds": map[string]interface{}{"type": "integer"},
 						}},
 						"status": map[string]interface{}{"type": "object", "properties": map[string]interface{}{
 							"completedAt": map[string]interface{}{"type": "string"},
@@ -302,8 +301,6 @@ func resourceState(err error) string {
 	return "deleted"
 }
 
-
-
 // waitFor polls condition until true or timeout, reporting the last state.
 func waitFor(t *testing.T, what string, timeout time.Duration, cond func() (bool, string)) {
 	t.Helper()
@@ -400,7 +397,7 @@ func TestE2E_DestructiveSuite(t *testing.T) {
 			if err != nil {
 				return false, "resource deleted under dry-run"
 			}
-			return time.Since(time.Now().Add(-12 * time.Second)) >= 0, "waiting out TTL window"
+			return time.Since(time.Now().Add(-12*time.Second)) >= 0, "waiting out TTL window"
 		})
 	})
 
