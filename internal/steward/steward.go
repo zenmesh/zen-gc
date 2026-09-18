@@ -96,8 +96,9 @@ func DefaultAutoMergePolicy() AutoMergePolicy {
 	}
 }
 
-// ClassifyPR determines author class and risk level.
-func ClassifyPR(pr PRInfo, policy AutoMergePolicy, changedPaths []string, title string) RiskClassify {
+// ClassifyPR determines author class and risk level. It mutates pr to
+// record the resolved author class.
+func ClassifyPR(pr *PRInfo, policy *AutoMergePolicy, changedPaths []string, title string) RiskClassify {
 	rc := RiskClassify{}
 	author := pr.ResolveAuthor()
 	bot := false
@@ -162,23 +163,29 @@ func ClassifyPR(pr PRInfo, policy AutoMergePolicy, changedPaths []string, title 
 	rc.ProtectedTouched = protected
 	rc.Level = "LOW"
 	for _, r := range rc.Reasons {
-		if strings.Contains(r, "major") || strings.Contains(r, "protected") {
+		switch {
+		case rc.ProtectedTouched || strings.Contains(r, "major") || strings.Contains(r, "protected"):
 			rc.Level = "HIGH"
+		default:
+			rc.Level = "MODERATE"
+		}
+		if rc.Level == "HIGH" {
 			break
 		}
-		rc.Level = "MODERATE"
 	}
-	rc.AutoMergeEligible = bot && !protected && !isMajor && pr.Additions <= policy.MaxAdditions && rc.Level != "HIGH"
-	if rc.AutoMergeEligible {
+	rc.AutoMergeEligible = bot && !rc.ProtectedTouched && !isMajor && pr.Additions <= policy.MaxAdditions && rc.Level != "HIGH"
+	switch {
+	case rc.AutoMergeEligible:
 		rc.Verdict = "AUTO_MERGE_ELIGIBLE"
-	} else if rc.ProtectedTouched || rc.Level == "HIGH" {
+	case rc.ProtectedTouched || rc.Level == "HIGH":
 		rc.Verdict = "ESCALATE"
-	} else {
+	default:
 		rc.Verdict = "HUMAN_APPROVAL"
 	}
 	return rc
 }
 
+// Marshal renders the classification as indented JSON for evidence records.
 func (rc RiskClassify) Marshal() []byte {
 	b, _ := json.MarshalIndent(rc, "", "  ")
 	return b
@@ -187,7 +194,7 @@ func (rc RiskClassify) Marshal() []byte {
 // QualifyMergeCandidate tests the merge candidate in an isolated workspace:
 // clone the PR head, merge current main into it, build+test. Credentials are
 // NOT passed to the test environment (PR code is untrusted).
-func QualifyMergeCandidate(ctx context.Context, repoDir string, prNumber int, baseSHA, headSHA string) (bool, string, error) {
+func QualifyMergeCandidate(ctx context.Context, repoDir string, prNumber int, baseSHA, headSHA string) (qualified bool, detail string, err error) {
 	// Create a fresh temp workspace.
 	tmp, err := os.MkdirTemp("", "steward-qual-")
 	if err != nil {
@@ -196,28 +203,28 @@ func QualifyMergeCandidate(ctx context.Context, repoDir string, prNumber int, ba
 	defer os.RemoveAll(tmp)
 
 	// Clone the PR head.
-	clone := exec.Command("git", "clone", "--no-local", repoDir, tmp)
+	clone := exec.CommandContext(ctx, "git", "clone", "--no-local", repoDir, tmp)
 	clone.Env = os.Environ()
 	if b, cerr := clone.CombinedOutput(); cerr != nil {
 		return false, fmt.Sprintf("clone: %v: %s", cerr, b), nil
 	}
 	// Fetch the PR branch from the real origin (it may only exist on GitHub).
-	remoteURL, rerr := exec.Command("git", "-C", repoDir, "remote", "get-url", "origin").Output()
+	remoteURL, rerr := exec.CommandContext(ctx, "git", "-C", repoDir, "remote", "get-url", "origin").Output()
 	if rerr != nil {
 		return false, "", rerr
 	}
-	fetch := exec.Command("git", "-C", tmp, "fetch",
+	fetch := exec.CommandContext(ctx, "git", "-C", tmp, "fetch",
 		strings.TrimSpace(string(remoteURL)), "pull/"+fmt.Sprint(prNumber)+"/head")
 	fetch.Env = os.Environ()
 	if b, ferr := fetch.CombinedOutput(); ferr != nil {
 		return false, fmt.Sprintf("fetch PR branch: %v: %s", ferr, b), nil
 	}
-	checkout := exec.Command("git", "-C", tmp, "checkout", "FETCH_HEAD")
+	checkout := exec.CommandContext(ctx, "git", "-C", tmp, "checkout", "FETCH_HEAD")
 	if b, cerr := checkout.CombinedOutput(); cerr != nil {
 		return false, fmt.Sprintf("checkout PR head: %v: %s", cerr, b), nil
 	}
 	// Verify head SHA.
-	got, err := exec.Command("git", "-C", tmp, "rev-parse", "HEAD").Output()
+	got, err := exec.CommandContext(ctx, "git", "-C", tmp, "rev-parse", "HEAD").Output()
 	if err != nil {
 		return false, "", err
 	}
@@ -226,21 +233,21 @@ func QualifyMergeCandidate(ctx context.Context, repoDir string, prNumber int, ba
 		return false, fmt.Sprintf("head SHA mismatch: expected %s, got %s", headSHA, actualHead), nil
 	}
 	// Merge current main.
-	merge := exec.Command("git", "-C", tmp, "merge", "origin/main", "--no-edit")
+	merge := exec.CommandContext(ctx, "git", "-C", tmp, "merge", "origin/main", "--no-edit")
 	merge.Env = os.Environ()
 	if b, merr := merge.CombinedOutput(); merr != nil {
 		return false, fmt.Sprintf("merge conflict: %v: %s", merr, b), nil
 	}
 	// Build and test.
-	build := exec.Command("go", "build", "./...")
+	build := exec.CommandContext(ctx, "go", "build", "./...")
 	build.Dir = tmp
 	build.Env = os.Environ()
 	if b, berr := build.CombinedOutput(); berr != nil {
 		return false, fmt.Sprintf("build: %v: %s", berr, b), nil
 	}
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+	testCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
-	test := exec.CommandContext(ctx, "go", "test", "./...")
+	test := exec.CommandContext(testCtx, "go", "test", "./...")
 	test.Dir = tmp
 	test.Env = os.Environ()
 	if b, terr := test.CombinedOutput(); terr != nil {

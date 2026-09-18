@@ -53,7 +53,7 @@ func NewHealthChecker(reconciler *GCPolicyReconciler) *HealthChecker {
 			if informer != nil {
 				// Capture informer in closure
 				inf := informer
-				informers[string(uid)] = func() bool { return inf.HasSynced() }
+				informers[uid] = func() bool { return inf.HasSynced() }
 			}
 		}
 		return informers

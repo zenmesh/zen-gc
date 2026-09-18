@@ -16,6 +16,8 @@ import (
 // SemanticClass is the protected dependency semantic classification.
 type SemanticClass string
 
+// Protected semantic classes recognized by the M057 governance correction.
+// Anything outside this set resolves to ClassUnknown (fail closed).
 const (
 	ClassOrdinaryPatch     SemanticClass = "ORDINARY_PATCH"
 	ClassOrdinaryMinor     SemanticClass = "ORDINARY_MINOR"
@@ -33,7 +35,7 @@ const (
 
 // classifySemantic determines the protected semantic class from the PR's
 // identity and content. Unknown => HUMAN_APPROVAL_REQUIRED (fail closed).
-func classifySemantic(author, title string, changedPaths []string) (SemanticClass, string) {
+func classifySemantic(author, title string, changedPaths []string) (sem SemanticClass, reason string) {
 	lc := strings.ToLower(title)
 
 	// Container base image change (Dockerfile).
@@ -57,9 +59,6 @@ func classifySemantic(author, title string, changedPaths []string) (SemanticClas
 	// Major version bump: parse "from X to Y" and compare major components.
 	if strings.Contains(lc, "major") {
 		return ClassUnknown, "major version bump (protected by default)"
-	}
-	for _, pattern := range []string{"from ", "to "} {
-		_ = pattern
 	}
 	if i := strings.Index(lc, " from "); i >= 0 {
 		fromPart := lc[i+6:]

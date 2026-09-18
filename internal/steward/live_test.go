@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -29,7 +30,7 @@ func TestStewardLivePRs(t *testing.T) {
 	var results []map[string]any
 	for _, pr := range prs {
 		paths := changedPathsFor(t, pr.Number)
-		rc := ClassifyPR(pr, policy, paths, pr.Title)
+		rc := ClassifyPR(&pr, &policy, paths, pr.Title)
 		row := map[string]any{
 			"pr": pr.Number, "author": pr.Author, "author_class": pr.AuthorClass,
 			"title": pr.Title, "risk": rc.Level, "verdict": rc.Verdict,
@@ -65,7 +66,11 @@ func TestStewardLivePRs(t *testing.T) {
 		results = append(results, row)
 	}
 	b, _ := json.MarshalIndent(results, "", "  ")
-	os.WriteFile("/tmp/m057-steward-prs.json", b, 0o644)
+	evidence := filepath.Join(t.TempDir(), "m057-steward-prs.json")
+	if err := os.WriteFile(evidence, b, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("evidence: %s", evidence)
 }
 
 func changedPathsFor(t *testing.T, prNum int) []string {
