@@ -118,7 +118,6 @@ func ClassifyPR(pr *PRInfo, policy *AutoMergePolicy, changedPaths []string, titl
 	}
 
 	// Protected path check.
-	protected := false
 	for _, p := range changedPaths {
 		for _, d := range policy.DenyPaths {
 			if strings.HasPrefix(p, d) {
@@ -160,7 +159,6 @@ func ClassifyPR(pr *PRInfo, policy *AutoMergePolicy, changedPaths []string, titl
 	if pr.Additions > policy.MaxAdditions {
 		rc.Reasons = append(rc.Reasons, fmt.Sprintf("additions %d > budget %d", pr.Additions, policy.MaxAdditions))
 	}
-	rc.ProtectedTouched = protected
 	rc.Level = "LOW"
 	for _, r := range rc.Reasons {
 		switch {
