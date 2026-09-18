@@ -31,18 +31,33 @@ import (
 
 // PRInfo is the discovered state of one open pull request.
 type PRInfo struct {
-	Number       int    `json:"number"`
-	Title        string `json:"title"`
-	Author       string `json:"author"`
-	AuthorClass  string `json:"author_class"` // DEPENDENCY_BOT | MAINTAINER | EXTERNAL_CONTRIBUTOR | UNKNOWN
-	Branch       string `json:"branch"`
-	BaseRef      string `json:"base_ref"`
-	HeadSHA      string `json:"head_sha"`
-	BaseSHA      string `json:"base_sha"`
-	ChangedFiles int    `json:"changed_files"`
-	Additions    int    `json:"additions"`
-	Deletions    int    `json:"deletions"`
-	URL          string `json:"url"`
+	Number       int             `json:"number"`
+	Title        string          `json:"title"`
+	Author       json.RawMessage `json:"author"`
+	AuthorClass  string          `json:"author_class"`
+	AuthorLogin  string          `json:"author_login,omitempty"`
+	Branch       string          `json:"branch"`
+	BaseRef      string          `json:"base_ref"`
+	HeadSHA      string          `json:"head_sha"`
+	BaseSHA      string          `json:"base_sha"`
+	ChangedFiles int             `json:"changed_files"`
+	Additions    int             `json:"additions"`
+	Deletions    int             `json:"deletions"`
+	URL          string          `json:"url"`
+}
+
+// ResolveAuthor extracts the login from the raw author field.
+func (p *PRInfo) ResolveAuthor() string {
+	if p.AuthorLogin != "" {
+		return p.AuthorLogin
+	}
+	var m struct {
+		Login string `json:"login"`
+	}
+	if json.Unmarshal(p.Author, &m) == nil {
+		p.AuthorLogin = m.Login
+	}
+	return p.AuthorLogin
 }
 
 // RiskClassify deterministically classifies a PR's risk.
@@ -84,9 +99,10 @@ func DefaultAutoMergePolicy() AutoMergePolicy {
 // ClassifyPR determines author class and risk level.
 func ClassifyPR(pr PRInfo, policy AutoMergePolicy, changedPaths []string, title string) RiskClassify {
 	rc := RiskClassify{}
+	author := pr.ResolveAuthor()
 	bot := false
 	for _, a := range policy.AllowedAuthors {
-		if pr.Author == a || strings.HasPrefix(pr.Author, a) {
+		if author == a || strings.HasPrefix(author, a) {
 			bot = true
 			break
 		}
@@ -94,7 +110,7 @@ func ClassifyPR(pr PRInfo, policy AutoMergePolicy, changedPaths []string, title 
 	switch {
 	case bot:
 		pr.AuthorClass = "DEPENDENCY_BOT"
-	case pr.Author == "zenmesh" || pr.Author == "neves":
+	case author == "zenmesh" || author == "neves":
 		pr.AuthorClass = "MAINTAINER"
 	default:
 		pr.AuthorClass = "EXTERNAL_CONTRIBUTOR"
@@ -171,7 +187,7 @@ func (rc RiskClassify) Marshal() []byte {
 // QualifyMergeCandidate tests the merge candidate in an isolated workspace:
 // clone the PR head, merge current main into it, build+test. Credentials are
 // NOT passed to the test environment (PR code is untrusted).
-func QualifyMergeCandidate(ctx context.Context, repoDir, prBranch string, baseSHA, headSHA string) (bool, string, error) {
+func QualifyMergeCandidate(ctx context.Context, repoDir string, prNumber int, baseSHA, headSHA string) (bool, string, error) {
 	// Create a fresh temp workspace.
 	tmp, err := os.MkdirTemp("", "steward-qual-")
 	if err != nil {
@@ -180,10 +196,25 @@ func QualifyMergeCandidate(ctx context.Context, repoDir, prBranch string, baseSH
 	defer os.RemoveAll(tmp)
 
 	// Clone the PR head.
-	clone := exec.Command("git", "clone", "--no-local", "--branch", prBranch, repoDir, tmp)
+	clone := exec.Command("git", "clone", "--no-local", repoDir, tmp)
 	clone.Env = os.Environ()
 	if b, cerr := clone.CombinedOutput(); cerr != nil {
-		return false, fmt.Sprintf("clone PR branch: %v: %s", cerr, b), nil
+		return false, fmt.Sprintf("clone: %v: %s", cerr, b), nil
+	}
+	// Fetch the PR branch from the real origin (it may only exist on GitHub).
+	remoteURL, rerr := exec.Command("git", "-C", repoDir, "remote", "get-url", "origin").Output()
+	if rerr != nil {
+		return false, "", rerr
+	}
+	fetch := exec.Command("git", "-C", tmp, "fetch",
+		strings.TrimSpace(string(remoteURL)), "pull/"+fmt.Sprint(prNumber)+"/head")
+	fetch.Env = os.Environ()
+	if b, ferr := fetch.CombinedOutput(); ferr != nil {
+		return false, fmt.Sprintf("fetch PR branch: %v: %s", ferr, b), nil
+	}
+	checkout := exec.Command("git", "-C", tmp, "checkout", "FETCH_HEAD")
+	if b, cerr := checkout.CombinedOutput(); cerr != nil {
+		return false, fmt.Sprintf("checkout PR head: %v: %s", cerr, b), nil
 	}
 	// Verify head SHA.
 	got, err := exec.Command("git", "-C", tmp, "rev-parse", "HEAD").Output()
@@ -223,14 +254,37 @@ func DiscoverPRs(ctx context.Context, repo string) ([]PRInfo, error) {
 	cmd := exec.CommandContext(ctx, "gh", "pr", "list",
 		"-R", "zenmesh/"+repo,
 		"--state", "open",
-		"--json", "number,title,author,headRefName,baseRefName,headRefOid,files,additions,deletions,url")
+		"--json", "number,title,author,headRefName,baseRefName,headRefOid,additions,deletions,url")
 	b, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("steward: gh pr list: %w", err)
 	}
-	var prs []PRInfo
-	if err := json.Unmarshal(b, &prs); err != nil {
+	var raw []struct {
+		Number int    `json:"number"`
+		Title  string `json:"title"`
+		Author struct {
+			Login string `json:"login"`
+		} `json:"author"`
+		HeadRefName string `json:"headRefName"`
+		BaseRefName string `json:"baseRefName"`
+		HeadRefOid  string `json:"headRefOid"`
+		Additions   int    `json:"additions"`
+		Deletions   int    `json:"deletions"`
+		URL         string `json:"url"`
+	}
+	if err := json.Unmarshal(b, &raw); err != nil {
 		return nil, fmt.Errorf("steward: gh pr list decode: %w", err)
+	}
+	prs := make([]PRInfo, len(raw))
+	for i, r := range raw {
+		prs[i] = PRInfo{
+			Number: r.Number, Title: r.Title,
+			AuthorLogin: r.Author.Login,
+			Branch:      r.HeadRefName, BaseRef: r.BaseRefName,
+			HeadSHA:   r.HeadRefOid,
+			Additions: r.Additions, Deletions: r.Deletions,
+			URL: r.URL,
+		}
 	}
 	return prs, nil
 }
