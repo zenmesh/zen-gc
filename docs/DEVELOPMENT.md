@@ -73,7 +73,7 @@ make build-image
 ### Version
 
 - **Go 1.26** is the standard across all OSS repos
-- Specified in `go.mod`: `go 1.26.0`
+- Specified in `go.mod`: `go 1.26.6`
 - Toolchain directive: Either use `toolchain go1.26.0` everywhere or nowhere (OSS consistency)
 
 ### go.mod Requirements

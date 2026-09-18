@@ -11,7 +11,7 @@ zen-gc is a Kubernetes controller that provides **declarative garbage collection
 - Emits **Prometheus metrics**, Kubernetes events, and structured logs
 - Runs **leader election** (2+ replicas; multi-node HA runtime not validated)
 - Runs **non-root** with **restricted** Pod Security Standards
-- Compiles with **Go 1.26** using `controller-runtime v0.19`
+- Compiles with **Go 1.26** using `controller-runtime v0.24`
 
 ### Validated deletion behavior (real, non-dry-run)
 
