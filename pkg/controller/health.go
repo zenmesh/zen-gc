@@ -39,6 +39,21 @@ type HealthChecker struct {
 
 	// Reconciler reference for checking informer sync status.
 	reconciler *GCPolicyReconciler
+
+	// leader tracks leadership-aware health semantics (SUPPORT2-032R,
+	// ported from zen-cleaner SUPPORT2-003 §11): when set, standby replicas
+	// are healthy by process law — reconciliation is lease-gated by
+	// client-go leader election, which is the actual safety boundary.
+	leader *LeaderState
+}
+
+// SetLeaderState wires leadership-aware health semantics. When set:
+//   - standby: process-level health (can reach the API and serve probes);
+//     informer-sync and evaluation laws do not apply because a standby does
+//     not reconcile by design.
+//   - leader: the existing informer-sync law applies.
+func (h *HealthChecker) SetLeaderState(leader *LeaderState) {
+	h.leader = leader
 }
 
 // NewHealthChecker creates a new health checker.
@@ -82,7 +97,13 @@ func (h *HealthChecker) UpdateLastEvaluationTime() {
 // It checks:
 // 1. All resource informers are synced
 // 2. Controller has been running long enough (at least 10 seconds).
+//
+// SUPPORT2-032R: leadership-aware — a healthy standby is Ready; readiness
+// never claims reconciliation (exactly-one is enforced by the lease).
 func (h *HealthChecker) ReadinessCheck(req *http.Request) error {
+	if h.leader != nil && !h.leader.IsLeading() {
+		return nil
+	}
 	return h.informerChecker.ReadinessCheck(req)
 }
 
@@ -92,6 +113,12 @@ func (h *HealthChecker) ReadinessCheck(req *http.Request) error {
 // 2. If no policies exist, controller is still considered alive (no work to do)
 // 3. If policies exist but haven't been evaluated, check if reconciler is processing.
 func (h *HealthChecker) LivenessCheck(req *http.Request) error {
+	// SUPPORT2-032R: leadership-aware — liveness must never fail a healthy
+	// standby; there is no evaluation activity on standby by design.
+	if h.leader != nil && !h.leader.IsLeading() {
+		return nil
+	}
+
 	// Use informer checker for basic liveness
 	if err := h.informerChecker.LivenessCheck(req); err != nil {
 		return err
