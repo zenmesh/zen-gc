@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gc-controller
-          image: docker.io/zenmesh/gc-controller:latest
+          image: IMAGE_PLACEHOLDER
           imagePullPolicy: IfNotPresent
           args:
             - --metrics-addr=:8080
