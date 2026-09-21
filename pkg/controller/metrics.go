@@ -3,7 +3,14 @@ package controller
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
+
+// served registers custom metrics with the registry actually exported by
+// the manager's metrics endpoint. promauto's default (the global
+// prometheus.DefaultRegisterer) is invisible to that endpoint, which left
+// every documented gc_* metric absent from :8080/metrics (SUPPORT2-032R).
+var served = promauto.With(metrics.Registry)
 
 const (
 	labelPhase              = "phase"
@@ -17,7 +24,7 @@ const (
 
 var (
 	// GcPoliciesTotal is a gauge that tracks the total number of GC policies by phase.
-	gcPoliciesTotal = promauto.NewGaugeVec(
+	gcPoliciesTotal = served.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gc_policies_total",
 			Help: "Total number of GC policies",
@@ -26,7 +33,7 @@ var (
 	)
 
 	// GcResourcesMatchedTotal is a counter that tracks the total number of resources matched by GC policies.
-	gcResourcesMatchedTotal = promauto.NewCounterVec(
+	gcResourcesMatchedTotal = served.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gc_resources_matched_total",
 			Help: "Total number of resources matched by GC policies",
@@ -35,7 +42,7 @@ var (
 	)
 
 	// GcResourcesDeletedTotal is a counter that tracks the total number of resources deleted by GC.
-	gcResourcesDeletedTotal = promauto.NewCounterVec(
+	gcResourcesDeletedTotal = served.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gc_resources_deleted_total",
 			Help: "Total number of resources deleted by GC",
@@ -44,7 +51,7 @@ var (
 	)
 
 	// GcDeletionDurationSeconds is a histogram that tracks the time taken to delete resources.
-	gcDeletionDurationSeconds = promauto.NewHistogramVec(
+	gcDeletionDurationSeconds = served.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "gc_deletion_duration_seconds",
 			Help:    "Time taken to delete resources",
@@ -54,7 +61,7 @@ var (
 	)
 
 	// GcErrorsTotal is a counter that tracks the total number of GC errors.
-	gcErrorsTotal = promauto.NewCounterVec(
+	gcErrorsTotal = served.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gc_errors_total",
 			Help: "Total number of GC errors",
@@ -63,7 +70,7 @@ var (
 	)
 
 	// GcEvaluationDurationSeconds is a histogram that tracks the time taken to evaluate policies.
-	gcEvaluationDurationSeconds = promauto.NewHistogramVec(
+	gcEvaluationDurationSeconds = served.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "gc_evaluation_duration_seconds",
 			Help:    "Time taken to evaluate GC policies",
@@ -73,7 +80,7 @@ var (
 	)
 
 	// GcInformersTotal is a gauge that tracks the total number of active resource informers.
-	gcInformersTotal = promauto.NewGauge(
+	gcInformersTotal = served.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "gc_informers_total",
 			Help: "Total number of active resource informers",
@@ -81,7 +88,7 @@ var (
 	)
 
 	// GcRateLimitersTotal is a gauge that tracks the total number of active rate limiters.
-	gcRateLimitersTotal = promauto.NewGauge(
+	gcRateLimitersTotal = served.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "gc_rate_limiters_total",
 			Help: "Total number of active rate limiters",
@@ -89,7 +96,7 @@ var (
 	)
 
 	// GcResourcesPendingTotal is a gauge that tracks the number of resources pending deletion.
-	gcResourcesPendingTotal = promauto.NewGaugeVec(
+	gcResourcesPendingTotal = served.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gc_resources_pending_total",
 			Help: "Number of resources pending deletion (matched but TTL not expired)",
@@ -98,7 +105,7 @@ var (
 	)
 
 	// GcLeaderElectionStatus is a gauge that tracks leader election status (1 = leader, 0 = follower).
-	gcLeaderElectionStatus = promauto.NewGauge(
+	gcLeaderElectionStatus = served.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "gc_leader_election_status",
 			Help: "Leader election status (1 if this instance is the leader, 0 otherwise)",
@@ -106,7 +113,7 @@ var (
 	)
 
 	// GcLeaderElectionTransitionsTotal is a counter that tracks the number of leader election transitions.
-	gcLeaderElectionTransitionsTotal = promauto.NewCounter(
+	gcLeaderElectionTransitionsTotal = served.NewCounter(
 		prometheus.CounterOpts{
 			Name: "gc_leader_election_transitions_total",
 			Help: "Total number of leader election transitions (becoming leader or losing leadership)",
