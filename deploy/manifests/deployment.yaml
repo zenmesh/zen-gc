@@ -15,7 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gc-controller
-  namespace: ${WEBHOOK_NAMESPACE:-gc-system}
+  namespace: ${WEBHOOK_NAMESPACE}
   labels:
     app: gc-controller
 spec:
