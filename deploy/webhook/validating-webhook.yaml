@@ -15,7 +15,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: gc-controller-webhook
-  namespace: gc-system
+  namespace: ${WEBHOOK_NAMESPACE:-gc-system}
 spec:
   ports:
     - port: 443
@@ -35,8 +35,9 @@ webhooks:
     clientConfig:
       service:
         name: gc-controller-webhook
-        namespace: gc-system
+        namespace: ${WEBHOOK_NAMESPACE:-gc-system}
         path: "/validate-gc-policy"
+      caBundle: ${WEBHOOK_CA_BUNDLE:-}
     rules:
       - apiGroups: ["gc.ops.zen-mesh.io"]
         apiVersions: ["v1alpha1"]

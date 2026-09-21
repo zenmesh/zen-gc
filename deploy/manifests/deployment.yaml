@@ -15,7 +15,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gc-controller
-  namespace: gc-system
+  namespace: ${WEBHOOK_NAMESPACE:-gc-system}
   labels:
     app: gc-controller
 spec:
@@ -37,7 +37,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gc-controller
-          image: IMAGE_PLACEHOLDER
+          image: ${GC_IMAGE}
           imagePullPolicy: IfNotPresent
           args:
             - --metrics-addr=:8080
