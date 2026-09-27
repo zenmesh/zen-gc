@@ -1,3 +1,10 @@
+> **⚠️ ARCHIVED — HISTORICAL / RENAMED PREDECESSOR (2026-09-27):** This repository is
+> retired from active development and is preserved as the historical/renamed predecessor
+> of **[zen-cleaner](https://github.com/zenmesh/zen-cleaner)** — the sole active open source
+> product of Zen Mesh. Everything below is historical documentation of this archived
+> release line; its historical Apache-2.0 licensing applies to these historical releases
+> only and does not describe any current Zen Mesh product. Do not start new work here.
+
 # zen-gc
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
